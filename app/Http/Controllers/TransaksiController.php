@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\MasterJenisPerawatan;
+use App\Models\MasterMetodePembayaran;
+use App\Models\Transaksi;
+use Illuminate\Http\Request;
+
+class TransaksiController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $Perawatan = MasterJenisPerawatan::where('Status', 'Y')
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->get();
+        $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
+        return view('transaksi.kasir.create', compact('Perawatan', 'MetodePembayaran'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Transaksi $transaksi)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Transaksi $transaksi)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Transaksi $transaksi)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Transaksi $transaksi)
+    {
+        //
+    }
+}
