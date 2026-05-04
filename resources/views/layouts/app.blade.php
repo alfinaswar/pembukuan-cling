@@ -27,6 +27,10 @@
     <link href="{{ asset('') }}assets/plugins/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
     <!-- Select Plugin CSS -->
     <link rel="stylesheet" href="{{ asset('') }}assets/plugins/select2/select2.min.css" />
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-pVTO1qL2DJ6VrX5rJ8v5Vu7JuxO2UdtVnEGEc4cGvaXHfFNimxQxlNMiZScQYevZYwWeajHeXXstyA4Y3WFDvA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 </head>
 
@@ -929,7 +933,7 @@
                             </a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
+                            <a href="{{ route('Insentif.index') }}" class="side-nav-link">
                                 <span class="menu-icon"><i data-lucide="gift"></i></span>
                                 <span class="menu-text">Insentif</span>
                             </a>
@@ -951,23 +955,37 @@
                                     </li>
                                     <li class="side-nav-item">
                                         <a href="{{ route('Klinik.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="user"></i></span>
+                                            <span class="menu-icon"><i data-lucide="hospital"></i></span>
                                             <span class="menu-text" data-lang="master-pasien">Master Klinik</span>
                                         </a>
                                     </li>
                                     <li class="side-nav-item">
                                         <a href="{{ route('MetodePembayaran.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="stethoscope"></i></span>
+                                            <span class="menu-icon"><i data-lucide="credit-card"></i></span>
                                             <span class="menu-text" data-lang="master-dokter">Metode Pembayaran</span>
                                         </a>
                                     </li>
                                     <li class="side-nav-item">
                                         <a href="{{ route('MasterShift.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="users"></i></span>
+                                            <span class="menu-icon"><i data-lucide="clock"></i></span>
                                             <span class="menu-text" data-lang="master-karyawan">Shift Kerja</span>
                                         </a>
                                     </li>
+                                    <li class="side-nav-item">
+                                        <a href="{{ route('users.index') }}" class="side-nav-link">
+                                            <span class="menu-icon"><i data-lucide="user-round"></i></span>
+                                            <span class="menu-text" data-lang="master-user">Pengguna</span>
+                                        </a>
+                                    </li>
+                                    <li class="side-nav-item">
+                                        <a href="{{ route('roles.index') }}" class="side-nav-link">
+                                            <span class="menu-icon"><i data-lucide="shield"></i></span>
+                                            <span class="menu-text" data-lang="master-roles">Roles</span>
+                                        </a>
+                                    </li>
+
                                 </ul>
+
                             </div>
                         </li>
 
@@ -1194,8 +1212,8 @@
                             <input class="form-check-input" type="radio" name="data-bs-theme"
                                 id="layout-color-light" value="light" />
                             <label class="form-check-label p-0 w-100" for="layout-color-light">
-                                <img src="{{ asset('') }}assets/images/layouts/theme-light.png" alt="layout-img"
-                                    class="img-fluid" />
+                                <img src="{{ asset('') }}assets/images/layouts/theme-light.png"
+                                    alt="layout-img" class="img-fluid" />
                             </label>
                         </div>
                         <h5 class="text-center text-muted mt-2 mb-0">Light</h5>

@@ -24,8 +24,8 @@
                             Pembayaran</a>
                     </div>
                     <div class="card-body">
-                        <table id="metodePembayaranTable"
-                            class="table table-bordered dt-responsive nowrap align-middle mb-0">
+                        <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
+                            id="metodePembayaranTable">
                             <thead class="thead-sm text-uppercase fs-xxs">
                                 <tr>
                                     <th width="5%; text-align:center;">#</th>

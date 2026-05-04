@@ -23,7 +23,8 @@
                         <a href="{{ route('Klinik.create') }}" class="btn btn-primary btn-sm">Tambah Klinik</a>
                     </div>
                     <div class="card-body">
-                        <table id="klinikTable" class="table table-bordered dt-responsive nowrap align-middle mb-0">
+                        <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
+                            id="klinikTable">
                             <thead class="thead-sm text-uppercase fs-xxs">
                                 <tr>
                                     <th style="width:40px;">#</th>

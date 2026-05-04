@@ -1,56 +1,106 @@
 @extends('layouts.app')
 
-
 @section('content')
-<div class="row">
-    <div class="col-lg-12 margin-tb">
-        <div class="pull-left">
-            <h2>Role Management</h2>
+    <div class="container-fluid">
+
+        <!-- Page Title -->
+        <div class="page-title-head d-flex align-items-center">
+            <div class="flex-grow-1">
+                <h4 class="page-main-title m-0">Role Management</h4>
+            </div>
+            <div class="text-end">
+                <ol class="breadcrumb m-0 py-0">
+                    <li class="breadcrumb-item"><a href="#">Master</a></li>
+                    <li class="breadcrumb-item active">Role</li>
+                </ol>
+            </div>
         </div>
-        <div class="pull-right">
-        @can('role-create')
-            <a class="btn btn-success" href="{{ route('roles.create') }}"> Create New Role</a>
-            @endcan
+
+        <!-- Alert -->
+        @if ($message = Session::get('success'))
+            <div class="alert alert-success mt-2">
+                {{ $message }}
+            </div>
+        @endif
+
+        <!-- Card -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+
+                    <!-- Header -->
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title">Data Role</h4>
+
+                        @can('role-create')
+                            <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
+                                + Tambah Role
+                            </a>
+                        @endcan
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
+                                id="usersTable">
+                                <thead class="text-uppercase fs-xxs">
+                                    <tr>
+                                        <th width="5%" class="text-center">#</th>
+                                        <th>Nama Role</th>
+                                        <th width="25%">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($roles as $key => $role)
+                                        <tr>
+                                            <td class="text-center">{{ $loop->iteration }}</td>
+                                            <td>{{ $role->name }}</td>
+                                            <td>
+                                                @can('role-edit')
+                                                    <a href="{{ route('roles.edit', $role->id) }}"
+                                                        class="btn btn-warning btn-sm">
+                                                        Edit
+                                                    </a>
+                                                @endcan
+
+                                                @can('role-delete')
+                                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Yakin hapus role ini?')">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                @endcan
+
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted">
+                                                Data role belum tersedia
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="mt-3">
+                            {!! $roles->links() !!}
+                        </div>
+
+                    </div>
+                    <!-- end card-body -->
+
+                </div>
+            </div>
         </div>
+
     </div>
-</div>
-
-
-@if ($message = Session::get('success'))
-    <div class="alert alert-success">
-        {{ $message }}
-    </div>
-@endif
-
-
-<table class="table table-bordered">
-  <tr>
-     <th>No</th>
-     <th>Name</th>
-     <th width="280px">Action</th>
-  </tr>
-    @foreach ($roles as $key => $role)
-    <tr>
-        <td>{{ ++$i }}</td>
-        <td>{{ $role->name }}</td>
-        <td>
-            <a class="btn btn-info" href="{{ route('roles.show',$role->id) }}">Show</a>
-            @can('role-edit')
-                <a class="btn btn-primary" href="{{ route('roles.edit',$role->id) }}">Edit</a>
-            @endcan
-            @can('role-delete')
-                {!! Form::open(['method' => 'DELETE','route' => ['roles.destroy', $role->id],'style'=>'display:inline']) !!}
-                    {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-                {!! Form::close() !!}
-            @endcan
-        </td>
-    </tr>
-    @endforeach
-</table>
-
-
-{!! $roles->render() !!}
-
-
-<p class="text-center text-primary"><small>Tutorial by ItSolutionStuff.com</small></p>
 @endsection

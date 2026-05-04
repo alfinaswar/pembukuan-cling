@@ -1,22 +1,355 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="page-title-head d-flex align-items-center">
-            <div class="flex-grow-1">
-                <h4 class="page-main-title m-0">Tambah Shift Kerja</h4>
-            </div>
-            <div class="text-end">
-                <ol class="breadcrumb m-0 py-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('MasterShift.index') }}">Shift Kerja</a></li>
-                    <li class="breadcrumb-item active">Tambah Shift Kerja</li>
-                </ol>
-            </div>
-        </div>
+    <style>
+        /* ===== TEAL THEME VARIABLES ===== */
+        :root {
+            --teal-primary: #0d9488;
+            --teal-dark: #0f766e;
+            --teal-darker: #115e59;
+            --teal-light: #ccfbf1;
+            --teal-lighter: #f0fdfa;
+            --teal-accent: #14b8a6;
+            --teal-text: #134e4a;
+            --border-color: #d1fae5;
+            --text-muted: #6b7280;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
+        }
 
-        <!-- MULAI ROW 1 -->
+        /* ===== CARD ===== */
+        .card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #f3f4f6;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 14px 20px;
+        }
+
+        .card-header h5.card-title {
+            font-size: .95rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        /* ===== RINGKASAN PER SHIFT header (teal) ===== */
+        .card-header-teal {
+            background: var(--teal-primary) !important;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header-teal h5 {
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .card-header-teal .icon-group {
+            color: rgba(255, 255, 255, .8);
+        }
+
+        /* ===== FORM LABELS ===== */
+        .form-label.fw-semibold,
+        .form-label.fw-bold {
+            color: #374151;
+            font-size: .875rem;
+        }
+
+        label.form-label.fw-bold.text-uppercase {
+            color: var(--teal-primary);
+            font-size: .8rem;
+            letter-spacing: .06em;
+        }
+
+        /* ===== INPUTS ===== */
+        .form-control,
+        .form-select {
+            border-color: #d1d5db;
+            border-radius: 7px;
+            font-size: .875rem;
+            color: #111827;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--teal-primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, .15);
+            outline: none;
+        }
+
+        .form-control.bg-light {
+            background-color: #f9fafb !important;
+        }
+
+        /* ===== RADIO BUTTONS (teal) ===== */
+        .form-check-input:checked {
+            background-color: var(--teal-primary);
+            border-color: var(--teal-primary);
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, .2);
+        }
+
+        /* ===== TABLE ===== */
+        #table-perawatan {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #table-perawatan thead th {
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: .78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px 12px;
+        }
+
+        #table-perawatan tbody td {
+            padding: 8px 12px;
+            vertical-align: middle;
+            border-color: #f3f4f6;
+            font-size: .875rem;
+        }
+
+        .btn-remove-perawatan {
+            color: #ef4444 !important;
+            opacity: .7;
+            transition: opacity .15s;
+        }
+
+        .btn-remove-perawatan:hover {
+            opacity: 1;
+        }
+
+        /* ===== JENIS PERAWATAN label ===== */
+        label.fw-semibold.mb-2 {
+            color: var(--teal-primary);
+            font-size: .8rem;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        /* ===== TAMBAH PERAWATAN button ===== */
+        #btn-tambah-perawatan {
+            border-color: var(--teal-primary);
+            color: var(--teal-primary);
+            font-size: .82rem;
+            border-radius: 7px;
+            padding: 6px 14px;
+            transition: background .15s, color .15s;
+        }
+
+        #btn-tambah-perawatan:hover {
+            background: var(--teal-primary);
+            color: #fff;
+        }
+
+        /* ===== TOTAL BIAYA CARD ===== */
+        .total-biaya-card {
+            background: var(--teal-lighter) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px;
+        }
+
+        .total-biaya-card .label-total {
+            font-size: .8rem;
+            color: var(--teal-primary);
+            font-weight: 500;
+        }
+
+        .total-biaya-card h3 {
+            color: var(--teal-primary) !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        /* ===== BIAYA ADMIN ===== */
+        .biaya-admin-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .biaya-admin-label {
+            font-size: .875rem;
+            color: #374151;
+        }
+
+        .biaya-admin-value {
+            font-size: .875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* ===== CARA BAYAR section ===== */
+        .cara-bayar-title {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--teal-primary);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .cara-bayar-divider {
+            border-color: #e5e7eb;
+        }
+
+        /* ===== TOTAL BAYAR row ===== */
+        .total-bayar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--teal-lighter);
+            border-radius: 7px;
+            margin-top: 8px;
+        }
+
+        .total-bayar-label {
+            font-size: .875rem;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .total-bayar-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--teal-primary);
+        }
+
+        /* ===== RINGKASAN values ===== */
+        .ringkasan-total-label {
+            font-size: .85rem;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .ringkasan-total-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .ringkasan-stat-label {
+            font-size: .82rem;
+            color: #6b7280;
+        }
+
+        .ringkasan-stat-value {
+            font-size: .875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* ===== STAFF CARD row ===== */
+        .staff-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--teal-lighter);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal-primary);
+            flex-shrink: 0;
+        }
+
+        /* ===== ACTION BUTTONS ===== */
+        .btn-cancel {
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: .875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background .15s;
+        }
+
+        .btn-cancel:hover {
+            background: #f9fafb;
+        }
+
+        .btn-save {
+            background: var(--teal-primary);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: .875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background .15s;
+        }
+
+        .btn-save:hover {
+            background: var(--teal-dark);
+            color: #fff;
+        }
+
+        /* ===== PRIMARY BUTTON generic ===== */
+        .btn-primary {
+            background-color: var(--teal-primary) !important;
+            border-color: var(--teal-primary) !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--teal-dark) !important;
+            border-color: var(--teal-dark) !important;
+        }
+
+        /* ===== PATIENT SEARCH icon ===== */
+        .input-search-wrap {
+            position: relative;
+        }
+
+        .input-search-wrap .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .input-search-wrap .form-control {
+            padding-left: 32px;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <!-- ROW 1 -->
         <div class="row mt-3">
+            <!-- LEFT: Form Transaksi Kasir -->
             <div class="col-xl-8">
                 <div class="card">
                     <div class="card-header">
@@ -28,10 +361,16 @@
 
                             <!-- Hari & Tanggal -->
                             <div class="mb-3">
-                                <label for="Tanggal" class="form-label fw-semibold">Hari & Tanggal</label>
-                                <input type="text" id="Tanggal" name="Tanggal" data-provider="flatpickr"
-                                    data-date-format="d M, Y" class="form-control @error('Tanggal') is-invalid @enderror"
-                                    value="{{ old('Tanggal', date('d M, Y')) }}" required>
+                                <label for="Tanggal" class="form-label fw-semibold">Hari &amp; Tanggal</label>
+                                <div style="position:relative;">
+                                    <span
+                                        style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;">
+                                        <i data-lucide="calendar" style="width:16px;height:16px;"></i>
+                                    </span>
+                                    <input type="text" id="Tanggal" name="Tanggal" data-provider="flatpickr"
+                                        data-date-format="Y-m-d" class="form-control @error('Tanggal') is-invalid @enderror"
+                                        style="padding-left:34px;" value="{{ old('Tanggal', date('d M, Y')) }}">
+                                </div>
                                 @error('Tanggal')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -40,182 +379,324 @@
                             <!-- Nama Pasien -->
                             <div class="mb-2">
                                 <label for="nama_pasien" class="form-label fw-semibold">Nama Pasien</label>
-                                <input type="text" id="nama_pasien" name="NamaPasien"
-                                    class="form-control @error('nama_pasien') is-invalid @enderror"
-                                    placeholder="Cari atau masukkan nama pasien" autocomplete="off" required>
-                                @error('nama_pasien')
+                                <div class="input-search-wrap">
+                                    <span class="search-icon">
+                                        <i data-lucide="search" style="width:15px;height:15px;"></i>
+                                    </span>
+                                    <input type="text" id="nama_pasien" name="NamaPasien"
+                                        class="form-control @error('NamaPasien') is-invalid @enderror"
+                                        placeholder="Masukkan nama pasien" autocomplete="off">
+                                </div>
+                                @error('NamaPasien')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
+
+                            <!-- Jenis Pasien radio -->
                             <div class="mb-3">
+                                <label class="form-label fw-semibold mb-1">Jenis Pasien</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="JenisPasien" id="pasien_baru"
-                                        value="Baru">
+                                    <input class="form-check-input @error('JenisPasien') is-invalid @enderror"
+                                        type="radio" name="JenisPasien" id="pasien_baru" value="Baru"
+                                        {{ old('JenisPasien') == 'Baru' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="pasien_baru">Pasien Baru</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="JenisPasien" id="pasien_lama"
-                                        value="Lama">
+                                    <input class="form-check-input @error('JenisPasien') is-invalid @enderror"
+                                        type="radio" name="JenisPasien" id="pasien_lama" value="Lama"
+                                        {{ old('JenisPasien') == 'Lama' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="pasien_lama">Pasien Lama</label>
                                 </div>
+                                @error('JenisPasien')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
                             </div>
+
 
                             <!-- Jenis Perawatan -->
                             <div class="mb-3">
                                 <label class="fw-semibold mb-2">Jenis Perawatan</label>
                                 <div class="table-responsive">
                                     <table class="table align-middle table-bordered mb-0" id="table-perawatan">
-                                        <thead class="table-light">
+                                        <thead>
                                             <tr>
-                                                <th style="width: 4%;">No.</th>
+                                                <th style="width:4%;">No.</th>
                                                 <th>Jenis Perawatan</th>
-                                                <th style="width: 24%;">Biaya Perawatan</th>
-                                                <th style="width: 8%;">Aksi</th>
+                                                <th style="width:26%;">Biaya Perawatan</th>
+                                                <th style="width:8%;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="body-perawatan">
-                                            <tr>
-                                                <td class="text-center align-middle">1</td>
-                                                <td>
-                                                    <select class="form-control select2 perawatan-select"
-                                                        name="JenisPerawatan[0][id]" required data-toggle="select2">
-                                                        <option value="">Pilih Jenis Perawatan</option>
-                                                        @foreach ($Perawatan as $row)
-                                                            <option value="{{ $row->id }}"
-                                                                data-harga="{{ $row->Tarif }}">{{ $row->Nama }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <input type="text" class="form-control biaya-perawatan bg-light"
-                                                        name="JenisPerawatan[0][Biaya]" placeholder="Rp 0">
-                                                </td>
-                                                <td class="text-center">
-                                                    <button type="button"
-                                                        class="btn btn-link text-danger px-2 btn-remove-perawatan"
-                                                        style="font-size:1.25rem;" title="Hapus">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            @php
+                                                $oldPerawatan = old('JenisPerawatan');
+                                            @endphp
+                                            @if (is_array($oldPerawatan) && count($oldPerawatan) > 0)
+                                                @foreach ($oldPerawatan as $idx => $perawatan)
+                                                    <tr>
+                                                        <td class="text-center align-middle">{{ $loop->iteration }}</td>
+                                                        <td>
+                                                            <select class="form-control perawatan-select"
+                                                                name="JenisPerawatan[{{ $idx }}][id]">
+                                                                <option value="">Pilih Jenis Perawatan</option>
+                                                                @foreach ($Perawatan as $row)
+                                                                    <option value="{{ $row->id }}"
+                                                                        data-harga="{{ $row->Tarif }}"
+                                                                        {{ isset($perawatan['id']) && $perawatan['id'] == $row->id ? 'selected' : '' }}>
+                                                                        {{ $row->Nama }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                class="form-control biaya-perawatan bg-light"
+                                                                name="JenisPerawatan[{{ $idx }}][Biaya]"
+                                                                placeholder="Rp 0"
+                                                                value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : '' }}">
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button"
+                                                                class="btn btn-link btn-remove-perawatan p-1"
+                                                                title="Hapus">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                    height="18" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M3 6h18" />
+                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                    <path d="M10 11v6" />
+                                                                    <path d="M14 11v6" />
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td class="text-center align-middle">1</td>
+                                                    <td>
+                                                        <select class="form-control perawatan-select"
+                                                            name="JenisPerawatan[0][id]">
+                                                            <option value="">Pilih Jenis Perawatan</option>
+                                                            @foreach ($Perawatan as $row)
+                                                                <option value="{{ $row->id }}"
+                                                                    data-harga="{{ $row->Tarif }}">{{ $row->Nama }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control biaya-perawatan bg-light"
+                                                            name="JenisPerawatan[0][Biaya]" placeholder="Rp 0">
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button"
+                                                            class="btn btn-link btn-remove-perawatan p-1" title="Hapus">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                height="18" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                <path d="M10 11v6" />
+                                                                <path d="M14 11v6" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>
-                                <button type="button" class="btn btn-outline-primary mt-3" id="btn-tambah-perawatan"><i
-                                        class="bi bi-plus-circle"></i> Tambah Perawatan</button>
+                                <button type="button" class="btn btn-outline-primary mt-3" id="btn-tambah-perawatan">
+                                    <i class="bi bi-plus-circle me-1"></i> Tambah Perawatan
+                                </button>
                             </div>
-                            <div class="mb-3">
-                                <label for="BiayaAdmin" class="form-label fw-semibold">Biaya Admin</label>
-                                <input type="text" class="form-control @error('BiayaAdmin') is-invalid @enderror"
-                                    id="biaya_admin" name="BiayaAdmin" placeholder="Masukkan biaya admin"
-                                    value="{{ old('BiayaAdmin') }}" required readonly>
+
+
+                            <!-- Biaya Admin -->
+                            <div class="biaya-admin-row mb-3">
+                                <span class="biaya-admin-label">
+                                    Biaya Admin
+                                    <span class="text-muted" style="font-size:.78rem;">(hanya untuk pasien baru)</span>
+                                </span>
+                                <div>
+                                    <input type="text"
+                                        class="form-control text-end @error('BiayaAdmin') is-invalid @enderror"
+                                        id="biaya_admin" name="BiayaAdmin"
+                                        style="width:130px;display:inline-block;background:#f9fafb;border:none;font-weight:600;color:#111827;"
+                                        placeholder="Rp 0" value="{{ old('BiayaAdmin') }}" readonly>
+                                </div>
                                 @error('BiayaAdmin')
-                                    <span class="invalid-feedback">{{ $message }}</span>
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-lg-12">
-                                <div class="card border-1" style="background-color: #f2fcfd;">
-                                    <div class="card-body">
-                                        <span class="small text-teal" style="color: #189282;">Total Biaya (Perawatan +
-                                            Biaya Admin<span id="info-pasien-baru"></span>)</span>
-                                        <h3 class="fw-semibold mt-1 mb-0" style="color: #189282;">
-                                            Rp <span id="total-biaya">0</span>
-                                        </h3>
+
+                            <!-- Total Biaya -->
+                            <input type="hidden" id="total-biaya-input" name="TotalBiaya" value="0">
+                            <div class="total-biaya-card card border-0 mb-3">
+                                <div class="card-body py-3 px-4">
+                                    <div class="label-total mb-1">
+                                        Total Biaya (Perawatan + Biaya Admin<span id="info-pasien-baru"></span>)
                                     </div>
+                                    <h3 class="mb-0">Rp <span id="total-biaya">0</span></h3>
                                 </div>
                             </div>
 
-                            <div class="text-end mt-3">
-                                <a href="{{ route('MasterShift.index') }}" class="btn btn-light">Batal</a>
-                                <button type="submit" class="btn btn-primary">Simpan</button>
+
+                            <!-- Action buttons -->
+                            <div class="d-flex justify-content-end gap-2 mt-3">
+                                <a href="{{ route('MasterShift.index') }}" class="btn-cancel">
+                                    <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
+                                </a>
+                                <button type="submit" class="btn-save">
+                                    <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan Transaksi
+                                </button>
                             </div>
-                        </form>
+
                     </div>
                 </div>
             </div>
-            <!-- KANAN ROW 1: Ringkasan Shift & Metode Pembayaran -->
+
+            <!-- RIGHT: Ringkasan + Metode Bayar + Staff -->
             <div class="col-xl-4">
-                <div class="row">
+                <div class="row g-3">
+
+                    <!-- Ringkasan Per Shift -->
                     <div class="col-12">
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h5 class="card-title text-uppercase">Ringkasan Per Shift</h5>
+                        <div class="card mb-0">
+                            <div class="card-header-teal">
+                                <h5>Ringkasan Per Shift</h5>
+                                <span class="icon-group">
+                                    <i data-lucide="users" style="width:20px;height:20px;"></i>
+                                </span>
                             </div>
-                            <div class="card-body">
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card">
-
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold text-uppercase">Metode Pembayaran</label>
-                                    <div>
-                                        @foreach ($MetodePembayaran as $mp)
-                                            <div class="form-check mb-2">
-                                                <input
-                                                    class="form-check-input @error('MetodePembayaran') is-invalid @enderror"
-                                                    type="radio" name="MetodePembayaran"
-                                                    id="metode_pembayaran_{{ $mp->id }}"
-                                                    value="{{ $mp->id }}"
-                                                    {{ old('MetodePembayaran') == $mp->id ? 'checked' : '' }} required>
-                                                <label class="form-check-label"
-                                                    for="metode_pembayaran_{{ $mp->id }}">
-                                                    {{ $mp->Nama }}
-                                                </label>
-                                            </div>
-                                        @endforeach
-
-                                        @error('MetodePembayaran')
-                                            <span class="invalid-feedback d-block">{{ $message }}</span>
-                                        @enderror
-                                        <hr>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-2"
-                                        style="background: #f2fcfd; border-radius: 6px;">
-                                        <span class="form-label fw-bold mb-0" style="font-size: 14px;">Total Bayar</span>
-                                        <span class="fw-semibold mb-0" style="color: #189282; font-size: 18px;">
-                                            Rp <span id="total-bayar">0</span>
-                                        </span>
-                                    </div>
+                            <div class="card-body py-3 px-4">
+                                <div class="ringkasan-total-label">Total Biaya Per Shift</div>
+                                <div class="ringkasan-total-value mb-3">Rp 0</div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="ringkasan-stat-label">Total Pasien Baru Per Shift</span>
+                                    <span class="ringkasan-stat-value">0 Pasien</span>
+                                </div>
+                                <hr class="my-2" style="border-color:#f3f4f6;">
+                                <div class="d-flex justify-content-between">
+                                    <span class="ringkasan-stat-label">Total Pasien Lama Per Shift</span>
+                                    <span class="ringkasan-stat-value">0 Pasien</span>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="card mb-3">
 
-                            <div class="card-body">
+                    <!-- Metode Pembayaran -->
+                    <div class="col-12">
+                        <div class="card mb-0">
+                            <div class="card-body py-3 px-4">
+                                <div class="cara-bayar-title">Cara Bayar</div>
+                                @foreach ($MetodePembayaran as $mp)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input @error('MetodePembayaran') is-invalid @enderror"
+                                            type="radio" name="MetodePembayaran"
+                                            id="metode_pembayaran_{{ $mp->id }}" value="{{ $mp->id }}"
+                                            {{ old('MetodePembayaran') == $mp->id ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="metode_pembayaran_{{ $mp->id }}">
+                                            {{ $mp->Nama }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                                @error('MetodePembayaran')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+
+                                <hr class="cara-bayar-divider mt-2 mb-3">
+
+                                <div class="total-bayar-row">
+                                    <span class="total-bayar-label">Total Bayar</span>
+                                    <span class="total-bayar-value">Rp <span id="total-bayar">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Staff: Dokter / Perawat / Kasir -->
+                    <div class="col-12">
+                        <div class="card mb-0">
+                            <div class="card-body py-3 px-4">
+
+                                <!-- Dokter -->
+                                <div class="mb-2">
+                                    <label for="Dokter" class="form-label fw-bold text-uppercase">
+                                        <i data-lucide="stethoscope" style="width:14px;height:14px;" class="me-1"></i>
+                                        Nama Dokter
+                                    </label>
+                                    <select name="Dokter" id="Dokter"
+                                        class="form-select staff-select @error('Dokter') is-invalid @enderror">
+                                        <option value="">-- Pilih Dokter --</option>
+                                        @foreach ($dokter as $d)
+                                            <option value="{{ $d->id }}"
+                                                {{ old('Dokter') == $d->id ? 'selected' : '' }}>{{ $d->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('Dokter')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <!-- Perawat -->
+                                <div class="mb-2">
+                                    <label for="Perawat" class="form-label fw-bold text-uppercase">
+                                        <i data-lucide="syringe" style="width:14px;height:14px;" class="me-1"></i>
+                                        Nama Perawat
+                                    </label>
+                                    <select name="Perawat" id="Perawat"
+                                        class="form-select staff-select @error('Perawat') is-invalid @enderror">
+                                        <option value="">-- Pilih Perawat --</option>
+                                        @foreach ($perawat as $p)
+                                            <option value="{{ $p->id }}"
+                                                {{ old('Perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('Perawat')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <!-- Kasir / Resepsionis -->
+                                <div class="mb-2">
+                                    <label for="Kasir" class="form-label fw-bold text-uppercase">
+                                        <i data-lucide="user-check" style="width:14px;height:14px;" class="me-1"></i>
+                                        Nama Resepsionis
+                                    </label>
+                                    <select name="Kasir" id="Kasir"
+                                        class="form-select staff-select @error('Kasir') is-invalid @enderror">
+                                        <option value="">-- Pilih Resepsionis --</option>
+                                        @foreach ($kasir as $r)
+                                            <option value="{{ $r->id }}"
+                                                {{ old('Kasir') == $r->id ? 'selected' : '' }}>{{ $r->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('Kasir')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
+            </form>
         </div>
-
-        <!-- MULAI ROW 2, JIKA NANTI DIBUTUHKAN TAMBAHAN KOLOM/PANEL -->
-        {{--
-        <div class="row mt-3">
-            <div class="col-lg-12">
-                <!-- Tambah kolom tambahan di row 2 di sini -->
-            </div>
-        </div>
-        --}}
     </div>
+
     @push('scripts')
         <script>
             let perawatanCount = 1;
-
-            // Helper rupiah format (tanpa Rp jika untuk value)
-            function plainRupiahFormat(num) {
-                if (!num) return '0';
-                return Number(num).toLocaleString('id-ID');
-            }
 
             function rupiahFormat(num) {
                 if (!num) return 'Rp 0';
@@ -229,46 +710,43 @@
             function recalculateTotal() {
                 let total = 0;
                 $('.biaya-perawatan').each(function() {
-                    let rawVal = $(this).val();
-                    let val = (rawVal + '').replace(/[^0-9]/g, '');
+                    let val = ($(this).val() + '').replace(/[^0-9]/g, '');
                     total += +val;
                 });
                 let admin = +($('#biaya_admin').val() + '').replace(/[^0-9]/g, '');
                 if (isNaN(admin)) admin = 0;
                 total += admin;
 
-                if (isPasienBaru()) {
-                    $('#info-pasien-baru').html(" (Rp 50.000 untuk pasien baru)");
-                } else {
-                    $('#info-pasien-baru').html("");
-                }
+                $('#info-pasien-baru').html(isPasienBaru() ? " (Rp 50.000 untuk pasien baru)" : "");
                 $('#total-biaya').text(total.toLocaleString('id-ID'));
+                $('#total-bayar').text(total.toLocaleString('id-ID'));
+                $('#total-biaya-input').val(total); // ← Set value ke input hidden
             }
 
-            // Format input menjadi rupiah saat ketik (saat diinput) - untuk biaya admin
-            $('#biaya_admin').on('input', function(e) {
+            $('#biaya_admin').on('input', function() {
                 let value = $(this).val().replace(/[^0-9]/g, '');
                 if (!value) value = '0';
                 $(this).val(rupiahFormat(value));
                 recalculateTotal();
             });
 
-            // Saat submit form, unformat biaya_admin agar backend dapat angka mentah
             $('#formTransaksiKasir').on('submit', function() {
-                let adminVal = $('#biaya_admin').val();
-                $('#biaya_admin').val((adminVal + '').replace(/[^0-9]/g, ''));
-                // Unformat semua biaya-perawatan ke angka
+                $('#biaya_admin').val(($('#biaya_admin').val() + '').replace(/[^0-9]/g, ''));
                 $('.biaya-perawatan').each(function() {
-                    let val = $(this).val();
-                    $(this).val((val + '').replace(/[^0-9]/g, ''));
+                    $(this).val(($(this).val() + '').replace(/[^0-9]/g, ''));
                 });
             });
 
-            // Select2
             $(document).ready(function() {
-                $('.select2').select2({});
+                // Init select2 for Perawatan ONLY on dynamic rows
+                $('.perawatan-select').select2({
+                    dropdownParent: $('#table-perawatan').parent()
+                });
+                // Init select2 for Staff (Dokter, Perawat, Kasir)
+                $('.staff-select').select2({
+                    dropdownParent: $('.card-body:has(#Kasir)')
+                });
 
-                // Atur biaya admin sesuai tipe pasien
                 $('input[name="JenisPasien"]').on('change', function() {
                     if (isPasienBaru()) {
                         $('#biaya_admin').prop('readonly', true).val(rupiahFormat(50000));
@@ -278,11 +756,8 @@
                     recalculateTotal();
                 });
 
-                // Initial state on page load
                 let jenisPasienChecked = $('input[name="JenisPasien"]:checked').val();
-                if (jenisPasienChecked === "Lama") {
-                    $('#biaya_admin').val(rupiahFormat(0)).prop('readonly', true);
-                } else if (jenisPasienChecked === "Baru") {
+                if (jenisPasienChecked === "Baru") {
                     $('#biaya_admin').val(rupiahFormat(50000)).prop('readonly', true);
                 } else {
                     $('#biaya_admin').val(rupiahFormat(0)).prop('readonly', true);
@@ -290,108 +765,84 @@
                 recalculateTotal();
             });
 
-            // Dynamic Add Perawatan
             $('#btn-tambah-perawatan').on('click', function() {
                 let idx = perawatanCount;
                 let options = @json($Perawatan);
                 let selectOpt = `<option value="">Pilih Jenis Perawatan</option>`;
-                options.forEach(function(row) {
+                options.forEach(row => {
                     selectOpt += `<option value="${row.id}" data-harga="${row.Tarif}">${row.Nama}</option>`;
                 });
 
                 let html = `
-        <tr>
-            <td class="text-center align-middle"></td>
-            <td>
-                <select class="form-control select2 perawatan-select" name="JenisPerawatan[${idx}][id]" required data-toggle="select2">
-                    ${selectOpt}
-                </select>
-            </td>
-            <td>
-                <input type="text" class="form-control biaya-perawatan bg-light" name="JenisPerawatan[${idx}][Biaya]" readonly placeholder="Rp 0">
-            </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-link text-danger px-2 btn-remove-perawatan" style="font-size:1.25rem;" title="Hapus">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        </tr>
-        `;
+            <tr>
+                <td class="text-center align-middle"></td>
+                <td>
+                    <select class="form-control perawatan-select" name="JenisPerawatan[${idx}][id]" >
+                        ${selectOpt}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control biaya-perawatan bg-light" name="JenisPerawatan[${idx}][Biaya]" placeholder="Rp 0">
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-link btn-remove-perawatan p-1" title="Hapus">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                        </svg>
+                    </button>
+                </td>
+            </tr>`;
+
                 $('#body-perawatan').append(html);
                 perawatanCount++;
-                $('.select2').last().select2({});
-
-                // Number NO. urut setiap baris
+                // Initialize select2 for new perawatan-select
+                $('#body-perawatan tr:last .perawatan-select').select2({
+                    dropdownParent: $('#table-perawatan').parent()
+                });
                 $('#body-perawatan tr').each(function(i) {
                     $(this).find('td:first').text(i + 1);
                 });
+                recalculateTotal();
             });
 
-            // Remove Perawatan
             $('#body-perawatan').on('click', '.btn-remove-perawatan', function() {
                 $(this).closest('tr').remove();
-
-                // Re-number baris setelah dihapus agar tidak meloncat no urut
                 $('#body-perawatan tr').each(function(i) {
                     $(this).find('td:first').text(i + 1);
                 });
                 recalculateTotal();
             });
 
-            // Set Harga on select changed
-            $('#body-perawatan').on('change', '.perawatan-select', function() {
-                let harga = $(this).find('option:selected').data('harga') ?? 0;
-                let input = $(this).closest('tr').find('.biaya-perawatan');
-                input.val(rupiahFormat(harga));
-                recalculateTotal();
-            });
-
-            // Format biaya perawatan in input for first time if selection done
+            // When Jenis Perawatan select changes, update the biaya accordingly
             $(document).on('change', '.perawatan-select', function() {
                 let harga = $(this).find('option:selected').data('harga') ?? 0;
-                let input = $(this).closest('tr').find('.biaya-perawatan');
-                input.val(rupiahFormat(harga));
+                $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
                 recalculateTotal();
             });
 
-            // Format biaya perawatan ketika diketik (jika diaktifkan menjadi editable)
-            $('#body-perawatan').on('input', '.biaya-perawatan', function(e) {
-                let val = $(this).val().replace(/[^0-9]/g, '');
+            $('#body-perawatan').on('input', '.biaya-perawatan', function() {
+                let val = ($(this).val() + '').replace(/[^0-9]/g, '');
                 if (!val) val = '0';
                 $(this).val(rupiahFormat(val));
                 recalculateTotal();
             });
 
-            // On page load: nomor urut always berurutan
+            // Inital setup for the first row & staff select2
             $(function() {
                 $('.perawatan-select').each(function() {
-                    let selected = $(this).find('option:selected');
-                    let harga = selected.data('harga') ?? 0;
-                    let input = $(this).closest('tr').find('.biaya-perawatan');
-                    input.val(rupiahFormat(harga));
+                    let harga = $(this).find('option:selected').data('harga') ?? 0;
+                    $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
                 });
-                // Set nomor urut always berurutan on load
                 $('#body-perawatan tr').each(function(i) {
                     $(this).find('td:first').text(i + 1);
                 });
-
-                // Format biaya admin field on load jika isiannya sudah ada
                 let adminCurrent = $('#biaya_admin').val();
                 if (adminCurrent && !adminCurrent.match(/Rp/)) {
-                    $('#biaya_admin').val(rupiahFormat(adminCurrent.replace(/[^0-9]/g, '')))
+                    $('#biaya_admin').val(rupiahFormat(adminCurrent.replace(/[^0-9]/g, '')));
                 }
-
                 recalculateTotal();
-
-                // Inisialisasi field biaya admin di awal sesuai kondisi radio
-                let jenisPasienChecked = $('input[name="JenisPasien"]:checked').val();
-                if (jenisPasienChecked === "Lama") {
-                    $('#biaya_admin').val(rupiahFormat(0)).prop('readonly', true);
-                } else if (jenisPasienChecked === "Baru") {
-                    $('#biaya_admin').val(rupiahFormat(50000)).prop('readonly', true);
-                } else {
-                    $('#biaya_admin').val(rupiahFormat(0)).prop('readonly', true);
-                }
             });
         </script>
     @endpush

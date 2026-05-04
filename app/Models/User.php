@@ -18,11 +18,20 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = ['id'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -42,4 +51,29 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the user associated with the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function getPerusahaan()
+    {
+        return $this->hasOne(MasterKlinik::class, 'Kode', 'kodeperusahaan');
+    }
+
+    // public function getJabatan()
+    // {
+    //     return $this->hasOne(MasterJabatan::class, 'id', 'jabatan');
+    // }
+
+    /**
+     * Get the Departemen associated with the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    // public function getDepartemen()
+    // {
+    //     return $this->hasOne(MasterDepartemen::class, 'id', 'departemen');
+    // }
 }

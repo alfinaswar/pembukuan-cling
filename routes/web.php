@@ -7,6 +7,7 @@ use App\Http\Controllers\MasterMetodePembayaranController;
 use App\Http\Controllers\MasterShiftController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RuleInsentifController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -79,5 +80,14 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [TransaksiController::class, 'update'])->name('Transaksi.update');
         Route::get('/show/{id}', [TransaksiController::class, 'show'])->name('Transaksi.show');
         Route::delete('/delete/{id}', [TransaksiController::class, 'destroy'])->name('Transaksi.destroy');
+    });
+    Route::prefix('insentif/')->group(function () {
+        Route::get('/', [RuleInsentifController::class, 'index'])->name('Insentif.index');
+        Route::get('/create', [RuleInsentifController::class, 'create'])->name('Insentif.create');
+        Route::post('/store', [RuleInsentifController::class, 'store'])->name('Insentif.store');
+        Route::get('/edit/{id}', [RuleInsentifController::class, 'edit'])->name('Insentif.edit');
+        Route::put('/update/{id}', [RuleInsentifController::class, 'update'])->name('Insentif.update');
+        Route::get('/show/{id}', [RuleInsentifController::class, 'show'])->name('Insentif.show');
+        Route::delete('/delete/{id}', [RuleInsentifController::class, 'destroy'])->name('Insentif.destroy');
     });
 });

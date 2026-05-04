@@ -23,7 +23,8 @@
                         <a href="{{ route('MasterShift.create') }}" class="btn btn-primary btn-sm">Tambah Shift</a>
                     </div>
                     <div class="card-body">
-                        <table id="shiftTable" class="table table-bordered dt-responsive nowrap align-middle mb-0">
+                        <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
+                            id="shiftTable">
                             <thead class="thead-sm text-uppercase fs-xxs">
                                 <tr>
                                     <th width="5%" style="text-align:center;">#</th>

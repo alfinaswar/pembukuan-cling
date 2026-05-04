@@ -4,13 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaksi extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'transaksis';
     protected $guarded = ['id'];
+    public function TransaksiDetail()
+    {
+        return $this->hasMany(TransaksiDetail::class, 'IdTransaksi', 'id');
+    }
 
     protected static function boot()
     {

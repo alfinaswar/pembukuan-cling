@@ -1,60 +1,143 @@
 @extends('layouts.app')
 
-
 @section('content')
-<div class="row">
-    <div class="col-lg-12 margin-tb">
-        <div class="pull-left">
-            <h2>Users Management</h2>
+    <div class="container-fluid">
+        <div class="page-title-head d-flex align-items-center">
+            <div class="flex-grow-1">
+                <h4 class="page-main-title m-0">Master Users</h4>
+            </div>
+            <div class="text-end">
+                <ol class="breadcrumb m-0 py-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Users</a></li>
+                    <li class="breadcrumb-item active">Data Users</li>
+                </ol>
+            </div>
         </div>
-        <div class="pull-right">
-            <a class="btn btn-success" href="{{ route('users.create') }}"> Create New User</a>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header justify-content-between">
+                        <h4 class="card-title">Data Users</h4>
+                        <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">Tambah User</a>
+                    </div>
+                    <div class="card-body">
+                        <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
+                            id="usersTable">
+                            <thead class="thead-sm text-uppercase fs-xxs">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th width="10%">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- Data akan dimuat melalui DataTables --}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- end card-body-->
+                </div>
+                <!-- end card-->
+            </div>
         </div>
-    </div>
-</div>
+    @endsection
 
+    @push('scripts')
+        @if (Session::get('success'))
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ Session::get('success') }}',
+                    iconColor: '#4BCC1F',
+                    confirmButtonText: 'Oke',
+                    confirmButtonColor: '#4BCC1F',
+                });
+            </script>
+        @endif
+        <script>
+            $(document).ready(function() {
+                $('body').on('click', '.btn-delete', function() {
+                    var id = $(this).data('id');
+                    Swal.fire({
+                        title: 'Hapus Data?',
+                        text: "Apakah Anda yakin ingin menghapus user ini?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '{{ route('users.destroy', ':id') }}'.replace(':id', id),
+                                type: 'DELETE',
+                                data: {
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+                                    if (response.status === 200) {
+                                        Swal.fire('Dihapus!', response.message, 'success');
+                                        $('#usersTable').DataTable().ajax.reload();
+                                    } else {
+                                        Swal.fire('Gagal!', response.message, 'error');
+                                    }
+                                },
+                                error: function(xhr) {
+                                    Swal.fire('Gagal!', xhr.responseJSON?.message ??
+                                        'Terjadi kesalahan saat menghapus.', 'error');
+                                }
+                            });
+                        }
+                    });
+                });
 
-@if ($message = Session::get('success'))
-<div class="alert alert-success">
-  {{ $message }}
-</div>
-@endif
-
-
-<table class="table table-bordered">
- <tr>
-   <th>No</th>
-   <th>Name</th>
-   <th>Email</th>
-   <th>Roles</th>
-   <th width="280px">Action</th>
- </tr>
- @foreach ($data as $key => $user)
-  <tr>
-    <td>{{ ++$i }}</td>
-    <td>{{ $user->name }}</td>
-    <td>{{ $user->email }}</td>
-    <td>
-      @if(!empty($user->getRoleNames()))
-        @foreach($user->getRoleNames() as $v)
-           <label class="badge bg-success">{{ $v }}</label>
-        @endforeach
-      @endif
-    </td>
-    <td>
-       <a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a>
-       <a class="btn btn-primary" href="{{ route('users.edit',$user->id) }}">Edit</a>
-        {!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
-            {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-        {!! Form::close() !!}
-    </td>
-  </tr>
- @endforeach
-</table>
-
-
-{!! $data->render() !!}
-
-
-<p class="text-center text-primary"><small>Tutorial by ItSolutionStuff.com</small></p>
-@endsection
+                $('#usersTable').DataTable({
+                    responsive: true,
+                    serverSide: true,
+                    processing: true,
+                    bDestroy: true,
+                    ajax: {
+                        url: "{{ route('users.index') }}",
+                    },
+                    language: {
+                        processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Memuat...</span>',
+                        paginate: {
+                            next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
+                            previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
+                        }
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'email',
+                            name: 'email'
+                        },
+                        {
+                            data: 'roles',
+                            name: 'roles',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+                    ]
+                });
+            });
+        </script>
+    @endpush
