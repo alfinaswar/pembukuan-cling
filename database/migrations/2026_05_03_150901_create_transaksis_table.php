@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('IdPerawat')->nullable();
             $table->string('IdDokter')->nullable();
             $table->string('Shift')->nullable();
+            $table->string('KodeCabang')->nullable();
             $table->string('UserCreate')->nullable();
             $table->string('UserUpdate')->nullable();
             $table->string('UserDelete')->nullable();

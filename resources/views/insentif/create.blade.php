@@ -28,9 +28,12 @@
                             <div class="row">
                                 <div class="mb-2 col-md-6">
                                     <label for="Role" class="form-label">Role <span class="text-danger">*</span></label>
-                                    <input type="text" id="Role" name="Role"
-                                        class="form-control @error('Role') is-invalid @enderror" value="{{ old('Role') }}"
-                                        required placeholder="Masukkan Role">
+                                    <input type="hidden" name="Role" id="Role" value="{{ $role->id ?? '' }}">
+                                    <input type="text" class="form-control" value="{{ $role->name ?? '' }}" readonly
+                                        disabled>
+
+
+
                                     @error('Role')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror

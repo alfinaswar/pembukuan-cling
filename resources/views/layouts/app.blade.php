@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-topbar-color="light">
 
 <head>
     <meta charset="utf-8" />
-    <title>Dashboard | UBold - Multipurpose Admin & Dashboard Template</title>
+    <title>Pembukuan | Cling Dental Clinic</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description"
-        content="UBold is a modern, responsive admin dashboard available on ThemeForest. Ideal for building CRM, CMS, project management tools, and custom web applications with a clean UI, flexible layouts, and rich features." />
+        content="Sistem pembukuan untuk Cling Dental Clinic. Kelola transaksi, data pasien, dan laporan keuangan dengan mudah dan efisien." />
     <meta name="keywords"
-        content="UBold, admin dashboard, ThemeForest, Bootstrap 5 admin, Tailwind CSS, responsive admin, CRM dashboard, CMS admin, web app UI, admin theme, premium admin template" />
-    <meta name="author" content="Coderthemes" />
+        content="Cling Dental Clinic, pembukuan, transaksi klinik, keuangan, data pasien, laporan klinik" />
+    <meta name="author" content="Cling Dental Clinic Team" />
 
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('') }}assets/images/favicon.ico" />
@@ -38,7 +38,7 @@
     <!-- Begin page -->
     <div class="wrapper">
         <header class="app-topbar">
-            <div class="container-fluid topbar-menu">
+            <div class="container-fluid topbar-menu" name="data-bs-theme" value="light">
                 <div class="d-flex align-items-center gap-2">
                     <!-- Topbar Brand Logo -->
                     <div class="logo-topbar">
@@ -63,198 +63,9 @@
                         </a>
                     </div>
 
-                    <!-- Sidebar Menu Toggle Button -->
-                    <button class="sidenav-toggle-button btn btn-default btn-icon">
-                        <i data-lucide="menu"></i>
-                    </button>
 
-                    <!-- Horizontal Menu Toggle Button -->
-                    <button class="topnav-toggle-button px-2" data-bs-toggle="collapse" data-bs-target="#topnav-menu">
-                        <i data-lucide="menu"></i>
-                    </button>
 
-                    <div id="loot-box" class="topbar-item d-none d-xl-flex">
-                        <div class="dropdown">
-                            <a href="#!"
-                                class="topbar-link btn shadow-none btn-link dropdown-toggle drop-arrow-none px-2"
-                                data-bs-toggle="dropdown">
-                                Loot Box
-                                <i data-lucide="chevron-down" class="ms-1"></i>
-                            </a>
-                            <div class="dropdown-menu">
-                                <!-- My Profile -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="circle-user-round" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Secret Identity</span>
-                                </a>
 
-                                <!-- Settings -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="bolt" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Control Panel</span>
-                                </a>
-
-                                <!-- Support -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="headset" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Help Squad</span>
-                                </a>
-                            </div>
-                            <!-- end dropdown-menu-->
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-
-                    <div id="megamenu-pages" class="topbar-item d-none d-md-flex">
-                        <div class="dropdown">
-                            <button class="topbar-link btn fw-medium btn-link dropdown-toggle drop-arrow-none px-2"
-                                data-bs-toggle="dropdown" type="button" aria-haspopup="false" aria-expanded="false">
-                                Pages
-                                <i data-lucide="chevron-down" class="ms-1"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-xxl p-0">
-                                <div class="h-100" style="max-height: 380px" data-simplebar="">
-                                    <div class="row g-0">
-                                        <!-- Dashboard & Analytics -->
-                                        <div class="col-md-4">
-                                            <div class="p-2">
-                                                <h5 class="mb-1 fw-semibold fs-sm dropdown-header">Dashboard &amp;
-                                                    Analytics</h5>
-                                                <ul class="list-unstyled megamenu-list">
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="chart-line"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Sales Dashboard
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="lightbulb"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Marketing Dashboard
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="dollar-sign"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Finance Overview
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="users"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            User Analytics
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="activity"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Traffic Insights
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        <!-- Project Management -->
-                                        <div class="col-md-4">
-                                            <div class="p-2">
-                                                <h5 class="mb-1 fw-semibold fs-sm dropdown-header">Project Management
-                                                </h5>
-                                                <ul class="list-unstyled megamenu-list">
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="kanban"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Kanban Workflow
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="calendar-clock"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Project Timeline
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="list-check"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Task Management
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="users-round"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Team Members
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="clipboard-type"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Assignments
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        <!-- User Management -->
-                                        <div class="col-md-4">
-                                            <div class="p-2">
-                                                <h5 class="mb-1 fw-semibold fs-sm dropdown-header">User Management</h5>
-                                                <ul class="list-unstyled megamenu-list">
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="circle-user-round"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            User Profiles
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="lock-keyhole"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Access Control
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="settings"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            Security Settings
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="users"
-                                                                class="align-middle me-2 fs-16"></i>
-                                                            User Groups
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="javascript:void(0);" class="dropdown-item">
-                                                            <i data-lucide="key" class="align-middle me-2 fs-16"></i>
-                                                            Authentication
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- end .h-100-->
-                            </div>
-                            <!-- .dropdown-menu-->
-                        </div>
-                        <!-- .dropdown-->
-                    </div>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
@@ -266,22 +77,22 @@
 
                     <div id="theme-dropdown" class="topbar-item d-none d-sm-flex">
                         <div class="dropdown">
-                            <button class="topbar-link" data-bs-toggle="dropdown" type="button"
-                                aria-haspopup="false" aria-expanded="false">
+                            <button class="topbar-link" data-bs-toggle="dropdown" type="button" aria-haspopup="false"
+                                aria-expanded="false">
                                 <i data-lucide="sun" class="topbar-link-icon d-none" id="theme-icon-light"></i>
                                 <i data-lucide="moon" class="topbar-link-icon d-none" id="theme-icon-dark"></i>
                                 <i data-lucide="sun-moon" class="topbar-link-icon d-none" id="theme-icon-system"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end" data-thememode="dropdown">
                                 <label class="dropdown-item cursor-pointer">
-                                    <input class="form-check-input" type="radio" name="data-bs-theme"
-                                        value="light" style="display: none" />
+                                    <input class="form-check-input" type="radio" name="data-bs-theme" value="light"
+                                        style="display: none" />
                                     <i data-lucide="sun" class="align-middle me-1 fs-16"></i>
                                     <span class="align-middle">Light</span>
                                 </label>
                                 <label class="dropdown-item cursor-pointer">
-                                    <input class="form-check-input" type="radio" name="data-bs-theme"
-                                        value="dark" style="display: none" />
+                                    <input class="form-check-input" type="radio" name="data-bs-theme" value="dark"
+                                        style="display: none" />
                                     <i data-lucide="moon" class="align-middle me-1 fs-16"></i>
                                     <span class="align-middle">Dark</span>
                                 </label>
@@ -1212,8 +1023,8 @@
                             <input class="form-check-input" type="radio" name="data-bs-theme"
                                 id="layout-color-light" value="light" />
                             <label class="form-check-label p-0 w-100" for="layout-color-light">
-                                <img src="{{ asset('') }}assets/images/layouts/theme-light.png"
-                                    alt="layout-img" class="img-fluid" />
+                                <img src="{{ asset('') }}assets/images/layouts/theme-light.png" alt="layout-img"
+                                    class="img-fluid" />
                             </label>
                         </div>
                         <h5 class="text-center text-muted mt-2 mb-0">Light</h5>
@@ -1236,8 +1047,8 @@
                             <input class="form-check-input" type="radio" name="data-bs-theme"
                                 id="layout-color-system" value="system" />
                             <label class="form-check-label p-0 w-100" for="layout-color-system">
-                                <img src="{{ asset('') }}assets/images/layouts/theme-system.png"
-                                    alt="layout-img" class="img-fluid" />
+                                <img src="{{ asset('') }}assets/images/layouts/theme-system.png" alt="layout-img"
+                                    class="img-fluid" />
                             </label>
                         </div>
                         <h5 class="text-center text-muted mt-2 mb-0">System</h5>
@@ -1580,6 +1391,7 @@
     <!-- Select2 Plugin Js -->
     <script src="{{ asset('') }}assets/plugins/select2/select2.min.js"></script>
     <script src="{{ asset('') }}assets/js/pages/form-select2.js"></script>
+    <script src="{{ asset('') }}assets/js/pages/form-choice.js"></script>
     @stack('scripts')
 </body>
 

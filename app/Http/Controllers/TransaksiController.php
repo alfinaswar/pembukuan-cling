@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\MasterJenisPerawatan;
 use App\Models\MasterMetodePembayaran;
+use App\Models\MasterShift;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Services\InsentifService;
+use Illuminate\Support\Carbon;
 
 class TransaksiController extends Controller
 {
@@ -84,6 +87,7 @@ class TransaksiController extends Controller
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
+        $shiftId = $this->getShift(now());
         $transaksi = Transaksi::create([
             'Tanggal' => $request->Tanggal,
             'NamaPasien' => $request->NamaPasien,
@@ -94,7 +98,7 @@ class TransaksiController extends Controller
             'IdResepsionis' => $request->Kasir,
             'IdPerawat' => $request->Perawat,
             'IdDokter' => $request->Dokter,
-            'Shift' => 1,
+            'Shift' => $shiftId,
             'UserCreate' => auth()->user()->name,
             'UserUpdate' => null,
             'UserDelete' => null,
@@ -120,7 +124,7 @@ class TransaksiController extends Controller
                 }
             }
         }
-
+        app(InsentifService::class)->proses($transaksi);
         return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil disimpan.');
     }
 
@@ -154,5 +158,15 @@ class TransaksiController extends Controller
     public function destroy(Transaksi $transaksi)
     {
         //
+    }
+    private function getShift($tanggal)
+    {
+        $jam = Carbon::parse($tanggal)->format('H:i:s');
+
+        $shift = MasterShift::whereTime('JamMulai', '<=', $jam)
+            ->whereTime('JamSelesai', '>', $jam)
+            ->first();
+
+        return $shift ? $shift->id : null;
     }
 }

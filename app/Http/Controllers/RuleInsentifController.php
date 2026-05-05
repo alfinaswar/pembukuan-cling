@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RuleInsentif;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
 class RuleInsentifController extends Controller
@@ -37,11 +38,17 @@ class RuleInsentifController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($id)
     {
-        return view('insentif.create');
+        $role = Role::where('id', $id)->first();
+        return view('insentif.create', compact('role'));
     }
-
+    public function aturan(Request $request)
+    {
+        $roles = Role::orderBy('id', 'DESC')->paginate(5);
+        return view('insentif.daftar-role', compact('roles'))
+            ->with('i', ($request->input('page', 1) - 1) * 5);
+    }
     /**
      * Store a newly created resource in storage.
      */

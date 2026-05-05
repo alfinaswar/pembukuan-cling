@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MasterJenisPerawatanController;
 use App\Http\Controllers\MasterKlinikController;
@@ -83,11 +84,13 @@ Route::group(['middleware' => ['auth']], function () {
     });
     Route::prefix('insentif/')->group(function () {
         Route::get('/', [RuleInsentifController::class, 'index'])->name('Insentif.index');
-        Route::get('/create', [RuleInsentifController::class, 'create'])->name('Insentif.create');
+        Route::get('/ketentuan', [RuleInsentifController::class, 'aturan'])->name('Insentif.aturan');
+        Route::get('/create/{id}', [RuleInsentifController::class, 'create'])->name('Insentif.create');
         Route::post('/store', [RuleInsentifController::class, 'store'])->name('Insentif.store');
         Route::get('/edit/{id}', [RuleInsentifController::class, 'edit'])->name('Insentif.edit');
         Route::put('/update/{id}', [RuleInsentifController::class, 'update'])->name('Insentif.update');
         Route::get('/show/{id}', [RuleInsentifController::class, 'show'])->name('Insentif.show');
         Route::delete('/delete/{id}', [RuleInsentifController::class, 'destroy'])->name('Insentif.destroy');
     });
+    Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });

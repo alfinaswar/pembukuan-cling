@@ -20,7 +20,7 @@
                 <div class="card">
                     <div class="card-header justify-content-between">
                         <h4 class="card-title">Data Rule Insentif</h4>
-                        <a href="{{ route('Insentif.create') }}" class="btn btn-primary btn-sm">Tambah Rule Insentif</a>
+                        <a href="{{ route('Insentif.aturan') }}" class="btn btn-primary btn-sm">Tambah Rule Insentif</a>
                     </div>
                     <div class="card-body">
                         <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
