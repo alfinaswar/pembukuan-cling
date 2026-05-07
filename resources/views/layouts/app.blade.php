@@ -1,1398 +1,2293 @@
-<!doctype html>
-<html lang="en" data-topbar-color="light">
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-bs-theme="light" data-color-theme="Blue_Theme" data-layout="vertical">
 
 <head>
-    <meta charset="utf-8" />
-    <title>Pembukuan | Cling Dental Clinic</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description"
-        content="Sistem pembukuan untuk Cling Dental Clinic. Kelola transaksi, data pasien, dan laporan keuangan dengan mudah dan efisien." />
-    <meta name="keywords"
-        content="Cling Dental Clinic, pembukuan, transaksi klinik, keuangan, data pasien, laporan klinik" />
-    <meta name="author" content="Cling Dental Clinic Team" />
+    <!-- Required meta tags -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('') }}assets/images/favicon.ico" />
-    <!-- Theme Config Js -->
-    <script src="{{ asset('') }}assets/js/config.js"></script>
+    <!-- Favicon icon-->
+    <link rel="shortcut icon" type="image/png" href="{{ asset('') }}assets/images/logos/favicon.png" />
 
-    <!-- Vendor css -->
-    <link href="{{ asset('') }}assets/css/vendors.min.css" rel="stylesheet" type="text/css" />
+    <!-- Core Css -->
+    <link rel="stylesheet" href="{{ asset('') }}assets/css/styles.css" />
 
-    <link href="{{ asset('') }}assets/plugins/datatables/responsive.bootstrap5.min.css" rel="stylesheet"
-        type="text/css" />
-    <!-- App css -->
-    <link id="app-style" href="{{ asset('') }}assets/css/app.min.css" rel="stylesheet" type="text/css" />
-    <!-- Sweet Alert css-->
-    <link href="{{ asset('') }}assets/plugins/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
-    <!-- Select Plugin CSS -->
-    <link rel="stylesheet" href="{{ asset('') }}assets/plugins/select2/select2.min.css" />
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-        integrity="sha512-pVTO1qL2DJ6VrX5rJ8v5Vu7JuxO2UdtVnEGEc4cGvaXHfFNimxQxlNMiZScQYevZYwWeajHeXXstyA4Y3WFDvA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <title>Modernize Bootstrap Admin</title>
 </head>
 
 <body>
-    <!-- Begin page -->
-    <div class="wrapper">
-        <header class="app-topbar">
-            <div class="container-fluid topbar-menu" name="data-bs-theme" value="light">
-                <div class="d-flex align-items-center gap-2">
-                    <!-- Topbar Brand Logo -->
-                    <div class="logo-topbar">
-                        <!-- Logo light -->
-                        <a href="index.html" class="logo-light">
-                            <span class="logo-lg">
-                                <img src="{{ asset('') }}assets/images/logo.png" alt="logo" />
-                            </span>
-                            <span class="logo-sm">
-                                <img src="{{ asset('') }}assets/images/logo-sm.png" alt="small logo" />
-                            </span>
-                        </a>
-
-                        <!-- Logo Dark -->
-                        <a href="index.html" class="logo-dark">
-                            <span class="logo-lg">
-                                <img src="{{ asset('') }}assets/images/logo-black.png" alt="dark logo" />
-                            </span>
-                            <span class="logo-sm">
-                                <img src="{{ asset('') }}assets/images/logo-sm.png" alt="small logo" />
-                            </span>
-                        </a>
-                    </div>
-
-
-
-
+    <!-- Preloader -->
+    <div class="preloader">
+        <img src="{{ asset('') }}assets/images/logos/favicon.png" alt="loader" class="lds-ripple img-fluid" />
+    </div>
+    <div id="main-wrapper">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar with-vertical">
+            <div><!-- ---------------------------------- -->
+                <!-- Start Vertical Layout Sidebar -->
+                <!-- ---------------------------------- -->
+                <div class="brand-logo d-flex align-items-center justify-content-between">
+                    <a href="../main/index.html" class="text-nowrap logo-img">
+                        <img src="{{ asset('') }}assets/images/logos/dark-logo.svg" class="dark-logo"
+                            alt="Logo-Dark" />
+                        <img src="{{ asset('') }}assets/images/logos/light-logo.svg" class="light-logo"
+                            alt="Logo-light" />
+                    </a>
+                    <a href="javascript:void(0)"
+                        class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none">
+                        <i class="ti ti-x"></i>
+                    </a>
                 </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <div id="search-box-rounded-right" class="app-search d-none d-xl-flex">
-                        <input type="search" class="form-control rounded-pill topbar-search" name="search"
-                            placeholder="Quick Search..." />
-                        <i data-lucide="search" class="app-search-icon text-muted"></i>
-                    </div>
-
-                    <div id="theme-dropdown" class="topbar-item d-none d-sm-flex">
-                        <div class="dropdown">
-                            <button class="topbar-link" data-bs-toggle="dropdown" type="button" aria-haspopup="false"
-                                aria-expanded="false">
-                                <i data-lucide="sun" class="topbar-link-icon d-none" id="theme-icon-light"></i>
-                                <i data-lucide="moon" class="topbar-link-icon d-none" id="theme-icon-dark"></i>
-                                <i data-lucide="sun-moon" class="topbar-link-icon d-none" id="theme-icon-system"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end" data-thememode="dropdown">
-                                <label class="dropdown-item cursor-pointer">
-                                    <input class="form-check-input" type="radio" name="data-bs-theme" value="light"
-                                        style="display: none" />
-                                    <i data-lucide="sun" class="align-middle me-1 fs-16"></i>
-                                    <span class="align-middle">Light</span>
-                                </label>
-                                <label class="dropdown-item cursor-pointer">
-                                    <input class="form-check-input" type="radio" name="data-bs-theme" value="dark"
-                                        style="display: none" />
-                                    <i data-lucide="moon" class="align-middle me-1 fs-16"></i>
-                                    <span class="align-middle">Dark</span>
-                                </label>
-                                <label class="dropdown-item cursor-pointer">
-                                    <input class="form-check-input" type="radio" name="data-bs-theme"
-                                        value="system" style="display: none" />
-                                    <i data-lucide="sun-moon" class="align-middle me-1 fs-16"></i>
-                                    <span class="align-middle">System</span>
-                                </label>
-                            </div>
-                            <!-- end dropdown-menu-->
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-
-                    <div id="apps-dropdown-grid" class="topbar-item d-none d-xl-flex">
-                        <div class="dropdown">
-                            <button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown"
-                                type="button" data-bs-auto-close="outside" aria-haspopup="false"
-                                aria-expanded="false">
-                                <i data-lucide="layout-grid" class="topbar-link-icon"></i>
-                            </button>
-
-                            <div class="dropdown-menu dropdown-menu-lg p-2 dropdown-menu-end">
-                                <div class="row align-items-center g-1">
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="{{ asset('') }}assets/images/logos/google.svg"
-                                                        alt="Google Logo" height="18" />
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Google</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="{{ asset('') }}assets/images/logos/figma.svg"
-                                                        alt="Figma Logo" height="18" />
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Figma</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="{{ asset('') }}assets/images/logos/slack.svg"
-                                                        alt="Slack Logo" height="18" />
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Slack</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="{{ asset('') }}assets/images/logos/dropbox.svg"
-                                                        alt="Dropbox Logo" height="18" />
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Dropbox</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4 text-center">
-                                        <a href="javascript:void(0);"
-                                            class="btn btn-sm rounded-circle btn-icon btn-danger">
-                                            <i data-lucide="circle-plus" class="fs-18"></i>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span
-                                                    class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i data-lucide="calendar" class="fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Calendar</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span
-                                                    class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i data-lucide="message-circle" class="fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Chat</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span
-                                                    class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i data-lucide="folder" class="fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Files</span>
-                                        </a>
-                                    </div>
-
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);"
-                                            class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span
-                                                    class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i data-lucide="users" class="fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Team</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- End dropdown-menu -->
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-
-                    <div id="notification-dropdown-people" class="topbar-item">
-                        <div class="dropdown">
-                            <button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown"
-                                type="button" data-bs-auto-close="outside" aria-haspopup="false"
-                                aria-expanded="false">
-                                <i data-lucide="bell" class="topbar-link-icon animate-ring"></i>
-                                <span class="badge text-bg-danger badge-circle topbar-badge">5</span>
-                            </button>
-
-                            <div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
-                                <div class="px-3 py-2 border-bottom">
-                                    <div class="row align-items-center">
-                                        <div class="col">
-                                            <h6 class="m-0 fs-md fw-semibold">Notifications</h6>
-                                        </div>
-                                        <div class="col text-end">
-                                            <a href="#!" class="badge badge-soft-success badge-label py-1">07
-                                                Notifications</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div style="max-height: 300px" data-simplebar="">
-                                    <!-- Notification 1 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-1">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="{{ asset('') }}assets/images/users/user-4.jpg"
-                                                    class="avatar-md rounded-circle" alt="User Avatar" />
-                                                <span
-                                                    class="position-absolute rounded-pill bg-success notification-badge">
-                                                    <i data-lucide="bell" class="align-middle"></i>
-                                                    <span class="visually-hidden">unread notification</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Emily Johnson</span>
-                                                commented on a task in
-                                                <span class="fw-medium text-body">Design Sprint</span>
-                                                <br />
-                                                <span class="fs-xs">12 minutes ago</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-1">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-
-                                    <!-- Notification 2 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-2">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="{{ asset('') }}assets/images/users/user-5.jpg"
-                                                    class="avatar-md rounded-circle" alt="User Avatar" />
-                                                <span
-                                                    class="position-absolute rounded-pill bg-info notification-badge">
-                                                    <i data-lucide="cloud-upload" class="align-middle"></i>
-                                                    <span class="visually-hidden">upload notification</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Michael Lee</span>
-                                                uploaded files to
-                                                <span class="fw-medium text-body">Marketing Assets</span>
-                                                <br />
-                                                <span class="fs-xs">25 minutes ago</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-2">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-
-                                    <!-- Notification 3 - Server CPU Alert -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-6">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <span
-                                                    class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
-                                                    <i data-lucide="database" class="fs-4"></i>
-                                                </span>
-                                                <span
-                                                    class="position-absolute rounded-pill bg-danger notification-badge">
-                                                    <i data-lucide="circle-alert" class="align-middle"></i>
-                                                    <span class="visually-hidden">server alert</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Server #3</span>
-                                                CPU usage exceeded 90%
-                                                <br />
-                                                <span class="fs-xs">Just now</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-6">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-
-                                    <!-- Notification 4 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-3">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="{{ asset('') }}assets/images/users/user-6.jpg"
-                                                    class="avatar-md rounded-circle" alt="User Avatar" />
-                                                <span
-                                                    class="position-absolute rounded-pill bg-warning notification-badge">
-                                                    <i data-lucide="alert-triangle" class="align-middle"></i>
-                                                    <span class="visually-hidden">alert</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Sophia Ray</span>
-                                                flagged an issue in
-                                                <span class="fw-medium text-body">Bug Tracker</span>
-                                                <br />
-                                                <span class="fs-xs">40 minutes ago</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-3">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-
-                                    <!-- Notification 5 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-4">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="{{ asset('') }}assets/images/users/user-7.jpg"
-                                                    class="avatar-md rounded-circle" alt="User Avatar" />
-                                                <span
-                                                    class="position-absolute rounded-pill bg-primary notification-badge">
-                                                    <i data-lucide="calendar-check" class="align-middle"></i>
-                                                    <span class="visually-hidden">event notification</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">David Kim</span>
-                                                scheduled a meeting for
-                                                <span class="fw-medium text-body">UX Review</span>
-                                                <br />
-                                                <span class="fs-xs">1 hour ago</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-4">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-
-                                    <!-- Notification 6 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-5">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="{{ asset('') }}assets/images/users/user-8.jpg"
-                                                    class="avatar-md rounded-circle" alt="User Avatar" />
-                                                <span
-                                                    class="position-absolute rounded-pill bg-secondary notification-badge">
-                                                    <i data-lucide="square-pen" class="align-middle"></i>
-                                                    <span class="visually-hidden">edit</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Isabella White</span>
-                                                updated the document in
-                                                <span class="fw-medium text-body">Product Specs</span>
-                                                <br />
-                                                <span class="fs-xs">2 hours ago</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-5">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-
-                                    <!-- Notification 7 - Deployment Success -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-7">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <span
-                                                    class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
-                                                    <i data-lucide="rocket" class="fs-4"></i>
-                                                </span>
-                                                <span
-                                                    class="position-absolute rounded-pill bg-success notification-badge">
-                                                    <i data-lucide="check" class="align-middle"></i>
-                                                    <span class="visually-hidden">deployment</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Production Server</span>
-                                                deployment completed successfully
-                                                <br />
-                                                <span class="fs-xs">30 minutes ago</span>
-                                            </span>
-                                            <button type="button"
-                                                class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn"
-                                                data-dismissible="#message-7">
-                                                <i data-lucide="x-square" class="fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- All-->
-                                <a href="javascript:void(0);"
-                                    class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">Read
-                                    All Messages</a>
-                            </div>
-                            <!-- End dropdown-menu -->
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-
-                    <div id="fullscreen-toggler" class="topbar-item d-none d-md-flex">
-                        <button class="topbar-link" type="button" data-toggle="fullscreen">
-                            <i data-lucide="maximize" class="topbar-link-icon"></i>
-                            <i data-lucide="minimize" class="topbar-link-icon d-none"></i>
-                        </button>
-                    </div>
-
-                    <div id="monochrome-toggler" class="topbar-item d-none d-xl-flex">
-                        <button id="monochrome-mode" class="topbar-link" type="button" data-toggle="monochrome">
-                            <i data-lucide="palette" class="topbar-link-icon"></i>
-                        </button>
-                    </div>
-
-                    <div class="topbar-item d-none d-sm-flex">
-                        <button class="topbar-link btn-theme-setting" data-bs-toggle="offcanvas"
-                            data-bs-target="#theme-settings-offcanvas" type="button">
-                            <i data-lucide="settings" class="topbar-link-icon"></i>
-                        </button>
-                    </div>
-
-                    <div id="language-selector-rounded" class="topbar-item">
-                        <div class="dropdown">
-                            <button class="topbar-link fw-bold" data-bs-toggle="dropdown" type="button"
-                                aria-haspopup="false" aria-expanded="false">
-                                <img src="{{ asset('') }}assets/images/flags/us.svg" alt="user-image"
-                                    class="rounded-circle me-2" height="18" id="selected-language-image" />
-                                <span id="selected-language-code">EN</span>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="en"
-                                    title="English">
-                                    <img src="{{ asset('') }}assets/images/flags/us.svg" alt="English"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">English</span>
-                                </a>
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="de"
-                                    title="German">
-                                    <img src="{{ asset('') }}assets/images/flags/de.svg" alt="German"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">Deutsch</span>
-                                </a>
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="it"
-                                    title="Italian">
-                                    <img src="{{ asset('') }}assets/images/flags/it.svg" alt="Italian"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">Italiano</span>
-                                </a>
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="es"
-                                    title="Spanish">
-                                    <img src="{{ asset('') }}assets/images/flags/es.svg" alt="Spanish"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">Español</span>
-                                </a>
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="ru"
-                                    title="Russian">
-                                    <img src="{{ asset('') }}assets/images/flags/ru.svg" alt="Russian"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">Русский</span>
-                                </a>
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="hi"
-                                    title="Hindi">
-                                    <img src="{{ asset('') }}assets/images/flags/in.svg" alt="Hindi"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">हिन्दी</span>
-                                </a>
-                                <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="ar"
-                                    title="Arabic">
-                                    <img src="{{ asset('') }}assets/images/flags/sa.svg" alt="Arabic"
-                                        class="me-1 rounded-circle" height="18" data-translator-image="" />
-                                    <span class="align-middle">عربي</span>
-                                </a>
-                            </div>
-                            <!-- end dropdown-menu-->
-                        </div>
-                        <!-- end dropdown-->
-                    </div>
-
-                    <div id="simple-user-dropdown" class="topbar-item nav-user">
-                        <div class="dropdown">
-                            <a class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown"
-                                href="#!" aria-haspopup="false" aria-expanded="false">
-                                <img src="{{ asset('') }}assets/images/users/user-1.jpg" width="32"
-                                    class="rounded-circle me-lg-2 d-flex" alt="user-image" />
-                                <div class="d-lg-flex align-items-center gap-1 d-none">
-                                    <h5 class="my-0">Geneva K.</h5>
-                                    <i data-lucide="chevron-down" class="align-middle"></i>
-                                </div>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <!-- Header -->
-                                <div class="dropdown-header noti-title">
-                                    <h6 class="text-overflow m-0">Welcome back!</h6>
-                                </div>
-
-                                <!-- My Profile -->
-                                <a href="#!" class="dropdown-item">
-                                    <i data-lucide="circle-user-round" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Profile</span>
-                                </a>
-
-                                <!-- Notifications -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="bell-ring" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Notifications</span>
-                                </a>
-
-                                <!-- Wallet -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="credit-card" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">
-                                        Balance:
-                                        <span class="fw-semibold">$985.25</span>
-                                    </span>
-                                </a>
-
-                                <!-- Settings -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="bolt" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Account Settings</span>
-                                </a>
-
-                                <!-- Support -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="headset" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Support Center</span>
-                                </a>
-
-                                <!-- Divider -->
-                                <div class="dropdown-divider"></div>
-
-                                <!-- Lock -->
-                                <a href="auth-lock-screen.html" class="dropdown-item">
-                                    <i data-lucide="lock-keyhole" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Lock Screen</span>
-                                </a>
-
-                                <!-- Logout -->
-                                <a href="javascript:void(0);" class="dropdown-item text-danger fw-semibold">
-                                    <i data-lucide="log-out" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Log Out</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <!-- Topbar End -->
-
-        <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content bg-transparent">
-                    <form>
-                        <div class="card mb-1">
-                            <div class="px-3 py-2 d-flex flex-row align-items-center" id="top-search">
-                                <i data-lucide="search" class="fs-22"></i>
-                                <input type="search" class="form-control border-0" id="search-modal-input"
-                                    placeholder="Search for actions, people," />
-                                <button type="submit" class="btn p-0" data-bs-dismiss="modal"
-                                    aria-label="Close">[esc]</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="sidenav-menu">
-            <!-- Brand Logo -->
-            <a href="index.html" class="logo">
-                <span class="logo logo-light">
-                    <span class="logo-lg"><img src="{{ asset('') }}assets/images/logo.png"
-                            alt="logo" /></span>
-                    <span class="logo-sm"><img src="{{ asset('') }}assets/images/logo-sm.png"
-                            alt="small logo" /></span>
-                </span>
-
-                <span class="logo logo-dark">
-                    <span class="logo-lg"><img src="{{ asset('') }}assets/images/logo-black.png"
-                            alt="dark logo" /></span>
-                    <span class="logo-sm"><img src="{{ asset('') }}assets/images/logo-sm.png"
-                            alt="small logo" /></span>
-                </span>
-            </a>
-
-            <!-- Sidebar Hover Menu Toggle Button -->
-            <button class="button-on-hover">
-                <span class="btn-on-hover-icon"></span>
-            </button>
-
-            <!-- Full Sidebar Menu Close Button -->
-            <button class="button-close-offcanvas">
-                <i data-lucide="menu" class="align-middle"></i>
-            </button>
-
-            <div class="scrollbar" data-simplebar="">
-                <div id="user-profile-settings" class="sidenav-user"
-                    style="background: url({{ asset('') }}assets/images/user-bg-pattern.svg)">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <a href="#!" class="link-reset">
-                                <img src="{{ asset('') }}assets/images/users/user-1.jpg" alt="user-image"
-                                    class="rounded-circle mb-2 avatar-md" />
-                                <span class="sidenav-user-name fw-bold">Geneva K.</span>
-                                <span class="fs-12 fw-semibold" data-lang="user-role">Art Director</span>
-                            </a>
-                        </div>
-                        <div>
-                            <a class="dropdown-toggle drop-arrow-none link-reset sidenav-user-set-icon"
-                                data-bs-toggle="dropdown" data-bs-offset="0,12" href="#!" aria-haspopup="false"
-                                aria-expanded="false">
-                                <i data-lucide="settings" class="fs-24 align-middle ms-1"></i>
-                            </a>
-
-                            <div class="dropdown-menu">
-                                <!-- Header -->
-                                <div class="dropdown-header noti-title">
-                                    <h6 class="text-overflow m-0">Welcome back!</h6>
-                                </div>
-
-                                <!-- My Profile -->
-                                <a href="#!" class="dropdown-item">
-                                    <i data-lucide="circle-user-round" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Profile</span>
-                                </a>
-
-                                <!-- Settings -->
-                                <a href="javascript:void(0);" class="dropdown-item">
-                                    <i data-lucide="bolt" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Account Settings</span>
-                                </a>
-
-                                <!-- Lock -->
-                                <a href="auth-lock-screen.html" class="dropdown-item">
-                                    <i data-lucide="lock-keyhole" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Lock Screen</span>
-                                </a>
-
-                                <!-- Logout -->
-                                <a href="javascript:void(0);" class="dropdown-item text-danger fw-semibold">
-                                    <i data-lucide="log-out" class="me-1 fs-lg align-middle"></i>
-                                    <span class="align-middle">Log Out</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!--- Sidenav Menu -->
-                <div id="sidenav-menu">
-                    <ul class="side-nav">
-                        <li class="side-nav-title mt-2" data-lang="main">Menu</li>
-
-                        <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="layout-dashboard"></i></span>
-                                <span class="menu-text">Dashboard Report</span>
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar>
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Menu</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-user"></i>
+                                </span>
+                                <span class="hide-menu">Pasien</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="{{ route('Transaksi.create') }}" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="shopping-cart"></i></span>
-                                <span class="menu-text">Transaksi Kasir</span>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-heartbeat"></i>
+                                </span>
+                                <span class="hide-menu">Perawatan</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="users"></i></span>
-                                <span class="menu-text">Pasien</span>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-receipt"></i>
+                                </span>
+                                <span class="hide-menu">Billing</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="heart-pulse"></i></span>
-                                <span class="menu-text">Data Perawatan</span>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-calendar"></i>
+                                </span>
+                                <span class="hide-menu">Jadwal</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="file-text"></i></span>
-                                <span class="menu-text">Laporan</span>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-file-text"></i>
+                                </span>
+                                <span class="hide-menu">Laporan</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="{{ route('Insentif.index') }}" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="gift"></i></span>
-                                <span class="menu-text">Insentif</span>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-cash"></i>
+                                </span>
+                                <span class="hide-menu">Insentif</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a data-bs-toggle="collapse" href="#data-master" aria-expanded="false"
-                                aria-controls="data-master" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="database"></i></span>
-                                <span class="menu-text" data-lang="data-master">Data Master</span>
-                                <span class="menu-arrow"></span>
-                            </a>
-                            <div class="collapse" id="data-master">
-                                <ul class="sub-menu">
-                                    <li class="side-nav-item">
-                                        <a href="{{ route('JenisPerawatan.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="package"></i></span>
-                                            <span class="menu-text" data-lang="master-produk">Jenis Perawatan</span>
-                                        </a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a href="{{ route('Klinik.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="hospital"></i></span>
-                                            <span class="menu-text" data-lang="master-pasien">Master Klinik</span>
-                                        </a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a href="{{ route('MetodePembayaran.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="credit-card"></i></span>
-                                            <span class="menu-text" data-lang="master-dokter">Metode Pembayaran</span>
-                                        </a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a href="{{ route('MasterShift.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="clock"></i></span>
-                                            <span class="menu-text" data-lang="master-karyawan">Shift Kerja</span>
-                                        </a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a href="{{ route('users.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="user-round"></i></span>
-                                            <span class="menu-text" data-lang="master-user">Pengguna</span>
-                                        </a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a href="{{ route('roles.index') }}" class="side-nav-link">
-                                            <span class="menu-icon"><i data-lucide="shield"></i></span>
-                                            <span class="menu-text" data-lang="master-roles">Roles</span>
-                                        </a>
-                                    </li>
-
-                                </ul>
-
-                            </div>
-                        </li>
-
-
-                        <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
-                                <span class="menu-icon"><i data-lucide="settings"></i></span>
-                                <span class="menu-text">Pengaturan</span>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-settings"></i>
+                                </span>
+                                <span class="hide-menu">Pengaturan</span>
                             </a>
                         </li>
                     </ul>
 
+                </nav>
+
+                <div class="fixed-profile p-3 mx-4 mb-2 bg-secondary-subtle rounded mt-3">
+                    <div class="hstack gap-3">
+                        <div class="john-img">
+                            <img src="{{ asset('') }}assets/images/profile/user-1.jpg" class="rounded-circle"
+                                width="40" height="40" alt="modernize-img" />
+                        </div>
+                        <div class="john-title">
+                            <h6 class="mb-0 fs-4 fw-semibold">Mathew</h6>
+                            <span class="fs-2">Designer</span>
+                        </div>
+                        <button class="border-0 bg-transparent text-primary ms-auto" tabindex="0" type="button"
+                            aria-label="logout" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="logout">
+                            <i class="ti ti-power fs-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ---------------------------------- -->
+                <!-- Start Vertical Layout Sidebar -->
+                <!-- ---------------------------------- -->
+            </div>
+        </aside>
+        <!--  Sidebar End -->
+        <div class="page-wrapper">
+            <!--  Header Start -->
+            <header class="topbar">
+                <div class="with-vertical"><!-- ---------------------------------- -->
+                    <!-- Start Vertical Layout Header -->
+                    <!-- ---------------------------------- -->
+                    <nav class="navbar navbar-expand-lg p-0">
+                        <ul class="navbar-nav">
+                            <li class="nav-item nav-icon-hover-bg rounded-circle ms-n2">
+                                <a class="nav-link sidebartoggler" id="headerCollapse" href="javascript:void(0)">
+                                    <i class="ti ti-menu-2"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item nav-icon-hover-bg rounded-circle d-none d-lg-flex">
+                                <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal"
+                                    data-bs-target="#exampleModal">
+                                    <i class="ti ti-search"></i>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <ul class="navbar-nav quick-links d-none d-lg-flex align-items-center">
+                            <!-- ------------------------------- -->
+                            <!-- start apps Dropdown -->
+                            <!-- ------------------------------- -->
+                            <li class="nav-item nav-icon-hover-bg rounded w-auto dropdown d-none d-lg-block mx-0">
+                                <div class="hover-dd">
+                                    <a class="nav-link" href="javascript:void(0)">
+                                        Apps<span class="mt-1">
+                                            <i class="ti ti-chevron-down fs-3"></i>
+                                        </span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-nav dropdown-menu-animate-up py-0">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="ps-7 pt-7">
+                                                    <div class="border-bottom">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="position-relative">
+                                                                    <a href="../main/app-chat.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-chat.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Chat Application
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">New
+                                                                                messages arrived</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-invoice.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-invoice.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">Invoice
+                                                                                App</h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Get
+                                                                                latest invoice</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-contact2.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-mobile.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Contact Application
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">2
+                                                                                Unsaved Contacts</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-email.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-message-box.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">Email
+                                                                                App</h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Get
+                                                                                new emails</span>
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="position-relative">
+                                                                    <a href="../main/page-user-profile.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-cart.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                User Profile
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">learn
+                                                                                more information</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-calendar.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-date.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Calendar App
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Get
+                                                                                dates</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-contact.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-lifebuoy.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Contact List Table
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Add
+                                                                                new contact</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-notes.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-application.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Notes Application
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">To-do
+                                                                                and Daily tasks</span>
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row align-items-center py-3">
+                                                        <div class="col-8">
+                                                            <a class="fw-semibold d-flex align-items-center lh-1"
+                                                                href="javascript:void(0)">
+                                                                <i class="ti ti-help fs-6 me-2"></i>Frequently Asked
+                                                                Questions
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="d-flex justify-content-end pe-4">
+                                                                <button class="btn btn-primary">Check</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 ms-n4">
+                                                <div class="position-relative p-7 border-start h-100">
+                                                    <h5 class="fs-5 mb-9 fw-semibold">Quick Links</h5>
+                                                    <ul class="">
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/page-pricing.html">Pricing Page</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/authentication-login.html">Authentication
+                                                                Design</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/authentication-register.html">Register
+                                                                Now</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/authentication-error.html">404 Error
+                                                                Page</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/app-notes.html">Notes App</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/page-user-profile.html">User
+                                                                Application</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/page-account-settings.html">Account
+                                                                Settings</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <!-- ------------------------------- -->
+                            <!-- end apps Dropdown -->
+                            <!-- ------------------------------- -->
+                            <li class="nav-item dropdown-hover d-none d-lg-block">
+                                <a class="nav-link" href="../main/app-chat.html">Chat</a>
+                            </li>
+                            <li class="nav-item dropdown-hover d-none d-lg-block">
+                                <a class="nav-link" href="../main/app-calendar.html">Calendar</a>
+                            </li>
+                            <li class="nav-item dropdown-hover d-none d-lg-block">
+                                <a class="nav-link" href="../main/app-email.html">Email</a>
+                            </li>
+                        </ul>
+
+                        <div class="d-block d-lg-none py-4">
+                            <a href="../main/index.html" class="text-nowrap logo-img">
+                                <img src="{{ asset('') }}assets/images/logos/dark-logo.svg" class="dark-logo"
+                                    alt="Logo-Dark" />
+                                <img src="{{ asset('') }}assets/images/logos/light-logo.svg" class="light-logo"
+                                    alt="Logo-light" />
+                            </a>
+                        </div>
+                        <a class="navbar-toggler nav-icon-hover-bg rounded-circle p-0 mx-0 border-0"
+                            href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="ti ti-dots fs-7"></i>
+                        </a>
+                        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0)"
+                                    class="nav-link nav-icon-hover-bg rounded-circle mx-0 ms-n1 d-flex d-lg-none align-items-center justify-content-center"
+                                    type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar"
+                                    aria-controls="offcanvasWithBothOptions">
+                                    <i class="ti ti-align-justified fs-7"></i>
+                                </a>
+                                <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
+                                    <!-- ------------------------------- -->
+                                    <!-- start language Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle">
+                                        <a class="nav-link moon dark-layout" href="javascript:void(0)">
+                                            <i class="ti ti-moon moon"></i>
+                                        </a>
+                                        <a class="nav-link sun light-layout" href="javascript:void(0)">
+                                            <i class="ti ti-sun sun"></i>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle dropdown">
+                                        <a class="nav-link" href="javascript:void(0)" id="drop2"
+                                            aria-expanded="false">
+                                            <img src="{{ asset('') }}assets/images/svgs/icon-flag-en.svg"
+                                                alt="modernize-img" width="20px" height="20px"
+                                                class="rounded-circle object-fit-cover round-20" />
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
+                                            aria-labelledby="drop2">
+                                            <div class="message-body">
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-en.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">English (UK)</p>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-cn.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">中国人 (Chinese)</p>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-fr.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">français (French)</p>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-sa.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">عربي (Arabic)</p>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end language Dropdown -->
+                                    <!-- ------------------------------- -->
+
+                                    <!-- ------------------------------- -->
+                                    <!-- start shopping cart Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle">
+                                        <a class="nav-link position-relative" href="javascript:void(0)"
+                                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
+                                            aria-controls="offcanvasRight">
+                                            <i class="ti ti-basket"></i>
+                                            <span class="popup-badge rounded-pill bg-danger text-white fs-2">2</span>
+                                        </a>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end shopping cart Dropdown -->
+                                    <!-- ------------------------------- -->
+
+                                    <!-- ------------------------------- -->
+                                    <!-- start notification Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle dropdown">
+                                        <a class="nav-link position-relative" href="javascript:void(0)"
+                                            id="drop2" aria-expanded="false">
+                                            <i class="ti ti-bell-ringing"></i>
+                                            <div class="notification bg-primary rounded-circle"></div>
+                                        </a>
+                                        <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
+                                            aria-labelledby="drop2">
+                                            <div class="d-flex align-items-center justify-content-between py-3 px-7">
+                                                <h5 class="mb-0 fs-5 fw-semibold">Notifications</h5>
+                                                <span class="badge text-bg-primary rounded-4 px-3 py-1 lh-sm">5
+                                                    new</span>
+                                            </div>
+                                            <div class="message-body" data-simplebar>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-2.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Roman Joined the Team!
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Congratulate
+                                                            him</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-3.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">New message</h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Salma sent you
+                                                            new message</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-4.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Bianca sent payment</h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Check your
+                                                            earnings</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-5.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Jolly completed tasks
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Assign her new
+                                                            tasks</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-6.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">John received payment
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">$230 deducted
+                                                            from account</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-7.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Roman Joined the Team!
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Congratulate
+                                                            him</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="py-6 px-7 mb-1">
+                                                <button class="btn btn-outline-primary w-100">See All
+                                                    Notifications</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end notification Dropdown -->
+                                    <!-- ------------------------------- -->
+
+                                    <!-- ------------------------------- -->
+                                    <!-- start profile Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link pe-0" href="javascript:void(0)" id="drop1"
+                                            aria-expanded="false">
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-profile-img">
+                                                    <img src="{{ asset('') }}assets/images/profile/user-1.jpg"
+                                                        class="rounded-circle" width="35" height="35"
+                                                        alt="modernize-img" />
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
+                                            aria-labelledby="drop1">
+                                            <div class="profile-dropdown position-relative" data-simplebar>
+                                                <div class="py-3 px-7 pb-0">
+                                                    <h5 class="mb-0 fs-5 fw-semibold">User Profile</h5>
+                                                </div>
+                                                <div class="d-flex align-items-center py-9 mx-7 border-bottom">
+                                                    <img src="{{ asset('') }}assets/images/profile/user-1.jpg"
+                                                        class="rounded-circle" width="80" height="80"
+                                                        alt="modernize-img" />
+                                                    <div class="ms-3">
+                                                        <h5 class="mb-1 fs-3">Mathew Anderson</h5>
+                                                        <span class="mb-1 d-block">Designer</span>
+                                                        <p class="mb-0 d-flex align-items-center gap-2">
+                                                            <i class="ti ti-mail fs-4"></i> info@modernize.com
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="message-body">
+                                                    <a href="../main/page-user-profile.html"
+                                                        class="py-8 px-7 mt-8 d-flex align-items-center">
+                                                        <span
+                                                            class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
+                                                            <img src="{{ asset('') }}assets/images/svgs/icon-account.svg"
+                                                                alt="modernize-img" width="24" height="24" />
+                                                        </span>
+                                                        <div class="w-100 ps-3">
+                                                            <h6 class="mb-1 fs-3 fw-semibold lh-base">My Profile</h6>
+                                                            <span class="fs-2 d-block text-body-secondary">Account
+                                                                Settings</span>
+                                                        </div>
+                                                    </a>
+                                                    <a href="../main/app-email.html"
+                                                        class="py-8 px-7 d-flex align-items-center">
+                                                        <span
+                                                            class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
+                                                            <img src="{{ asset('') }}assets/images/svgs/icon-inbox.svg"
+                                                                alt="modernize-img" width="24" height="24" />
+                                                        </span>
+                                                        <div class="w-100 ps-3">
+                                                            <h6 class="mb-1 fs-3 fw-semibold lh-base">My Inbox</h6>
+                                                            <span class="fs-2 d-block text-body-secondary">Messages &
+                                                                Emails</span>
+                                                        </div>
+                                                    </a>
+                                                    <a href="../main/app-notes.html"
+                                                        class="py-8 px-7 d-flex align-items-center">
+                                                        <span
+                                                            class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
+                                                            <img src="{{ asset('') }}assets/images/svgs/icon-tasks.svg"
+                                                                alt="modernize-img" width="24" height="24" />
+                                                        </span>
+                                                        <div class="w-100 ps-3">
+                                                            <h6 class="mb-1 fs-3 fw-semibold lh-base">My Task</h6>
+                                                            <span class="fs-2 d-block text-body-secondary">To-do and
+                                                                Daily Tasks</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                                <div class="d-grid py-4 px-7 pt-8">
+                                                    <div
+                                                        class="upgrade-plan bg-primary-subtle position-relative overflow-hidden rounded-4 p-4 mb-9">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <h5 class="fs-4 mb-3 fw-semibold">Unlimited Access
+                                                                </h5>
+                                                                <button class="btn btn-primary">Upgrade</button>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="m-n4 unlimited-img">
+                                                                    <img src="{{ asset('') }}assets/images/backgrounds/unlimited-bg.png"
+                                                                        alt="modernize-img" class="w-100" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <a href="../main/authentication-login.html"
+                                                        class="btn btn-outline-primary">Log Out</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end profile Dropdown -->
+                                    <!-- ------------------------------- -->
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+                    <!-- ---------------------------------- -->
+                    <!-- End Vertical Layout Header -->
+                    <!-- ---------------------------------- -->
+
+                    <!-- ------------------------------- -->
+                    <!-- apps Dropdown in Small screen -->
+                    <!-- ------------------------------- -->
+                    <!--  Mobilenavbar -->
+                    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="mobilenavbar"
+                        aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <nav class="sidebar-nav scroll-sidebar">
+                            <div class="offcanvas-header justify-content-between">
+                                <img src="{{ asset('') }}assets/images/logos/favicon.ico" alt="modernize-img"
+                                    class="img-fluid" />
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body h-n80" data-simplebar="" data-simplebar>
+                                <ul id="sidebarnav">
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                            aria-expanded="false">
+                                            <span>
+                                                <i class="ti ti-apps"></i>
+                                            </span>
+                                            <span class="hide-menu">Apps</span>
+                                        </a>
+                                        <ul aria-expanded="false" class="collapse first-level my-3">
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-chat.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-chat.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Chat Application</h6>
+                                                        <span class="fs-2 d-block text-muted">New messages
+                                                            arrived</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-invoice.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-invoice.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Invoice App</h6>
+                                                        <span class="fs-2 d-block text-muted">Get latest
+                                                            invoice</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-cotact.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-mobile.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Contact Application</h6>
+                                                        <span class="fs-2 d-block text-muted">2 Unsaved
+                                                            Contacts</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-email.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-message-box.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Email App</h6>
+                                                        <span class="fs-2 d-block text-muted">Get new emails</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/page-user-profile.html"
+                                                    class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-cart.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">User Profile</h6>
+                                                        <span class="fs-2 d-block text-muted">learn more
+                                                            information</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-calendar.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-date.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Calendar App</h6>
+                                                        <span class="fs-2 d-block text-muted">Get dates</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-contact2.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-lifebuoy.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Contact List Table</h6>
+                                                        <span class="fs-2 d-block text-muted">Add new contact</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item py-2">
+                                                <a href="../main/app-notes.html" class="d-flex align-items-center">
+                                                    <div
+                                                        class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-dd-application.svg"
+                                                            alt="modernize-img" class="img-fluid" width="24"
+                                                            height="24" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1 bg-hover-primary">Notes Application</h6>
+                                                        <span class="fs-2 d-block text-muted">To-do and Daily
+                                                            tasks</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <ul class="px-8 mt-7 mb-4">
+                                                <li class="sidebar-item mb-3">
+                                                    <h5 class="fs-5 fw-semibold">Quick Links</h5>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/page-pricing.html">Pricing Page</a>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/authentication-login.html">Authentication
+                                                        Design</a>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/authentication-register.html">Register Now</a>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/authentication-error.html">404 Error Page</a>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/app-notes.html">Notes App</a>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/page-user-profile.html">User Application</a>
+                                                </li>
+                                                <li class="sidebar-item py-2">
+                                                    <a class="fw-semibold text-dark"
+                                                        href="../main/page-account-settings.html">Account Settings</a>
+                                                </li>
+                                            </ul>
+                                        </ul>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="../main/app-chat.html" aria-expanded="false">
+                                            <span>
+                                                <i class="ti ti-message-dots"></i>
+                                            </span>
+                                            <span class="hide-menu">Chat</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="../main/app-calendar.html"
+                                            aria-expanded="false">
+                                            <span>
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                            <span class="hide-menu">Calendar</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="../main/app-email.html" aria-expanded="false">
+                                            <span>
+                                                <i class="ti ti-mail"></i>
+                                            </span>
+                                            <span class="hide-menu">Email</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+                <div class="app-header with-horizontal">
+                    <nav class="navbar navbar-expand-xl container-fluid p-0">
+                        <ul class="navbar-nav align-items-center">
+                            <li class="nav-item nav-icon-hover-bg rounded-circle d-flex d-xl-none ms-n2">
+                                <a class="nav-link sidebartoggler" id="sidebarCollapse" href="javascript:void(0)">
+                                    <i class="ti ti-menu-2"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item d-none d-xl-block">
+                                <a href="../main/index.html" class="text-nowrap nav-link">
+                                    <img src="{{ asset('') }}assets/images/logos/dark-logo.svg" class="dark-logo"
+                                        width="180" alt="modernize-img" />
+                                    <img src="{{ asset('') }}assets/images/logos/light-logo.svg"
+                                        class="light-logo" width="180" alt="modernize-img" />
+                                </a>
+                            </li>
+                            <li class="nav-item nav-icon-hover-bg rounded-circle d-none d-xl-flex">
+                                <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal"
+                                    data-bs-target="#exampleModal">
+                                    <i class="ti ti-search"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav quick-links d-none d-xl-flex align-items-center">
+                            <!-- ------------------------------- -->
+                            <!-- start apps Dropdown -->
+                            <!-- ------------------------------- -->
+                            <li class="nav-item nav-icon-hover-bg rounded w-auto dropdown d-none d-lg-flex">
+                                <div class="hover-dd">
+                                    <a class="nav-link" href="javascript:void(0)">
+                                        Apps<span class="mt-1">
+                                            <i class="ti ti-chevron-down fs-3"></i>
+                                        </span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-nav dropdown-menu-animate-up py-0">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="ps-7 pt-7">
+                                                    <div class="border-bottom">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="position-relative">
+                                                                    <a href="../main/app-chat.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-chat.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Chat Application
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">New
+                                                                                messages arrived</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-invoice.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-invoice.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">Invoice
+                                                                                App</h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Get
+                                                                                latest invoice</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-contact2.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-mobile.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Contact Application
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">2
+                                                                                Unsaved Contacts</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-email.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-message-box.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">Email
+                                                                                App</h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Get
+                                                                                new emails</span>
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="position-relative">
+                                                                    <a href="../main/page-user-profile.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-cart.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                User Profile
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">learn
+                                                                                more information</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-calendar.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-date.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Calendar App
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Get
+                                                                                dates</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-contact.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-lifebuoy.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Contact List Table
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">Add
+                                                                                new contact</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <a href="../main/app-notes.html"
+                                                                        class="d-flex align-items-center pb-9 position-relative">
+                                                                        <div
+                                                                            class="text-bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
+                                                                            <img src="{{ asset('') }}assets/images/svgs/icon-dd-application.svg"
+                                                                                alt="modernize-img" class="img-fluid"
+                                                                                width="24" height="24" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-1 fw-semibold fs-3">
+                                                                                Notes Application
+                                                                            </h6>
+                                                                            <span
+                                                                                class="fs-2 d-block text-body-secondary">To-do
+                                                                                and Daily tasks</span>
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row align-items-center py-3">
+                                                        <div class="col-8">
+                                                            <a class="fw-semibold d-flex align-items-center lh-1"
+                                                                href="javascript:void(0)">
+                                                                <i class="ti ti-help fs-6 me-2"></i>Frequently Asked
+                                                                Questions
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="d-flex justify-content-end pe-4">
+                                                                <button class="btn btn-primary">Check</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 ms-n4">
+                                                <div class="position-relative p-7 border-start h-100">
+                                                    <h5 class="fs-5 mb-9 fw-semibold">Quick Links</h5>
+                                                    <ul class="">
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/page-pricing.html">Pricing Page</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/authentication-login.html">Authentication
+                                                                Design</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/authentication-register.html">Register
+                                                                Now</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/authentication-error.html">404 Error
+                                                                Page</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/app-notes.html">Notes App</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/page-user-profile.html">User
+                                                                Application</a>
+                                                        </li>
+                                                        <li class="mb-3">
+                                                            <a class="fw-semibold bg-hover-primary"
+                                                                href="../main/page-account-settings.html">Account
+                                                                Settings</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <!-- ------------------------------- -->
+                            <!-- end apps Dropdown -->
+                            <!-- ------------------------------- -->
+                            <li class="nav-item dropdown-hover d-none d-lg-block">
+                                <a class="nav-link" href="../main/app-chat.html">Chat</a>
+                            </li>
+                            <li class="nav-item dropdown-hover d-none d-lg-block">
+                                <a class="nav-link" href="../main/app-calendar.html">Calendar</a>
+                            </li>
+                            <li class="nav-item dropdown-hover d-none d-lg-block">
+                                <a class="nav-link" href="../main/app-email.html">Email</a>
+                            </li>
+                        </ul>
+                        <div class="d-block d-xl-none">
+                            <a href="../main/index.html" class="text-nowrap nav-link">
+                                <img src="{{ asset('') }}assets/images/logos/dark-logo.svg" width="180"
+                                    alt="modernize-img" />
+                            </a>
+                        </div>
+                        <a class="navbar-toggler nav-icon-hover-bg rounded-circle p-0 mx-0 border-0"
+                            href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="p-2">
+                                <i class="ti ti-dots fs-7"></i>
+                            </span>
+                        </a>
+                        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                            <div class="d-flex align-items-center justify-content-between px-0 px-xl-8">
+                                <a href="javascript:void(0)"
+                                    class="nav-link round-40 p-1 ps-0 d-flex d-xl-none align-items-center justify-content-center"
+                                    type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar"
+                                    aria-controls="offcanvasWithBothOptions">
+                                    <i class="ti ti-align-justified fs-7"></i>
+                                </a>
+                                <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
+                                    <!-- ------------------------------- -->
+                                    <!-- start language Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle">
+                                        <a class="nav-link moon dark-layout" href="javascript:void(0)">
+                                            <i class="ti ti-moon moon"></i>
+                                        </a>
+                                        <a class="nav-link sun light-layout" href="javascript:void(0)">
+                                            <i class="ti ti-sun sun"></i>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle dropdown">
+                                        <a class="nav-link" href="javascript:void(0)" id="drop2"
+                                            aria-expanded="false">
+                                            <img src="{{ asset('') }}assets/images/svgs/icon-flag-en.svg"
+                                                alt="modernize-img" width="20px" height="20px"
+                                                class="rounded-circle object-fit-cover round-20" />
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
+                                            aria-labelledby="drop2">
+                                            <div class="message-body">
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-en.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">English (UK)</p>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-cn.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">中国人 (Chinese)</p>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-fr.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">français (French)</p>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="d-flex align-items-center gap-2 py-3 px-4 dropdown-item">
+                                                    <div class="position-relative">
+                                                        <img src="{{ asset('') }}assets/images/svgs/icon-flag-sa.svg"
+                                                            alt="modernize-img" width="20px" height="20px"
+                                                            class="rounded-circle object-fit-cover round-20" />
+                                                    </div>
+                                                    <p class="mb-0 fs-3">عربي (Arabic)</p>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end language Dropdown -->
+                                    <!-- ------------------------------- -->
+
+                                    <!-- ------------------------------- -->
+                                    <!-- start shopping cart Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle">
+                                        <a class="nav-link position-relative" href="javascript:void(0)"
+                                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
+                                            aria-controls="offcanvasRight">
+                                            <i class="ti ti-basket"></i>
+                                            <span class="popup-badge rounded-pill bg-danger text-white fs-2">2</span>
+                                        </a>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end shopping cart Dropdown -->
+                                    <!-- ------------------------------- -->
+
+                                    <!-- ------------------------------- -->
+                                    <!-- start notification Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item nav-icon-hover-bg rounded-circle dropdown">
+                                        <a class="nav-link position-relative" href="javascript:void(0)"
+                                            id="drop2" aria-expanded="false">
+                                            <i class="ti ti-bell-ringing"></i>
+                                            <div class="notification bg-primary rounded-circle"></div>
+                                        </a>
+                                        <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
+                                            aria-labelledby="drop2">
+                                            <div class="d-flex align-items-center justify-content-between py-3 px-7">
+                                                <h5 class="mb-0 fs-5 fw-semibold">Notifications</h5>
+                                                <span class="badge text-bg-primary rounded-4 px-3 py-1 lh-sm">5
+                                                    new</span>
+                                            </div>
+                                            <div class="message-body" data-simplebar>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-2.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Roman Joined the Team!
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Congratulate
+                                                            him</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-3.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">New message</h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Salma sent you
+                                                            new message</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-4.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Bianca sent payment</h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Check your
+                                                            earnings</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-5.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Jolly completed tasks
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Assign her new
+                                                            tasks</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-6.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">John received payment
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">$230 deducted
+                                                            from account</span>
+                                                    </div>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    class="py-6 px-7 d-flex align-items-center dropdown-item">
+                                                    <span class="me-3">
+                                                        <img src="{{ asset('') }}assets/images/profile/user-7.jpg"
+                                                            alt="user" class="rounded-circle" width="48"
+                                                            height="48" />
+                                                    </span>
+                                                    <div class="w-100">
+                                                        <h6 class="mb-1 fw-semibold lh-base">Roman Joined the Team!
+                                                        </h6>
+                                                        <span class="fs-2 d-block text-body-secondary">Congratulate
+                                                            him</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="py-6 px-7 mb-1">
+                                                <button class="btn btn-outline-primary w-100">See All
+                                                    Notifications</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end notification Dropdown -->
+                                    <!-- ------------------------------- -->
+
+                                    <!-- ------------------------------- -->
+                                    <!-- start profile Dropdown -->
+                                    <!-- ------------------------------- -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link pe-0" href="javascript:void(0)" id="drop1"
+                                            aria-expanded="false">
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-profile-img">
+                                                    <img src="{{ asset('') }}assets/images/profile/user-1.jpg"
+                                                        class="rounded-circle" width="35" height="35"
+                                                        alt="modernize-img" />
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
+                                            aria-labelledby="drop1">
+                                            <div class="profile-dropdown position-relative" data-simplebar>
+                                                <div class="py-3 px-7 pb-0">
+                                                    <h5 class="mb-0 fs-5 fw-semibold">User Profile</h5>
+                                                </div>
+                                                <div class="d-flex align-items-center py-9 mx-7 border-bottom">
+                                                    <img src="{{ asset('') }}assets/images/profile/user-1.jpg"
+                                                        class="rounded-circle" width="80" height="80"
+                                                        alt="modernize-img" />
+                                                    <div class="ms-3">
+                                                        <h5 class="mb-1 fs-3">Mathew Anderson</h5>
+                                                        <span class="mb-1 d-block">Designer</span>
+                                                        <p class="mb-0 d-flex align-items-center gap-2">
+                                                            <i class="ti ti-mail fs-4"></i> info@modernize.com
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="message-body">
+                                                    <a href="../main/page-user-profile.html"
+                                                        class="py-8 px-7 mt-8 d-flex align-items-center">
+                                                        <span
+                                                            class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
+                                                            <img src="{{ asset('') }}assets/images/svgs/icon-account.svg"
+                                                                alt="modernize-img" width="24"
+                                                                height="24" />
+                                                        </span>
+                                                        <div class="w-100 ps-3">
+                                                            <h6 class="mb-1 fs-3 fw-semibold lh-base">My Profile</h6>
+                                                            <span class="fs-2 d-block text-body-secondary">Account
+                                                                Settings</span>
+                                                        </div>
+                                                    </a>
+                                                    <a href="../main/app-email.html"
+                                                        class="py-8 px-7 d-flex align-items-center">
+                                                        <span
+                                                            class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
+                                                            <img src="{{ asset('') }}assets/images/svgs/icon-inbox.svg"
+                                                                alt="modernize-img" width="24"
+                                                                height="24" />
+                                                        </span>
+                                                        <div class="w-100 ps-3">
+                                                            <h6 class="mb-1 fs-3 fw-semibold lh-base">My Inbox</h6>
+                                                            <span class="fs-2 d-block text-body-secondary">Messages &
+                                                                Emails</span>
+                                                        </div>
+                                                    </a>
+                                                    <a href="../main/app-notes.html"
+                                                        class="py-8 px-7 d-flex align-items-center">
+                                                        <span
+                                                            class="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
+                                                            <img src="{{ asset('') }}assets/images/svgs/icon-tasks.svg"
+                                                                alt="modernize-img" width="24"
+                                                                height="24" />
+                                                        </span>
+                                                        <div class="w-100 ps-3">
+                                                            <h6 class="mb-1 fs-3 fw-semibold lh-base">My Task</h6>
+                                                            <span class="fs-2 d-block text-body-secondary">To-do and
+                                                                Daily Tasks</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                                <div class="d-grid py-4 px-7 pt-8">
+                                                    <div
+                                                        class="upgrade-plan bg-primary-subtle position-relative overflow-hidden rounded-4 p-4 mb-9">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <h5 class="fs-4 mb-3 fw-semibold">Unlimited Access
+                                                                </h5>
+                                                                <button class="btn btn-primary">Upgrade</button>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="m-n4 unlimited-img">
+                                                                    <img src="{{ asset('') }}assets/images/backgrounds/unlimited-bg.png"
+                                                                        alt="modernize-img" class="w-100" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <a href="../main/authentication-login.html"
+                                                        class="btn btn-outline-primary">Log Out</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- ------------------------------- -->
+                                    <!-- end profile Dropdown -->
+                                    <!-- ------------------------------- -->
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </header>
+            <!--  Header End -->
+
+            <aside class="left-sidebar with-horizontal">
+                <!-- Sidebar scroll-->
+                <div>
+                    <!-- Sidebar navigation-->
+                    <nav id="sidebarnavh" class="sidebar-nav scroll-sidebar container-fluid">
+                        <ul id="sidebarnav">
+                            <!-- ============================= -->
+                            <!-- Home -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Home</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- Dashboard -->
+                            <!-- =================== -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-home-2"></i>
+                                    </span>
+                                    <span class="hide-menu">Dashboard</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/index.html" class="sidebar-link">
+                                            <i class="ti ti-aperture"></i>
+                                            <span class="hide-menu">Modern</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/index2.html" class="sidebar-link">
+                                            <i class="ti ti-shopping-cart"></i>
+                                            <span class="hide-menu">eCommerce</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/index3.html" class="sidebar-link">
+                                            <i class="ti ti-currency-dollar"></i>
+                                            <span class="hide-menu">NFT</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/index4.html" class="sidebar-link">
+                                            <i class="ti ti-cpu"></i>
+                                            <span class="hide-menu">Crypto</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/index5.html" class="sidebar-link">
+                                            <i class="ti ti-activity-heartbeat"></i>
+                                            <span class="hide-menu">General</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/index6.html" class="sidebar-link">
+                                            <i class="ti ti-playlist"></i>
+                                            <span class="hide-menu">Music</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- ============================= -->
+                            <!-- Apps -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Apps</span>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link two-column has-arrow" href="javascript:void(0)"
+                                    aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-archive"></i>
+                                    </span>
+                                    <span class="hide-menu">Apps</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-calendar.html" class="sidebar-link">
+                                            <i class="ti ti-calendar"></i>
+                                            <span class="hide-menu">Calendar</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-kanban.html" class="sidebar-link">
+                                            <i class="ti ti-layout-kanban"></i>
+                                            <span class="hide-menu">Kanban</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-chat.html" class="sidebar-link">
+                                            <i class="ti ti-message-dots"></i>
+                                            <span class="hide-menu">Chat</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="../main/app-email.html"
+                                            aria-expanded="false">
+                                            <span>
+                                                <i class="ti ti-mail"></i>
+                                            </span>
+                                            <span class="hide-menu">Email</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-contact.html" class="sidebar-link">
+                                            <i class="ti ti-phone"></i>
+                                            <span class="hide-menu">Contact Table</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-contact2.html" class="sidebar-link">
+                                            <i class="ti ti-list-details"></i>
+                                            <span class="hide-menu">Contact List</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-notes.html" class="sidebar-link">
+                                            <i class="ti ti-notes"></i>
+                                            <span class="hide-menu">Notes</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/app-invoice.html" class="sidebar-link">
+                                            <i class="ti ti-file-text"></i>
+                                            <span class="hide-menu">Invoice</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/page-user-profile.html" class="sidebar-link">
+                                            <i class="ti ti-user-circle"></i>
+                                            <span class="hide-menu">User Profile</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/blog-posts.html" class="sidebar-link">
+                                            <i class="ti ti-article"></i>
+                                            <span class="hide-menu">Posts</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/blog-detail.html" class="sidebar-link">
+                                            <i class="ti ti-details"></i>
+                                            <span class="hide-menu">Detail</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/eco-shop.html" class="sidebar-link">
+                                            <i class="ti ti-shopping-cart"></i>
+                                            <span class="hide-menu">Shop</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/eco-shop-detail.html" class="sidebar-link">
+                                            <i class="ti ti-basket"></i>
+                                            <span class="hide-menu">Shop Detail</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/eco-product-list.html" class="sidebar-link">
+                                            <i class="ti ti-list-check"></i>
+                                            <span class="hide-menu">List</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/eco-checkout.html" class="sidebar-link">
+                                            <i class="ti ti-brand-shopee"></i>
+                                            <span class="hide-menu">Checkout</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="../main/eco-add-product.html">
+                                            <i class="ti ti-file-plus"></i>
+                                            <span class="hide-menu">Add Product</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="../main/eco-edit-product.html">
+                                            <i class="ti ti-file-pencil"></i>
+                                            <span class="hide-menu">Edit Product</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <!-- ============================= -->
+                            <!-- Frontend pages -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Frontend pages</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- pages -->
+                            <!-- =================== -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <i class="ti ti-app-window"></i>
+                                    </span>
+                                    <span class="hide-menu">Frontend pages</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/frontend-landingpage.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Homepage</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/frontend-aboutpage.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">About Us</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/frontend-contactpage.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Contact Us</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/frontend-blogpage.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Blog</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/frontend-blogdetailpage.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Blog Details</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <!-- ============================= -->
+                            <!-- PAGES -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">PAGES</span>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-notebook"></i>
+                                    </span>
+                                    <span class="hide-menu">Pages</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/page-faq.html" class="sidebar-link">
+                                            <i class="ti ti-help"></i>
+                                            <span class="hide-menu">FAQ</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/page-account-settings.html" class="sidebar-link">
+                                            <i class="ti ti-user-circle"></i>
+                                            <span class="hide-menu">Account Setting</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/page-pricing.html" class="sidebar-link">
+                                            <i class="ti ti-currency-dollar"></i>
+                                            <span class="hide-menu">Pricing</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/widgets-cards.html" class="sidebar-link">
+                                            <i class="ti ti-cards"></i>
+                                            <span class="hide-menu">Card</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/widgets-banners.html" class="sidebar-link">
+                                            <i class="ti ti-ad"></i>
+                                            <span class="hide-menu">Banner</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/widgets-charts.html" class="sidebar-link">
+                                            <i class="ti ti-chart-bar"></i>
+                                            <span class="hide-menu">Charts</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../landingpage/index.html" class="sidebar-link">
+                                            <i class="ti ti-app-window"></i>
+                                            <span class="hide-menu">Landing Page</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- ============================= -->
+                            <!-- UI -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">UI</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- UI Elements -->
+                            <!-- =================== -->
+                            <li class="sidebar-item mega-dropdown">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <i class="ti ti-layout-grid"></i>
+                                    </span>
+                                    <span class="hide-menu">UI</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-accordian.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Accordian</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-badge.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Badge</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-buttons.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Buttons</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-dropdowns.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Dropdowns</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-modals.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Modals</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-tab.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Tab</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-tooltip-popover.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Tooltip & Popover</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-notification.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Alerts</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-progressbar.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Progressbar</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-pagination.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Pagination</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-typography.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Typography</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-bootstrap-ui.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Bootstrap UI</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-breadcrumb.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Breadcrumb</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-offcanvas.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Offcanvas</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-lists.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Lists</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-grid.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Grid</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-carousel.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Carousel</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-scrollspy.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Scrollspy</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-spinner.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Spinner</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/ui-link.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Link</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- ============================= -->
+                            <!-- Forms -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Forms</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- Forms -->
+                            <!-- =================== -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link two-column has-arrow" href="javascript:void(0)"
+                                    aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <i class="ti ti-file-text"></i>
+                                    </span>
+                                    <span class="hide-menu">Forms</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <!-- form elements -->
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-inputs.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Forms Input</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-input-groups.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Input Groups</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-input-grid.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Input Grid</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-checkbox-radio.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Checkbox & Radios</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-bootstrap-switch.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Bootstrap Switch</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-select2.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Select2</span>
+                                        </a>
+                                    </li>
+                                    <!-- form inputs -->
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-basic.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Basic Form</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-vertical.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Form Vertical</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-horizontal.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Form Horizontal</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-actions.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Form Actions</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-row-separator.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Row Separator</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-bordered.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Form Bordered</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-detail.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Form Detail</span>
+                                        </a>
+                                    </li>
+                                    <!-- form wizard -->
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-wizard.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Form Wizard</span>
+                                        </a>
+                                    </li>
+                                    <!-- Quill Editor -->
+                                    <li class="sidebar-item">
+                                        <a href="../main/form-editor-quill.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Quill Editor</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- ============================= -->
+                            <!-- Tables -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Tables</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- Bootstrap Table -->
+                            <!-- =================== -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <i class="ti ti-layout-sidebar"></i>
+                                    </span>
+                                    <span class="hide-menu">Tables</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-basic.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Basic Table</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-dark-basic.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Dark Basic Table</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-sizing.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Sizing Table</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-layout-coloured.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Coloured Table</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-datatable-basic.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Basic Initialisation</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-datatable-api.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">API</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/table-datatable-advanced.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Advanced Initialisation</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- ============================= -->
+                            <!-- Charts -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Charts</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- Apex Chart -->
+                            <!-- =================== -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <i class="ti ti-chart-pie"></i>
+                                    </span>
+                                    <span class="hide-menu">Charts</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/chart-apex-line.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Line Chart</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/chart-apex-area.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Area Chart</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/chart-apex-bar.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Bar Chart</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/chart-apex-pie.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Pie Chart</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/chart-apex-radial.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Radial Chart</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/chart-apex-radar.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Radar Chart</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- ============================= -->
+                            <!-- Icons -->
+                            <!-- ============================= -->
+                            <li class="nav-small-cap">
+                                <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                                <span class="hide-menu">Icons</span>
+                            </li>
+                            <!-- =================== -->
+                            <!-- Tabler Icon -->
+                            <!-- =================== -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <i class="ti ti-archive"></i>
+                                    </span>
+                                    <span class="hide-menu">Icon</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="../main/icon-tabler.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Tabler Icon</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="../main/icon-solar.html" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Solar Icon</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- multi level -->
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="rounded-3">
+                                        <iconify-icon icon="solar:airbuds-case-minimalistic-line-duotone"
+                                            class="ti"></iconify-icon>
+                                    </span>
+                                    <span class="hide-menu">Multi DD</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a href="https://adminmart.github.io/premium-documentation/bootstrap/modernize/index.html"
+                                            class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Documentation</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="javascript:void(0)" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Page 1</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="javascript:void(0)" class="sidebar-link has-arrow">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Page 2</span>
+                                        </a>
+                                        <ul aria-expanded="false" class="collapse second-level">
+                                            <li class="sidebar-item">
+                                                <a href="javascript:void(0)" class="sidebar-link">
+                                                    <i class="ti ti-circle"></i>
+                                                    <span class="hide-menu">Page 2.1</span>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item">
+                                                <a href="javascript:void(0)" class="sidebar-link">
+                                                    <i class="ti ti-circle"></i>
+                                                    <span class="hide-menu">Page 2.2</span>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item">
+                                                <a href="javascript:void(0)" class="sidebar-link">
+                                                    <i class="ti ti-circle"></i>
+                                                    <span class="hide-menu">Page 2.3</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="javascript:void(0)" class="sidebar-link">
+                                            <i class="ti ti-circle"></i>
+                                            <span class="hide-menu">Page 3</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                    <!-- End Sidebar navigation -->
+                </div>
+                <!-- End Sidebar scroll-->
+            </aside>
+
+            <div class="body-wrapper">
+                <div class="container-fluid">
+                    @yield('content')
                 </div>
             </div>
+
+
         </div>
-        <!-- Sidenav Menu End -->
-
-
-        <!-- ============================================================== -->
-        <!-- Start Main Content -->
-        <!-- ============================================================== -->
-
-        <div class="content-page">
-            <div class="container-fluid">
-                @yield('content')
-            </div>
-            <!-- end table-responsive-->
-        </div>
-        <!-- end card-body-->
-
-        <div class="card-footer border-0">
-            <div class="align-items-center justify-content-between row text-center text-sm-start">
-                <div class="col-sm">
-                    <div data-table-pagination-info="orders"></div>
-                </div>
-                <div class="col-sm-auto mt-3 mt-sm-0">
-                    <div data-table-pagination></div>
-                </div>
-                <!-- end col-->
-            </div>
-            <!-- end row-->
-        </div>
-        <!-- end card-footer-->
     </div>
-    <!-- end card-->
-    </div>
-    <!-- end col-->
-    </div>
-    <!-- end row-->
-    </div>
-    <!-- container -->
+    <div class="dark-transparent sidebartoggler"></div>
+    <script src="{{ asset('') }}assets/js/vendor.min.js"></script>
+    <!-- Import Js Files -->
+    <script src="{{ asset('') }}assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('') }}assets/libs/simplebar/dist/simplebar.min.js"></script>
+    <script src="{{ asset('') }}assets/js/theme/app.init.js"></script>
+    <script src="{{ asset('') }}assets/js/theme/theme.js"></script>
+    <script src="{{ asset('') }}assets/js/theme/app.min.js"></script>
+    <script src="{{ asset('') }}assets/js/theme/sidebarmenu.js"></script>
 
-    <!-- Footer Start -->
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12 text-center">
-                    ©
-                    <span data-current-year></span>
-                    UBold By <span class="fw-semibold">Coderthemes</span>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- end Footer -->
+    <!-- solar icons -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 
-    </div>
-
-    <!-- ============================================================== -->
-    <!-- End of Main Content -->
-    <!-- ============================================================== -->
-    </div>
-    <!-- END wrapper -->
-
-    <div class="offcanvas offcanvas-end overflow-hidden" tabindex="-1" id="theme-settings-offcanvas">
-        <div class="d-flex justify-content-between text-bg-primary gap-2 p-3"
-            style="background-image: url({{ asset('') }}assets/images/settings-bg.png)">
-            <div>
-                <h5 class="mb-1 fw-bold text-white text-uppercase">Admin Customizer</h5>
-                <p class="text-white text-opacity-75 fst-italic fw-medium mb-0">Easily configure layout, styles, and
-                    preferences for your admin interface.</p>
-            </div>
-
-            <div class="flex-grow-0">
-                <button type="button"
-                    class="d-block btn btn-sm bg-white bg-opacity-25 text-white rounded-circle btn-icon"
-                    data-bs-dismiss="offcanvas">
-                    <i data-lucide="x" class="fs-lg"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="offcanvas-body theme-customizer-bar p-0 h-100" data-simplebar="">
-            <div id="skin" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Select Theme</h5>
-                <div class="row g-3">
-                    <div class="col-6" id="skin-default">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-default"
-                                value="default" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-default">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-default.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Default</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-minimal">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-minimal"
-                                value="minimal" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-minimal">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-minimal.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Minimal</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-modern">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-modern"
-                                value="modern" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-modern">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-modern.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Modern</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-material">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-material"
-                                value="material" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-material">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-material.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Material</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-saas">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-saas"
-                                value="saas" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-saas">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-saas.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">SaaS</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-flat">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-flat"
-                                value="flat" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-flat">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-flat.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Flat</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-galaxy">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-galaxy"
-                                value="galaxy" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-galaxy">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-galaxy.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Galaxy</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-retro">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-retro"
-                                value="retro" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-retro">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-retro.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Retro</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-neon">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-neon"
-                                value="neon" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-neon">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-neon.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Neon</h5>
-                    </div>
-
-                    <div class="col-6" id="skin-pixel">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-skin" id="demo-skin-pixel"
-                                value="pixel" />
-                            <label class="form-check-label p-0 w-100" for="demo-skin-pixel">
-                                <img src="{{ asset('') }}assets/images/layouts/skin-pixel.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Pixel</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="theme" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Color Scheme</h5>
-                <div class="row">
-                    <div class="col-4" id="theme-light">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-bs-theme"
-                                id="layout-color-light" value="light" />
-                            <label class="form-check-label p-0 w-100" for="layout-color-light">
-                                <img src="{{ asset('') }}assets/images/layouts/theme-light.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Light</h5>
-                    </div>
-
-                    <div class="col-4" id="theme-dark">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-bs-theme"
-                                id="layout-color-dark" value="dark" />
-                            <label class="form-check-label p-0 w-100" for="layout-color-dark">
-                                <img src="{{ asset('') }}assets/images/layouts/theme-dark.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Dark</h5>
-                    </div>
-
-                    <div class="col-4" id="theme-system">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-bs-theme"
-                                id="layout-color-system" value="system" />
-                            <label class="form-check-label p-0 w-100" for="layout-color-system">
-                                <img src="{{ asset('') }}assets/images/layouts/theme-system.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">System</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="topbar-color" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Topbar Color</h5>
-
-                <div class="row g-3">
-                    <div class="col-4" id="topbar-color-light">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-topbar-color"
-                                id="layout-topbar-color-light" value="light" />
-                            <label class="form-check-label p-0 w-100" for="layout-topbar-color-light">
-                                <img src="{{ asset('') }}assets/images/layouts/topbar-color-light.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="text-center text-muted mt-2 mb-0">Light</h5>
-                    </div>
-
-                    <div class="col-4" id="topbar-color-dark">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-topbar-color"
-                                id="layout-topbar-color-dark" value="dark" />
-                            <label class="form-check-label p-0 w-100" for="layout-topbar-color-dark">
-                                <img src="{{ asset('') }}assets/images/layouts/topbar-color-dark.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Dark</h5>
-                    </div>
-
-                    <div class="col-4" id="topbar-color-gray">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-topbar-color"
-                                id="layout-topbar-color-gray" value="gray" />
-                            <label class="form-check-label p-0 w-100" for="layout-topbar-color-gray">
-                                <img src="{{ asset('') }}assets/images/layouts/topbar-color-gray.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Gray</h5>
-                    </div>
-
-                    <div class="col-4" id="topbar-color-gradient">
-                        <div class="form-check card-radio">
-                            <input class="form-check-input" type="radio" name="data-topbar-color"
-                                id="layout-topbar-color-gradient" value="gradient" />
-                            <label class="form-check-label p-0 w-100" for="layout-topbar-color-gradient">
-                                <img src="{{ asset('') }}assets/images/layouts/topbar-color-gradient.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Gradient</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sidenav-color" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Sidenav Color</h5>
-
-                <div class="row g-3">
-                    <div class="col-4" id="sidenav-color-light">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-menu-color"
-                                id="layout-sidenav-color-light" value="light" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-color-light">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-color-light.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Light</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-color-dark">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-menu-color"
-                                id="layout-sidenav-color-dark" value="dark" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-color-dark">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-color-dark.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Dark</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-color-gray">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-menu-color"
-                                id="layout-sidenav-color-gray" value="gray" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-color-gray">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-color-gray.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Gray</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-color-gradient">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-menu-color"
-                                id="layout-sidenav-color-gradient" value="gradient" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-color-gradient">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-color-gradient.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Gradient</h5>
-                    </div>
-                    <div class="col-4" id="sidenav-color-image">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-menu-color"
-                                id="layout-sidenav-color-image" value="image" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-color-image">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-color-image.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="fs-sm text-center text-muted mt-2 mb-0">Image</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sidenav-size" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Sidebar Size</h5>
-
-                <div class="row g-3">
-                    <div class="col-4" id="sidenav-size-default">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-sidenav-size"
-                                id="layout-sidenav-size-default" value="default" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-size-default">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-size-default.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">Default</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-size-compact">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-sidenav-size"
-                                id="layout-sidenav-size-compact" value="compact" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-size-compact">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-size-compact.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">Compact</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-size-condensed">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-sidenav-size"
-                                id="layout-sidenav-size-condensed" value="condensed" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-size-condensed">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-size-condensed.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">Condensed</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-size-on-hover">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-sidenav-size"
-                                id="layout-sidenav-size-small-hover" value="on-hover" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-size-small-hover">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-size-on-hover.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">On Hover</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-size-on-hover-active">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-sidenav-size"
-                                id="layout-sidenav-size-small-hover-active" value="on-hover-active" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-size-small-hover-active">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-size-on-hover-active.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 fs-base text-center text-muted mt-2">On Hover - Show</h5>
-                    </div>
-
-                    <div class="col-4" id="sidenav-size-offcanvas">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-sidenav-size"
-                                id="layout-sidenav-size-offcanvas" value="offcanvas" />
-                            <label class="form-check-label p-0 w-100" for="layout-sidenav-size-offcanvas">
-                                <img src="{{ asset('') }}assets/images/layouts/sidenav-size-offcanvas.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">Offcanvas</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="width" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Layout Width</h5>
-
-                <div class="row g-3">
-                    <div class="col-4" id="width-fluid">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-layout-width"
-                                id="layout-width-fluid" value="fluid" />
-                            <label class="form-check-label p-0 w-100" for="layout-width-fluid">
-                                <img src="{{ asset('') }}assets/images/layouts/width-fluid.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">Fluid</h5>
-                    </div>
-
-                    <div class="col-4" id="width-boxed">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="data-layout-width"
-                                id="layout-width-boxed" value="boxed" />
-                            <label class="form-check-label p-0 w-100" for="layout-width-boxed">
-                                <img src="{{ asset('') }}assets/images/layouts/width-boxed.png"
-                                    alt="layout-img" class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">Boxed</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="dir" class="p-3 border-bottom border-dashed">
-                <h5 class="mb-3 fw-bold">Layout Direction</h5>
-
-                <div class="row g-3">
-                    <div class="col-4" id="dir-ltr">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="dir" id="layout-dir-ltr"
-                                value="ltr" />
-                            <label class="form-check-label p-0 w-100" for="layout-dir-ltr">
-                                <img src="{{ asset('') }}assets/images/layouts/dir-ltr.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">LTR</h5>
-                    </div>
-
-                    <div class="col-4" id="dir-rtl">
-                        <div class="form-check sidebar-setting card-radio">
-                            <input class="form-check-input" type="radio" name="dir" id="layout-dir-rtl"
-                                value="rtl" />
-                            <label class="form-check-label p-0 w-100" for="layout-dir-rtl">
-                                <img src="{{ asset('') }}assets/images/layouts/dir-rtl.png" alt="layout-img"
-                                    class="img-fluid" />
-                            </label>
-                        </div>
-                        <h5 class="mb-0 text-center text-muted mt-2">RTL</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div id="position" class="p-3 border-bottom border-dashed">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Layout Position</h5>
-
-                    <div class="d-flex gap-1">
-                        <div id="position-fixed">
-                            <input type="radio" class="btn-check" name="data-layout-position"
-                                id="layout-position-fixed" value="fixed" />
-                            <label class="btn btn-sm btn-soft-warning w-sm"
-                                for="layout-position-fixed">Fixed</label>
-                        </div>
-                        <div id="position-scrollable">
-                            <input type="radio" class="btn-check" name="data-layout-position"
-                                id="layout-position-scrollable" value="scrollable" />
-                            <label class="btn btn-sm btn-soft-warning w-sm ms-0"
-                                for="layout-position-scrollable">Scrollable</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sidenav-user" class="p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <label class="fw-bold m-0" for="sidebaruser-check">Sidebar User Info</label>
-                    </h5>
-                    <div class="form-check form-switch fs-lg">
-                        <input type="checkbox" class="form-check-input" name="sidebar-user"
-                            id="sidebaruser-check" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="offcanvas-footer border-top p-3 text-center">
-            <div class="row justify-content-end">
-                <div class="col-6">
-                    <a href="https://1.envato.market/uboldadmin" class="btn btn-success fw-semibold py-2 w-100"
-                        target="_blank"><i data-lucide="shopping-basket" class="me-2 fs-md"></i> Buy Now</a>
-                </div>
-                <div class="col-6">
-                    <button type="button" class="btn btn-danger fw-semibold py-2 w-100" id="reset-layout"><i
-                            data-lucide="refresh-ccw" class="me-2 fs-md"></i> Reset</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- end offcanvas-->
-    <!-- Vendor js -->
-    <script src="{{ asset('') }}assets/js/vendors.min.js"></script>
-
-    <!-- App js -->
-    <script src="{{ asset('') }}assets/js/app.js"></script>
+    <!-- highlight.js (code view) -->
+    <script src="{{ asset('') }}assets/js/highlights/highlight.min.js"></script>
+    <script>
+        hljs.initHighlightingOnLoad();
 
 
-    <!-- E Charts js -->
-    <script src="{{ asset('') }}assets/plugins/chartjs/chart.umd.js"></script>
-
-    <!-- Custom table -->
-    <script src="{{ asset('') }}assets/js/pages/custom-table.js"></script>
-
-    <!-- Dashboard Page js -->
-    <script src="{{ asset('') }}assets/js/pages/dashboard-ecommerce.js"></script>
-    <!-- Jquery for Datatables-->
-    <script src="{{ asset('') }}assets/plugins/jquery/jquery.min.js"></script>
-
-    <!-- Datatables js -->
-    <script src="{{ asset('') }}assets/plugins/datatables/dataTables.min.js"></script>
-    <script src="{{ asset('') }}assets/plugins/datatables/dataTables.bootstrap5.min.js"></script>
-    <script src="{{ asset('') }}assets/plugins/datatables/dataTables.responsive.min.js"></script>
-    <script src="{{ asset('') }}assets/plugins/datatables/responsive.bootstrap5.min.js"></script>
-
-    <!-- Page js -->
-    <script src="{{ asset('') }}assets/js/pages/datatables-basic.js"></script>
-    <script src="{{ asset('') }}assets/plugins/sweetalert2/sweetalert2.min.js"></script>
-    <!-- Select2 Plugin Js -->
-    <script src="{{ asset('') }}assets/plugins/select2/select2.min.js"></script>
-    <script src="{{ asset('') }}assets/js/pages/form-select2.js"></script>
-    <script src="{{ asset('') }}assets/js/pages/form-choice.js"></script>
-    @stack('scripts')
+        document.querySelectorAll("pre.code-view > code").forEach((codeBlock) => {
+            codeBlock.textContent = codeBlock.innerHTML;
+        });
+    </script>
+    <script src="{{ asset('') }}assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="{{ asset('') }}assets/js/dashboards/dashboard4.js"></script>
 </body>
 
 </html>
