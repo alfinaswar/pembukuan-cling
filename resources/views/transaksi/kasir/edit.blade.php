@@ -2,7 +2,7 @@
 
 @section('content')
     <style>
-        /* ===== TEAL THEME VARIABLES ===== */
+        /* (CSS sama persis, tidak diubah) */
         :root {
             --teal-primary: #0d9488;
             --teal-dark: #0f766e;
@@ -16,7 +16,6 @@
             --card-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
         }
 
-        /* ===== CARD ===== */
         .card {
             border: 1px solid #e5e7eb;
             border-radius: 10px;
@@ -39,7 +38,6 @@
             letter-spacing: .04em;
         }
 
-        /* ===== RINGKASAN PER SHIFT header (teal) ===== */
         .card-header-teal {
             background: var(--teal-primary) !important;
             border-radius: 10px 10px 0 0 !important;
@@ -62,7 +60,6 @@
             color: rgba(255, 255, 255, .8);
         }
 
-        /* ===== FORM LABELS ===== */
         .form-label.fw-semibold,
         .form-label.fw-bold {
             color: #374151;
@@ -75,7 +72,6 @@
             letter-spacing: .06em;
         }
 
-        /* ===== INPUTS ===== */
         .form-control,
         .form-select {
             border-color: #d1d5db;
@@ -96,7 +92,6 @@
             background-color: #f9fafb !important;
         }
 
-        /* ===== RADIO BUTTONS (teal) ===== */
         .form-check-input:checked {
             background-color: var(--teal-primary);
             border-color: var(--teal-primary);
@@ -106,7 +101,6 @@
             box-shadow: 0 0 0 3px rgba(13, 148, 136, .2);
         }
 
-        /* ===== TABLE ===== */
         #table-perawatan {
             border-radius: 8px;
             overflow: hidden;
@@ -140,7 +134,6 @@
             opacity: 1;
         }
 
-        /* ===== JENIS PERAWATAN label ===== */
         label.fw-semibold.mb-2 {
             color: var(--teal-primary);
             font-size: .8rem;
@@ -149,7 +142,6 @@
             letter-spacing: .06em;
         }
 
-        /* ===== TAMBAH PERAWATAN button ===== */
         #btn-tambah-perawatan {
             border-color: var(--teal-primary);
             color: var(--teal-primary);
@@ -164,7 +156,6 @@
             color: #fff;
         }
 
-        /* ===== TOTAL BIAYA CARD ===== */
         .total-biaya-card {
             background: var(--teal-lighter) !important;
             border: 1px solid var(--border-color) !important;
@@ -183,7 +174,6 @@
             font-size: 1.5rem;
         }
 
-        /* ===== BIAYA ADMIN ===== */
         .biaya-admin-row {
             display: flex;
             align-items: center;
@@ -203,7 +193,6 @@
             color: #111827;
         }
 
-        /* ===== CARA BAYAR section ===== */
         .cara-bayar-title {
             font-size: .8rem;
             font-weight: 700;
@@ -217,7 +206,6 @@
             border-color: #e5e7eb;
         }
 
-        /* ===== TOTAL BAYAR row ===== */
         .total-bayar-row {
             display: flex;
             justify-content: space-between;
@@ -240,7 +228,6 @@
             color: var(--teal-primary);
         }
 
-        /* ===== RINGKASAN values ===== */
         .ringkasan-total-label {
             font-size: .85rem;
             color: #6b7280;
@@ -264,7 +251,6 @@
             color: #111827;
         }
 
-        /* ===== STAFF CARD row ===== */
         .staff-icon {
             width: 32px;
             height: 32px;
@@ -277,7 +263,6 @@
             flex-shrink: 0;
         }
 
-        /* ===== ACTION BUTTONS ===== */
         .btn-cancel {
             border: 1px solid #d1d5db;
             background: #fff;
@@ -315,7 +300,6 @@
             color: #fff;
         }
 
-        /* ===== PRIMARY BUTTON generic ===== */
         .btn-primary {
             background-color: var(--teal-primary) !important;
             border-color: var(--teal-primary) !important;
@@ -327,7 +311,6 @@
             border-color: var(--teal-dark) !important;
         }
 
-        /* ===== PATIENT SEARCH icon ===== */
         .input-search-wrap {
             position: relative;
         }
@@ -353,27 +336,23 @@
             <div class="col-xl-8">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Transaksi Kasir</h5>
+                        <h5 class="card-title">Edit Transaksi Kasir</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('Transaksi.store') }}" method="POST" id="formTransaksiKasir">
+                        <form action="{{ route('Transaksi.update', $transaksi->id) }}" method="POST" id="formTransaksiKasir">
                             @csrf
-                            {{-- <div class="col-12">
-                                <label class="form-label mt-3">Default Material Date Picker</label>
-                                <input type="text" class="form-control" placeholder="2024-06-04" id="mdate" />
-                            </div> --}}
+                            @method('PUT')
                             <!-- Hari & Tanggal -->
                             <div class="col-12 mb-3">
                                 <label class="form-label mt-3" for="Tanggal">Hari &amp; Tanggal</label>
                                 <input type="text"
                                     class="form-control bootstrapMaterialDatePicker @error('Tanggal') is-invalid @enderror"
-                                    placeholder="2024-06-04" name="Tanggal" value="{{ old('Tanggal', date('Y-m-d')) }}"
-                                    id="mdate" />
+                                    placeholder="2024-06-04" name="Tanggal"
+                                    value="{{ old('Tanggal', $transaksi->Tanggal ?? date('Y-m-d')) }}" id="mdate" />
                                 @error('Tanggal')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
-
 
                             <!-- Nama Pasien -->
                             <div class="mb-2">
@@ -384,6 +363,7 @@
                                     </span>
                                     <input type="text" id="nama_pasien" name="NamaPasien"
                                         class="form-control @error('NamaPasien') is-invalid @enderror"
+                                        value="{{ old('NamaPasien', $transaksi->NamaPasien) }}"
                                         placeholder="Masukkan nama pasien" autocomplete="off">
                                 </div>
                                 @error('NamaPasien')
@@ -397,20 +377,19 @@
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input @error('JenisPasien') is-invalid @enderror"
                                         type="radio" name="JenisPasien" id="pasien_baru" value="Baru"
-                                        {{ old('JenisPasien') == 'Baru' ? 'checked' : '' }}>
+                                        {{ old('JenisPasien', $transaksi->JenisPasien) == 'Baru' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="pasien_baru">Pasien Baru</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input @error('JenisPasien') is-invalid @enderror"
                                         type="radio" name="JenisPasien" id="pasien_lama" value="Lama"
-                                        {{ old('JenisPasien') == 'Lama' ? 'checked' : '' }}>
+                                        {{ old('JenisPasien', $transaksi->JenisPasien) == 'Lama' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="pasien_lama">Pasien Lama</label>
                                 </div>
                                 @error('JenisPasien')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
                             </div>
-
 
                             <!-- Jenis Perawatan -->
                             <div class="mb-3">
@@ -427,10 +406,15 @@
                                         </thead>
                                         <tbody id="body-perawatan">
                                             @php
-                                                $oldPerawatan = old('JenisPerawatan');
+                                                $perawatanLama = old(
+                                                    'JenisPerawatan',
+                                                    isset($transaksi->TransaksiDetail)
+                                                        ? $transaksi->TransaksiDetail->toArray()
+                                                        : [],
+                                                );
                                             @endphp
-                                            @if (is_array($oldPerawatan) && count($oldPerawatan) > 0)
-                                                @foreach ($oldPerawatan as $idx => $perawatan)
+                                            @if (is_array($perawatanLama) && count($perawatanLama) > 0)
+                                                @foreach ($perawatanLama as $idx => $perawatan)
                                                     <tr>
                                                         <td class="text-center align-middle">{{ $loop->iteration }}</td>
                                                         <td>
@@ -440,7 +424,7 @@
                                                                 @foreach ($Perawatan as $row)
                                                                     <option value="{{ $row->id }}"
                                                                         data-harga="{{ $row->Tarif }}"
-                                                                        {{ isset($perawatan['id']) && $perawatan['id'] == $row->id ? 'selected' : '' }}>
+                                                                        {{ (isset($perawatan['JenisPerawatan']) && $perawatan['JenisPerawatan'] == $row->id) || (isset($perawatan['id']) && $perawatan['id'] == $row->id) ? 'selected' : '' }}>
                                                                         {{ $row->Nama }}
                                                                     </option>
                                                                 @endforeach
@@ -451,7 +435,7 @@
                                                                 class="form-control biaya-perawatan bg-light"
                                                                 name="JenisPerawatan[{{ $idx }}][Biaya]"
                                                                 placeholder="Rp 0"
-                                                                value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : '' }}">
+                                                                value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : (isset($perawatan['biaya']) ? $perawatan['biaya'] : '') }}">
                                                         </td>
                                                         <td class="text-center">
                                                             <button type="button"
@@ -514,7 +498,6 @@
                                 </button>
                             </div>
 
-
                             <!-- Biaya Admin -->
                             <div class="biaya-admin-row mb-3">
                                 <span class="biaya-admin-label">
@@ -526,7 +509,8 @@
                                         class="form-control text-end @error('BiayaAdmin') is-invalid @enderror"
                                         id="biaya_admin" name="BiayaAdmin"
                                         style="width:130px;display:inline-block;background:#f9fafb;border:none;font-weight:600;color:#111827;"
-                                        placeholder="Rp 0" value="{{ old('BiayaAdmin') }}" readonly>
+                                        placeholder="Rp 0" value="{{ old('BiayaAdmin', $transaksi->BiayaAdmin) }}"
+                                        readonly>
                                 </div>
                                 @error('BiayaAdmin')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
@@ -534,7 +518,8 @@
                             </div>
 
                             <!-- Total Biaya -->
-                            <input type="hidden" id="total-biaya-input" name="TotalBiaya" value="0">
+                            <input type="hidden" id="total-biaya-input" name="TotalBiaya"
+                                value="{{ old('TotalBiaya', $transaksi->TotalBayar) }}">
                             <div class="total-biaya-card card border-0 mb-3">
                                 <div class="card-body py-3 px-4">
                                     <div class="label-total mb-1">
@@ -544,17 +529,15 @@
                                 </div>
                             </div>
 
-
                             <!-- Action buttons -->
                             <div class="d-flex justify-content-end gap-2 mt-3">
-                                <a href="{{ route('MasterShift.index') }}" class="btn-cancel">
+                                <a href="{{ route('Transaksi.index') }}" class="btn-cancel">
                                     <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
                                 </a>
                                 <button type="submit" class="btn-save">
-                                    <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan Transaksi
+                                    <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan Perubahan
                                 </button>
                             </div>
-
                     </div>
                 </div>
             </div>
@@ -598,7 +581,7 @@
                                         <input class="form-check-input @error('MetodePembayaran') is-invalid @enderror"
                                             type="radio" name="MetodePembayaran"
                                             id="metode_pembayaran_{{ $mp->id }}" value="{{ $mp->id }}"
-                                            {{ old('MetodePembayaran') == $mp->id ? 'checked' : '' }}>
+                                            {{ old('MetodePembayaran', $transaksi->MetodePembayaran) == $mp->id ? 'checked' : '' }}>
                                         <label class="form-check-label" for="metode_pembayaran_{{ $mp->id }}">
                                             {{ $mp->Nama }}
                                         </label>
@@ -622,7 +605,6 @@
                     <div class="col-12">
                         <div class="card mb-0">
                             <div class="card-body py-3 px-4">
-
                                 <!-- Dokter -->
                                 <div class="mb-2">
                                     <label for="Dokter" class="form-label fw-bold text-uppercase">
@@ -634,7 +616,8 @@
                                         <option value="">-- Pilih Dokter --</option>
                                         @foreach ($dokter as $d)
                                             <option value="{{ $d->id }}"
-                                                {{ old('Dokter') == $d->id ? 'selected' : '' }}>{{ $d->name }}
+                                                {{ old('Dokter', $transaksi->IdDokter) == $d->id ? 'selected' : '' }}>
+                                                {{ $d->name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -642,7 +625,6 @@
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
                                 </div>
-
                                 <!-- Perawat -->
                                 <div class="mb-2">
                                     <label for="Perawat" class="form-label fw-bold text-uppercase">
@@ -654,15 +636,14 @@
                                         <option value="">-- Pilih Perawat --</option>
                                         @foreach ($perawat as $p)
                                             <option value="{{ $p->id }}"
-                                                {{ old('Perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
-                                            </option>
+                                                {{ old('Perawat', $transaksi->IdPerawat) == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}</option>
                                         @endforeach
                                     </select>
                                     @error('Perawat')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
                                 </div>
-
                                 <!-- Kasir / Resepsionis -->
                                 <div class="mb-2">
                                     <label for="Kasir" class="form-label fw-bold text-uppercase">
@@ -674,30 +655,27 @@
                                         <option value="">-- Pilih Resepsionis --</option>
                                         @foreach ($kasir as $r)
                                             <option value="{{ $r->id }}"
-                                                {{ old('Kasir') == $r->id ? 'selected' : '' }}>{{ $r->name }}
-                                            </option>
+                                                {{ old('Kasir', $transaksi->IdResepsionis) == $r->id ? 'selected' : '' }}>
+                                                {{ $r->name }}</option>
                                         @endforeach
                                     </select>
                                     @error('Kasir')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
                                 </div>
-
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             </form>
         </div>
     </div>
-
-
 @endsection
+
 @push('scripts')
     <script>
-        let perawatanCount = 1;
+        let perawatanCount = $('#body-perawatan tr').length;
 
         function rupiahFormat(num) {
             if (!num) return 'Rp 0';
@@ -717,7 +695,6 @@
             let admin = +($('#biaya_admin').val() + '').replace(/[^0-9]/g, '');
             if (isNaN(admin)) admin = 0;
             total += admin;
-
             $('#info-pasien-baru').html(isPasienBaru() ? " (Rp 50.000 untuk pasien baru)" : "");
             $('#total-biaya').text(total.toLocaleString('id-ID'));
             $('#total-bayar').text(total.toLocaleString('id-ID'));
@@ -739,11 +716,9 @@
         });
 
         $(document).ready(function() {
-            // Init select2 for Perawatan ONLY on dynamic rows
             $('.perawatan-select').select2({
                 dropdownParent: $('#table-perawatan').parent()
             });
-            // Init select2 for Staff (Dokter, Perawat, Kasir)
             $('.staff-select').select2({
                 dropdownParent: $('.card-body:has(#Kasir)')
             });
@@ -798,7 +773,6 @@
 
             $('#body-perawatan').append(html);
             perawatanCount++;
-            // Initialize select2 for new perawatan-select
             $('#body-perawatan tr:last .perawatan-select').select2({
                 dropdownParent: $('#table-perawatan').parent()
             });
@@ -830,11 +804,18 @@
             recalculateTotal();
         });
 
-        // Inital setup for the first row & staff select2
+        // Initial setup for the displayed values from model
         $(function() {
             $('.perawatan-select').each(function() {
                 let harga = $(this).find('option:selected').data('harga') ?? 0;
-                $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
+                // if biaya-perawatan sudah terisi, jangan timpa (untuk editing)
+                let $input = $(this).closest('tr').find('.biaya-perawatan');
+                let v = $input.val();
+                if (!v || v == '0') {
+                    $input.val(rupiahFormat(harga));
+                } else {
+                    $input.val(rupiahFormat(v.replace(/[^0-9]/g, '')));
+                }
             });
             $('#body-perawatan tr').each(function(i) {
                 $(this).find('td:first').text(i + 1);

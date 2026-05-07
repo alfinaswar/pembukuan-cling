@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MasterJenisPerawatanController;
 use App\Http\Controllers\MasterKlinikController;
 use App\Http\Controllers\MasterMetodePembayaranController;
@@ -91,6 +92,9 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [RuleInsentifController::class, 'update'])->name('Insentif.update');
         Route::get('/show/{id}', [RuleInsentifController::class, 'show'])->name('Insentif.show');
         Route::delete('/delete/{id}', [RuleInsentifController::class, 'destroy'])->name('Insentif.destroy');
+    });
+    Route::prefix('laporan')->group(function () {
+        Route::get('/umum', [LaporanController::class, 'indexUmum'])->name('laporan-umum.index');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });

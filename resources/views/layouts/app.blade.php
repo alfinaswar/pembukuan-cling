@@ -12,7 +12,11 @@
 
     <!-- Core Css -->
     <link rel="stylesheet" href="{{ asset('') }}assets/css/styles.css" />
-
+    <link rel="stylesheet" href="{{ asset('') }}assets/libs/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" href="{{ asset('') }}assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-datetimepicker/2.7.1/css/bootstrap-material-datetimepicker.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Modernize Bootstrap Admin</title>
 </head>
 
@@ -63,7 +67,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#" aria-expanded="false">
+                            <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-receipt"></i>
                                 </span>
@@ -79,12 +83,78 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#" aria-expanded="false">
+                            <a class="sidebar-link" href="{{ route('laporan-umum.index') }}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-file-text"></i>
                                 </span>
-                                <span class="hide-menu">Laporan</span>
+                                <span class="hide-menu">Laporan Umum</span>
                             </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                <span class="d-flex">
+                                    <i class="ti ti-box-multiple"></i>
+                                </span>
+                                <span class="hide-menu">Menu Level</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="javascript:void(0)" class="sidebar-link">
+                                        <div class="round-16 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-circle"></i>
+                                        </div>
+                                        <span class="hide-menu">Level 1</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                        <div class="round-16 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-circle"></i>
+                                        </div>
+                                        <span class="hide-menu">Level 1.1</span>
+                                    </a>
+                                    <ul aria-expanded="false" class="collapse two-level">
+                                        <li class="sidebar-item">
+                                            <a href="javascript:void(0)" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-circle"></i>
+                                                </div>
+                                                <span class="hide-menu">Level 2</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                                aria-expanded="false">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-circle"></i>
+                                                </div>
+                                                <span class="hide-menu">Level 2.1</span>
+                                            </a>
+                                            <ul aria-expanded="false" class="collapse three-level">
+                                                <li class="sidebar-item">
+                                                    <a href="javascript:void(0)" class="sidebar-link">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <i class="ti ti-circle"></i>
+                                                        </div>
+                                                        <span class="hide-menu">Level 3</span>
+                                                    </a>
+                                                </li>
+                                                <li class="sidebar-item">
+                                                    <a href="javascript:void(0)" class="sidebar-link">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <i class="ti ti-circle"></i>
+                                                        </div>
+                                                        <span class="hide-menu">Level 3.1</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
                         </li>
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="#" aria-expanded="false">
@@ -117,7 +187,8 @@
                             <span class="fs-2">Designer</span>
                         </div>
                         <button class="border-0 bg-transparent text-primary ms-auto" tabindex="0" type="button"
-                            aria-label="logout" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="logout">
+                            aria-label="logout" data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-title="logout">
                             <i class="ti ti-power fs-6"></i>
                         </button>
                     </div>
@@ -2278,16 +2349,24 @@
 
     <!-- highlight.js (code view) -->
     <script src="{{ asset('') }}assets/js/highlights/highlight.min.js"></script>
-    <script>
-        hljs.initHighlightingOnLoad();
-
-
-        document.querySelectorAll("pre.code-view > code").forEach((codeBlock) => {
-            codeBlock.textContent = codeBlock.innerHTML;
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
     <script src="{{ asset('') }}assets/libs/apexcharts/dist/apexcharts.min.js"></script>
     <script src="{{ asset('') }}assets/js/dashboards/dashboard4.js"></script>
+    <script src="{{ asset('') }}assets/libs/select2/dist/js/select2.full.min.js"></script>
+    <script src="{{ asset('') }}assets/libs/select2/dist/js/select2.min.js"></script>
+    <script src="{{ asset('') }}assets/js/forms/select2.init.js"></script>
+    <script src="{{ asset('') }}assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="{{ asset('') }}assets/js/datatable/datatable-basic.init.js"></script>
+    <script src="{{ asset('') }}assets/js/extra-libs/moment/moment.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-datetimepicker/2.7.1/js/bootstrap-material-datetimepicker.min.js">
+    </script>
+    <script src="{{ asset('') }}assets/js/forms/material-datepicker-init.js"></script>
+    <script src="{{ asset('') }}assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="{{ asset('') }}assets/js/apex-chart/apex.pie.init.js"></script>
+    <!-- solar icons -->
+
 </body>
+@stack('scripts')
 
 </html>

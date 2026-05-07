@@ -7,18 +7,37 @@ use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
 use App\Models\Transaksi;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Services\InsentifService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Yajra\DataTables\DataTables;
 
 class TransaksiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            $data = Transaksi::with('TransaksiDetail')->latest();
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                    $encryptedId = encrypt($row->id);
+                    return '
+                        <a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
+                            <i class="fa fa-trash"></i> Hapus
+                        </button>
+                    ';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+        return view('transaksi.kasir.index');
     }
 
     /**
@@ -139,9 +158,29 @@ class TransaksiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Transaksi $transaksi)
+    public function edit($id)
     {
-        //
+        $id = decrypt($id);
+        $transaksi = Transaksi::with(['TransaksiDetail', 'getPerawat', 'getDokter', 'getResepsionis'])
+            ->findOrFail($id);
+
+        $Perawatan = MasterJenisPerawatan::where('Status', 'Y')
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->get();
+
+        $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
+        $dokter = User::role('Dokter')->get();
+        $perawat = User::role('Perawat')->get();
+        $kasir = User::role('Kasir / Resepsionis')->get();
+
+        return view('transaksi.kasir.edit', compact(
+            'transaksi',
+            'Perawatan',
+            'MetodePembayaran',
+            'dokter',
+            'perawat',
+            'kasir'
+        ));
     }
 
     /**
@@ -159,6 +198,7 @@ class TransaksiController extends Controller
     {
         //
     }
+
     private function getShift($tanggal)
     {
         $jam = Carbon::parse($tanggal)->format('H:i:s');

@@ -12,9 +12,25 @@ class Transaksi extends Model
 
     protected $table = 'transaksis';
     protected $guarded = ['id'];
+
     public function TransaksiDetail()
     {
         return $this->hasMany(TransaksiDetail::class, 'IdTransaksi', 'id');
+    }
+
+    public function getPerawat()
+    {
+        return $this->belongsTo(User::class, 'IdPerawat', 'id');
+    }
+
+    public function getDokter()
+    {
+        return $this->belongsTo(User::class, 'IdDokter', 'id');
+    }
+
+    public function getResepsionis()
+    {
+        return $this->belongsTo(User::class, 'IdResepsionis', 'id');
     }
 
     protected static function boot()
