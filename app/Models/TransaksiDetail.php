@@ -12,4 +12,10 @@ class TransaksiDetail extends Model
 
     protected $table = 'transaksi_details';
     protected $guarded = ['id'];
+
+    public function MasterJenisPerawatan()
+    {
+        return $this->belongsTo(MasterJenisPerawatan::class, 'JenisPerawatan', 'id');
+    }
+
 }

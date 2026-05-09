@@ -23,18 +23,103 @@ class TransaksiController extends Controller
             $data = Transaksi::with('TransaksiDetail')->latest();
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('TotalBayar', function ($row) {
+                    $TotalBayar = $row->TotalBayar;
+                    return 'Rp ' . number_format($TotalBayar, 0, ',', '.');
+                })
+                ->addColumn('BiayaAdmin', function ($row) {
+                    $BiayaAdmin = $row->BiayaAdmin;
+                    return 'Rp ' . number_format($BiayaAdmin, 0, ',', '.');
+                })
+                ->addColumn('MetodePembayaran', function ($row) {
+                    if ($row->getMetodePembayaran) {
+                        return $row->getMetodePembayaran->Nama;
+                    }
+                    return '-';
+                })
+                ->addColumn('Shift', function ($row) {
+                    if ($row->getShift) {
+                        return $row->getShift->Nama;
+                    }
+                    return '-';
+                })
+                ->addColumn('Perawat', function ($row) {
+                    if ($row->getPerawat) {
+                        return $row->getPerawat->name;
+                    }
+                    return '-';
+                })
+                ->addColumn('Dokter', function ($row) {
+                    if ($row->getDokter) {
+                        return $row->getDokter->name;
+                    }
+                    return '-';
+                })
+                ->addColumn('Resepsionis', function ($row) {
+                    if ($row->getResepsionis) {
+                        return $row->getResepsionis->name;
+                    }
+                    return '-';
+                })
+
+                ->addColumn('Layanan', function ($row) {
+                    if ($row->TransaksiDetail && count($row->TransaksiDetail) > 0) {
+                        // Rekap layanan: group by nama, jumlahkan biaya dan hitung count
+                        $rekap = [];
+                        foreach ($row->TransaksiDetail as $detail) {
+                            $nama = optional($detail->MasterJenisPerawatan)->Nama;
+                            $biaya = isset($detail->Biaya) ? (int) $detail->Biaya : 0;
+                            if ($nama) {
+                                if (!isset($rekap[$nama])) {
+                                    $rekap[$nama] = [
+                                        'nama' => $nama,
+                                        'harga' => 0,
+                                        'count' => 0,
+                                    ];
+                                }
+                                $rekap[$nama]['harga'] += $biaya;
+                                $rekap[$nama]['count'] += 1;
+                            }
+                        }
+
+                        if (empty($rekap)) {
+                            return '-';
+                        }
+
+                        $html = '<dl>';
+                        foreach ($rekap as $item) {
+                            $namaStr = e($item['nama']);
+                            // Jika count > 1, tampilkan jumlah
+                            if ($item['count'] > 1) {
+                                $namaStr .= ' x' . $item['count'];
+                            }
+                            $hargaStr = 'Rp ' . number_format($item['harga'], 0, ',', '.');
+                            $html .= '<dt style="font-weight:500;">' . $namaStr . ':</dt>';
+                            $html .= '<dd style="margin-bottom:6px;">' . e($hargaStr) . '</dd>';
+                        }
+                        $html .= '</dl>';
+                        return $html;
+                    }
+                    return '-';
+                })
+
+
+
+
+
+
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
                         <a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i> Edit
+                            <i class="fa fa-edit"></i>
                         </a>
                         <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                            <i class="fa fa-trash"></i> Hapus
+                            <i class="fa fa-trash"></i>
                         </button>
                     ';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'TotalBayar', 'BiayaAdmin', 'Perawat', 'Dokter', 'Resepsionis', 'Layanan'])
                 ->make(true);
         }
         return view('transaksi.kasir.index');
@@ -49,11 +134,28 @@ class TransaksiController extends Controller
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get();
 
+        // Ambil shift aktif saat ini
+        $shift = MasterShift::whereTime('JamMulai', '<=', now()->format('H:i:s'))
+            ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
+            ->first();
+        // dd($shift);
+        $totalPasienBaru = Transaksi::where('JenisPasien', 'Baru')
+            ->where('Shift', optional($shift)->id)
+            ->whereDate('created_at', today())
+            ->count();
+
+        // Hitung total pasien lama pada shift ini
+        $totalPasienLama = Transaksi::where('JenisPasien', 'Lama')
+            ->where('Shift', optional($shift)->id)
+            ->whereDate('created_at', today())
+            ->count();
+
+
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
-        return view('transaksi.kasir.create', compact('Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir'));
+        return view('transaksi.kasir.create', compact('Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
     }
 
     /**

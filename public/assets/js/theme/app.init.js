@@ -5,5 +5,5 @@ var userSettings = {
     Direction: "ltr", // ltr | rtl
     Theme: "light", // light | dark
     ColorTheme: "Green_Theme", // Blue_Theme | Aqua_Theme | Purple_Theme | Green_Theme | Cyan_Theme | Orange_Theme
-    cardBorder: false, // true | false
+    cardBorder: true, // true | false
 };

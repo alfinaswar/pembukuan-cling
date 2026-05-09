@@ -577,13 +577,14 @@
                                 <div class="ringkasan-total-value mb-3">Rp 0</div>
                                 <div class="d-flex justify-content-between">
                                     <span class="ringkasan-stat-label">Total Pasien Baru Per Shift</span>
-                                    <span class="ringkasan-stat-value">0 Pasien</span>
+                                    <span class="ringkasan-stat-value">{{ $totalPasienBaru }} Pasien</span>
                                 </div>
                                 <hr class="my-2" style="border-color:#f3f4f6;">
                                 <div class="d-flex justify-content-between">
                                     <span class="ringkasan-stat-label">Total Pasien Lama Per Shift</span>
-                                    <span class="ringkasan-stat-value">0 Pasien</span>
+                                    <span class="ringkasan-stat-value">{{ $totalPasienLama }} Pasien</span>
                                 </div>
+
                             </div>
                         </div>
                     </div>

@@ -1,36 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="card-title mb-0">Data Transaksi Kasir</h4>
-                <a href="{{ route('Transaksi.create') }}" class="btn btn-success">
-                    <i class="ti ti-plus"></i> Tambah Transaksi
-                </a>
-            </div>
-            <div class="table-responsive">
-                <table id="transaksiKasirTable" class="table table-striped table-bordered align-middle" style="width: 100%;">
+    <div class="container-fluid">
+        <div class="datatables">
+            <div class="card">
+                <div class="card-header bg-teal-primary text-white d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="ti ti-currency-dollar me-2"></i>
+                        Kasir - Daftar Transaksi
+                    </h5>
+                    <a href="{{ route('Transaksi.create') }}" class="btn btn-primary">
+                        <i class="ti ti-plus"></i> Transaksi Baru
+                    </a>
+                </div>
+                <div class="card-body">
 
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Kode</th>
-                            <th>Tanggal</th>
-                            <th>Nama Pasien</th>
-                            <th>Jenis Pasien</th>
-                            <th>Metode Pembayaran</th>
-                            <th>Biaya Admin</th>
-                            <th>Total Bayar</th>
-                            <th>Shift</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data akan diisi oleh DataTables -->
-                    </tbody>
-                </table>
+                    <div class="table-responsive">
+                        <table id="transaksiKasirTable" class="table table-striped table-bordered align-middle"
+                            style="width: 100%;">
+
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Kode</th>
+                                    <th>Tanggal</th>
+                                    <th>Nama Pasien</th>
+                                    <th>Jenis Pasien</th>
+                                    <th>Metode Pembayaran</th>
+                                    <th>Layanan</th>
+                                    <th>Total Bayar</th>
+                                    <th>Shift</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data akan diisi oleh DataTables -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 @endsection
@@ -130,8 +140,8 @@
                         name: 'MetodePembayaran'
                     },
                     {
-                        data: 'BiayaAdmin',
-                        name: 'BiayaAdmin'
+                        data: 'Layanan',
+                        name: 'Layanan'
                     },
                     {
                         data: 'TotalBayar',

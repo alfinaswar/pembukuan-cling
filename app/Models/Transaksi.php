@@ -17,6 +17,10 @@ class Transaksi extends Model
     {
         return $this->hasMany(TransaksiDetail::class, 'IdTransaksi', 'id');
     }
+    public function getMetodePembayaran()
+    {
+        return $this->belongsTo(MasterMetodePembayaran::class, 'MetodePembayaran', 'id');
+    }
 
     public function getPerawat()
     {
@@ -31,6 +35,10 @@ class Transaksi extends Model
     public function getResepsionis()
     {
         return $this->belongsTo(User::class, 'IdResepsionis', 'id');
+    }
+    public function getShift()
+    {
+        return $this->belongsTo(MasterShift::class, 'Shift', 'id');
     }
 
     protected static function boot()
