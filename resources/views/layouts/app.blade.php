@@ -19,6 +19,96 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('') }}assets/libs/daterangepicker/daterangepicker.css">
     <title>Modernize Bootstrap Admin</title>
+    <style>
+        /* ===== SIDEBAR DARK NAVY THEME ===== */
+        .left-sidebar {
+            background: #0f1623 !important;
+        }
+
+        .brand-logo {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Nav section label */
+        .nav-small-cap {
+            color: #4a6080 !important;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+        }
+
+        /* Semua link sidebar */
+        .sidebar-link {
+            color: #8aa3c0 !important;
+            border-radius: 10px !important;
+            margin-bottom: 2px;
+            transition: all 0.2s ease !important;
+            position: relative;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(33, 150, 243, 0.1) !important;
+            color: #c5d8f0 !important;
+        }
+
+        /* Icon sidebar */
+        .sidebar-link i {
+            color: #5a7a9a !important;
+        }
+
+        /* Active state */
+        .sidebar-link.active,
+        .sidebar-link[aria-expanded="true"] {
+            background: #1e3a5f !important;
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        .sidebar-link.active i {
+            color: #2196f3 !important;
+        }
+
+        /* Garis biru kiri saat active */
+        .sidebar-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: #2196f3;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* Submenu */
+        .first-level .sidebar-link,
+        .two-level .sidebar-link,
+        .three-level .sidebar-link {
+            color: #6a8aaa !important;
+            font-size: 13px;
+        }
+
+        .first-level .sidebar-link.active,
+        .two-level .sidebar-link.active {
+            background: rgba(33, 150, 243, 0.15) !important;
+            color: #90caf9 !important;
+        }
+
+        /* Profile box di bawah */
+        .fixed-profile {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.07) !important;
+            border-radius: 12px !important;
+        }
+
+        .fixed-profile h6 {
+            color: #d0e4f7 !important;
+        }
+
+        .fixed-profile span {
+            color: #5a7a9a !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -1658,7 +1748,7 @@
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="../main/frontend-aboutpage.html" class="sidebar-link">
+                                        <a href="{{ route('laporan-perawat.index') }}" class="sidebar-link">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-user-nurse"></i>
                                             </div>

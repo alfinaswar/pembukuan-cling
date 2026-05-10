@@ -208,44 +208,36 @@
 
         <div class="col-lg-6">
             <div class="card mb-2">
-                <div class="p-2 d-flex align-items-stretch h-100">
-                    <div class="row w-100">
-                        <div class="col-4 col-md-3 d-flex align-items-center pe-0">
-                            <img src="../assets/images/products/s1.jpg" class="rounded img-fluid" />
-                        </div>
-                        <div class="col-8 col-md-9 d-flex align-items-center ps-2">
-                            <div>
-                                <a href="javascript:void(0)" class="card-title link-primary fw-semibold text-dark">
-                                    50% sell on wrist watch
-                                </a>
-                                <p class="card-subtitle mt-1">
-                                    By Daniel Jubile
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="ti ti-stethoscope me-2"></i>
+                        Jenis Perawatan Terbanyak
+                    </h5>
                 </div>
-            </div>
-            <div class="card mb-2">
-                <div class="p-2 d-flex align-items-stretch h-100">
-                    <div class="row w-100">
-                        <div class="col-4 col-md-3 d-flex align-items-center pe-0">
-                            <img src="../assets/images/products/s1.jpg" class="rounded img-fluid" />
+                <div class="card-body">
+                    @if (isset($jenisPerawatanTerbanyak) && count($jenisPerawatanTerbanyak) > 0)
+                        <ul class="list-group list-group-flush">
+                            @foreach ($jenisPerawatanTerbanyak as $perawatan)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        {{ $perawatan['JenisPerawatan'] ?? '-' }}
+                                    </span>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ $perawatan['jumlah'] ?? 0 }} Pasien
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <div class="text-muted">
+                            Tidak ada data jenis perawatan terbanyak untuk periode ini.
                         </div>
-                        <div class="col-8 col-md-9 d-flex align-items-center ps-2">
-                            <div>
-                                <a href="javascript:void(0)" class="card-title link-primary fw-semibold text-dark">
-                                    50% sell on wrist watch
-                                </a>
-                                <p class="card-subtitle mt-1">
-                                    By Daniel Jubile
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    @endif
+
                 </div>
             </div>
         </div>
+
     </div>
     <div class="row">
         <div class="col-12">
@@ -253,7 +245,7 @@
 
             </div>
         </div>
-        {{-- <div class="datatables">
+        <div class="datatables">
             <div class="card">
                 <div class="card-header bg-teal-primary text-white d-flex align-items-center justify-content-between">
                     <h5 class="mb-0 fw-semibold">
@@ -264,50 +256,57 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="tabel-transaksi-terbaru"
-                            class="table table-striped table-bordered text-nowrap align-middle">
+                            class="table table-striped table-bordered text-nowrap align-middle dataTable display">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>No</th>
+                                    <th>Nama Pasien</th>
+                                    <th>Jenis Perawatan</th>
+                                    <th>Total Biaya</th>
+                                    <th>Cara Bayar</th>
                                     <th>Tanggal</th>
-                                    <th>Pasien</th>
-                                    <th>Jenis Pasien</th>
-                                    <th>Pembayaran</th>
-                                    <th>Layanan</th>
-                                    <th>Total</th>
-                                    <th>Shift</th>
+                                    <th>Cabang</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($transaksiTerbaru as $i => $tr)
                                     <tr>
                                         <td>{{ $i + 1 }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
                                         <td>{{ $tr->NamaPasien ?? '-' }}</td>
-                                        <td>{{ $tr->JenisPasien ?? '-' }}</td>
                                         <td>
-                                            {{ $tr->rel_metode_pembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}
+                                            @if (!empty($tr->TransaksiDetail) && count($tr->TransaksiDetail) > 0)
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach ($tr->TransaksiDetail as $td)
+                                                        <li>
+                                                            {{ $td->MasterJenisPerawatan->Nama ?? '-' }}:
+                                                            <span class="text-secondary">
+                                                                {{ 'Rp ' . number_format($td->Biaya ?? 0, 0, ',', '.') }}
+                                                            </span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                -
+                                            @endif
                                         </td>
-                                        <td>
-                                            {{ $tr->Layanan ?? '-' }}
-                                        </td>
-                                        <td>
-                                            {{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}
-                                        </td>
-                                        <td>
-                                            {{ $tr->Shift ?? '-' }}
-                                        </td>
+                                        <td>{{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}</td>
+                                        <td>{{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $tr->getCabang->Nama ?? '-' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted">Data tidak tersedia.</td>
+                                        <td colspan="7" class="text-center text-muted">Data tidak tersedia.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
+
                     </div>
                 </div>
+
             </div>
-        </div> --}}
+        </div>
 
     </div>
 @endsection
@@ -442,7 +441,9 @@
                     },
                     success: function(res) {
                         // Update kartu statistik
-                        $('#val-total-biaya').text('Rp ' + res.totalBiaya.toLocaleString('id-ID'));
+                        $('#val-total-biaya').text('Rp ' + res.totalBiaya.toLocaleString('id-ID')
+                            .replace(/,/g, '.'));
+
                         $('#val-total-pasien').text(res.totalPasien);
                         $('#val-pasien-baru').text(res.pasienBaru);
                         $('#val-pasien-lama').text(res.pasienLama);
@@ -455,10 +456,115 @@
                             'text-danger');
                         updatePersen('#persen-pasien-lama', res.totalPasienLamaPersen, 'text-warning',
                             'text-danger');
+                        // Update daftar jenis perawatan terbanyak
+                        var $jenisPerawatanList = $('.card-body ul.list-group');
+                        var $jenisPerawatanEmpty = $(
+                            '.card-body .text-muted:contains("Tidak ada data jenis perawatan terbanyak")'
+                        );
+                        if (Array.isArray(res.jenisPerawatanTerbanyak) && res.jenisPerawatanTerbanyak
+                            .length > 0) {
+                            if ($jenisPerawatanList.length) {
+                                $jenisPerawatanList.empty();
+                                res.jenisPerawatanTerbanyak.forEach(function(perawatan) {
+                                    var nama = perawatan.JenisPerawatan ? perawatan
+                                        .JenisPerawatan : '-';
+                                    var jumlah = typeof perawatan.jumlah !== "undefined" ?
+                                        perawatan.jumlah : 0;
+                                    var li = `
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>${nama}</span>
+                                            <span class="badge bg-primary rounded-pill">${jumlah} Pasien</span>
+                                        </li>
+                                    `;
+                                    $jenisPerawatanList.append(li);
+                                });
+                            }
+                            $jenisPerawatanList.show();
+                            $jenisPerawatanEmpty.hide();
+                        } else {
+                            $jenisPerawatanList.empty().hide();
+                            $jenisPerawatanEmpty.show();
+                        }
+
 
                         // Update chart
                         renderChart(res.paymentChartLabels, res.paymentChartTotals);
+
+                        // Update datatable
+                        var $tbody = $('#tabel-transaksi-terbaru tbody');
+                        $tbody.empty();
+
+                        if (res.transaksiTerbaru.length > 0) {
+                            $.each(res.transaksiTerbaru, function(i, tr) {
+                                var namaPasien = tr.NamaPasien ? tr.NamaPasien : '-';
+
+                                // Jenis Perawatan list
+                                var jenisPerawatanHtml = '-';
+                                if (Array.isArray(tr.TransaksiDetail) && tr.TransaksiDetail
+                                    .length > 0) {
+                                    jenisPerawatanHtml = '<ul class="list-unstyled mb-0">';
+                                    tr.TransaksiDetail.forEach(function(td) {
+                                        var namaPerawatan = (td.MasterJenisPerawatan &&
+                                                td.MasterJenisPerawatan.Nama) ? td
+                                            .MasterJenisPerawatan.Nama : '-';
+                                        var biaya = 'Rp ' + Number(td.Biaya ?? 0)
+                                            .toLocaleString('id-ID');
+                                        jenisPerawatanHtml +=
+                                            `<li>${namaPerawatan}: <span class="text-secondary">${biaya}</span></li>`;
+                                    });
+                                    jenisPerawatanHtml += '</ul>';
+                                }
+
+                                // Total Bayar
+                                var totalBayar = 'Rp ' + Number(tr.TotalBayar ?? 0)
+                                    .toLocaleString('id-ID');
+
+                                // Cara Bayar
+                                var caraBayar = '-';
+                                if (tr.rel_metode_pembayaran && tr.rel_metode_pembayaran.Nama) {
+                                    caraBayar = tr.rel_metode_pembayaran.Nama;
+                                } else if (tr.MetodePembayaran) {
+                                    caraBayar = tr.MetodePembayaran;
+                                }
+
+                                // Tanggal
+                                var tanggal = '-';
+                                if (tr.created_at) {
+                                    var tanggalObj = moment(tr.created_at);
+                                    tanggal = tanggalObj.isValid() ? tanggalObj.format(
+                                        'DD/MM/YYYY HH:mm') : '-';
+                                }
+
+                                // Cabang
+                                var cabang = '-';
+                                if (tr.rel_cabang && tr.rel_cabang.Nama) {
+                                    cabang = tr.rel_cabang.Nama;
+                                } else if (tr.Cabang) {
+                                    cabang = tr.Cabang;
+                                }
+
+                                var row = `
+                                    <tr>
+                                        <td>${i + 1}</td>
+                                        <td>${namaPasien}</td>
+                                        <td>${jenisPerawatanHtml}</td>
+                                        <td>${totalBayar}</td>
+                                        <td>${caraBayar}</td>
+                                        <td>${tanggal}</td>
+                                        <td>${cabang}</td>
+                                    </tr>
+                                `;
+                                $tbody.append(row);
+                            });
+                        } else {
+                            $tbody.append(
+                                `<tr>
+                                    <td colspan="7" class="text-center text-muted">Data tidak tersedia.</td>
+                                </tr>`
+                            );
+                        }
                     },
+
                     complete: function() {
                         $('#dashboard-cards').removeClass('opacity-50');
                     },
