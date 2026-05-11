@@ -27,6 +27,7 @@
 
         .brand-logo {
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background-color: #ffffff;
         }
 
         /* Nav section label */
@@ -124,9 +125,9 @@
                 <!-- ---------------------------------- -->
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                     <a href="../main/index.html" class="text-nowrap logo-img">
-                        <img src="{{ asset('') }}assets/images/logos/dark-logo.svg" class="dark-logo"
+                        <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px" class="dark-logo"
                             alt="Logo-Dark" />
-                        <img src="{{ asset('') }}assets/images/logos/light-logo.svg" class="light-logo"
+                        <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px" class="light-logo"
                             alt="Logo-light" />
                     </a>
                     <a href="javascript:void(0)"
@@ -299,17 +300,8 @@
                     <!-- ---------------------------------- -->
                     <nav class="navbar navbar-expand-lg p-0">
                         <ul class="navbar-nav">
-                            <li class="nav-item nav-icon-hover-bg rounded-circle ms-n2">
-                                <a class="nav-link sidebartoggler" id="headerCollapse" href="javascript:void(0)">
-                                    <i class="ti ti-menu-2"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item nav-icon-hover-bg rounded-circle d-none d-lg-flex">
-                                <a class="nav-link" href="javascript:void(0)" data-bs-toggle="modal"
-                                    data-bs-target="#exampleModal">
-                                    <i class="ti ti-search"></i>
-                                </a>
-                            </li>
+
+
                         </ul>
 
                         <ul class="navbar-nav quick-links d-none d-lg-flex align-items-center">
@@ -1657,9 +1649,10 @@
                     <!-- ---------------------------------- -->
                     <div class="brand-logo d-flex align-items-center justify-content-between">
                         <a href="../main/index.html" class="text-nowrap logo-img">
-                            <img src="../assets/images/logos/dark-logo.svg" class="dark-logo" alt="Logo-Dark" />
-                            <img src="../assets/images/logos/light-logo.svg" class="light-logo"
-                                alt="Logo-light" />
+                            <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
+                                class="dark-logo" alt="Logo-Dark" />
+                            <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
+                                class="light-logo" alt="Logo-light" />
                         </a>
                         <a href="javascript:void(0)"
                             class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none">

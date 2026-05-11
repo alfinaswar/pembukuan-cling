@@ -21,4 +21,18 @@ class InsentifKaryawan extends Model
      * @var array
      */
     protected $guarded = ['id'];
+    /**
+     * Get the transaksi (transaction) associated with the insentif.
+     */
+    public function getTransaksi()
+    {
+        return $this->belongsTo(Transaksi::class, 'IdTransaksi', 'id');
+    }
+    /**
+     * Get the perawat (nurse) associated with the insentif.
+     */
+    public function getUser()
+    {
+        return $this->belongsTo(User::class, 'UserId', 'id');
+    }
 }

@@ -28,10 +28,10 @@
                             <div class="card-body">
                                 <a href="{{ url('/') }}"
                                     class="text-nowrap logo-img text-center d-block mb-5 w-100">
-                                    <img src="{{ asset('assets/images/logo-black.png') }}" class="dark-logo"
-                                        alt="Logo-Dark" />
-                                    <img src="{{ asset('assets/images/logo.png') }}" class="light-logo"
-                                        alt="Logo-light" />
+                                    <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="180px"
+                                        class="dark-logo" alt="Logo-Dark" />
+                                    <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="180px"
+                                        class="light-logo" alt="Logo-light" />
                                 </a>
                                 <form method="POST" action="{{ route('login') }}">
                                     @csrf
@@ -66,19 +66,19 @@
                                                 Ingat Perangkat Ini
                                             </label>
                                         </div>
-                                        @if (Route::has('password.request'))
+                                        {{-- @if (Route::has('password.request'))
                                             <a class="text-primary fw-medium"
                                                 href="{{ route('password.request') }}">Lupa Kata Sandi?</a>
-                                        @endif
+                                        @endif --}}
                                     </div>
                                     <button type="submit" class="btn btn-primary w-100 py-8 mb-4 rounded-2">
                                         Masuk
                                     </button>
-                                    <div class="d-flex align-items-center justify-content-center">
+                                    {{-- <div class="d-flex align-items-center justify-content-center">
                                         <p class="fs-4 mb-0 fw-medium">Belum punya akun di Klinik Cling?</p>
                                         <a class="text-primary fw-medium ms-2" href="{{ route('register') }}">Buat
                                             akun</a>
-                                    </div>
+                                    </div> --}}
                                 </form>
                             </div>
                         </div>

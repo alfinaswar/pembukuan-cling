@@ -47,6 +47,10 @@ class Transaksi extends Model
     {
         return $this->belongsTo(MasterKlinik::class, 'KodeCabang', 'Kode');
     }
+    public function getInsentif()
+    {
+        return $this->hasMany(InsentifKaryawan::class, 'id', 'IdTransksi');
+    }
 
     protected static function boot()
     {
