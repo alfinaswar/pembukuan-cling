@@ -41,7 +41,8 @@ class InsentifService
         // AMBIL NAMA TINDAKAN
         // =====================================================
 
-        $tindakans = $transaksi->TransaksiDetail()
+        $tindakans = $transaksi
+            ->TransaksiDetail()
             ->with('MasterJenisPerawatan')
             ->get()
             ->pluck('MasterJenisPerawatan.Nama')
@@ -69,7 +70,6 @@ class InsentifService
             ->get();
 
         foreach ($rules as $rule) {
-
             $value = $context[$rule->JenisRule] ?? null;
 
             if ($value === null) {
@@ -83,13 +83,17 @@ class InsentifService
             // =================================================
 
             if ($rule->JenisRule == 'tindakan') {
-
-                $isValid = in_array($rule->Nilai, $value);
-
+                foreach ($value as $tindakan) {
+                    if (str_contains(
+                        strtolower($tindakan),
+                        strtolower($rule->Nilai)
+                    )) {
+                        $isValid = true;
+                        break;
+                    }
+                }
             } else {
-
                 switch ($rule->Operator) {
-
                     case '>=':
                         $isValid = $value >= $rule->Nilai;
                         break;
@@ -127,16 +131,13 @@ class InsentifService
             // =================================================
 
             if ($rule->BerlakuPer == 'shift') {
-
                 $exists = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->where('Shift', $shift)
                     ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
                     ->exists();
-
             } else {
-
                 $exists = InsentifKaryawan::where('IdTransaksi', $transaksi->id)
                     ->where('UserId', $userId)
                     ->where('Role', $rule->Role)
@@ -173,7 +174,6 @@ class InsentifService
     private function getUserByRole($transaksi, $role)
     {
         return match ((int) $role) {
-
             // RESEPSIONIS
             5 => $transaksi->IdResepsionis,
 

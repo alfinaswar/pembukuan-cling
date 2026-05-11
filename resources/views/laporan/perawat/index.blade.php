@@ -26,6 +26,15 @@
             background: rgba(108, 117, 125, 0.18) !important;
         }
     </style>
+    <style>
+        /* Custom for 5 even cols on large and above */
+        @media (min-width: 992px) {
+            .col-lg-2-4 {
+                flex: 0 0 20%;
+                max-width: 20%;
+            }
+        }
+    </style>
     <div class="row mb-3 align-items-center">
         <div class="col-lg-6 col-md-6 col-sm-12">
             <h5 class="mb-0 fw-semibold">Dashboard Report Insentif Perawat</h5>
@@ -90,10 +99,10 @@
             </div>
         </div>
     </div>
-    <div class="row gx-3 mb-4" style="overflow-x: auto; white-space: nowrap;">
+    <div class="row gx-3 mb-2">
         <!-- Total Shift -->
-        <div class="col-auto" style="min-width: 220px;">
-            <div class="card shadow-sm border-0 text-center" style="background: #5c27fe; color: #fff;">
+        <div class="col-12 col-md-6 col-lg-2-4 mb-2" style="flex:1 1 0; min-width: 0;">
+            <div class="card shadow-sm border-0 text-center" style="background: #5c27fe; color: #fff; height: 100%;">
                 <div class="card-body py-3 px-2 d-flex align-items-center">
                     <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
                         style="width:44px; height:44px; background:#4821c8;">
@@ -110,8 +119,8 @@
             </div>
         </div>
         <!-- Total Omset 1 Shift -->
-        <div class="col-auto" style="min-width: 260px;">
-            <div class="card shadow-sm border-0 text-center" style="background: #07c37f; color: #fff;">
+        <div class="col-12 col-md-6 col-lg-2-4 mb-2" style="flex:1 1 0; min-width: 0;">
+            <div class="card shadow-sm border-0 text-center" style="background: #07c37f; color: #fff; height: 100%;">
                 <div class="card-body py-3 px-2 d-flex align-items-center">
                     <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
                         style="width:44px; height:44px; background:#05a46b;">
@@ -128,8 +137,8 @@
             </div>
         </div>
         <!-- Total Insentif Diperoleh -->
-        <div class="col-auto" style="min-width: 240px;">
-            <div class="card shadow-sm border-0 text-center" style="background: #2196f3; color: #fff;">
+        <div class="col-12 col-md-6 col-lg-2-4 mb-2" style="flex:1 1 0; min-width: 0;">
+            <div class="card shadow-sm border-0 text-center" style="background: #2196f3; color: #fff; height: 100%;">
                 <div class="card-body py-3 px-2 d-flex align-items-center">
                     <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
                         style="width:44px; height:44px; background:#1565c0;">
@@ -146,8 +155,8 @@
             </div>
         </div>
         <!-- Rata-Rata Omset / Shift -->
-        <div class="col-auto" style="min-width: 240px;">
-            <div class="card shadow-sm border-0 text-center" style="background: #fcbb3d; color: #fff;">
+        <div class="col-12 col-md-6 col-lg-2-4 mb-2" style="flex:1 1 0; min-width: 0;">
+            <div class="card shadow-sm border-0 text-center" style="background: #fcbb3d; color: #fff; height: 100%;">
                 <div class="card-body py-3 px-2 d-flex align-items-center">
                     <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
                         style="width:44px; height:44px; background:#df9e20;">
@@ -169,8 +178,8 @@
             </div>
         </div>
         <!-- Total Pasien Dilayani -->
-        <div class="col-auto" style="min-width: 220px;">
-            <div class="card shadow-sm border-0 text-center" style="background: #ea4e8b; color: #fff;">
+        <div class="col-12 col-md-6 col-lg-2-4 mb-2" style="flex:1 1 0; min-width: 0;">
+            <div class="card shadow-sm border-0 text-center" style="background: #ea4e8b; color: #fff; height: 100%;">
                 <div class="card-body py-3 px-2 d-flex align-items-center">
                     <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
                         style="width:44px; height:44px; background:#b8336a;">
@@ -186,6 +195,7 @@
                 </div>
             </div>
         </div>
+
     </div>
     <div class="row">
 
@@ -196,11 +206,11 @@
                     <div class="d-flex align-items-star">
                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white me-3"
                             style="width:32px; height:32px;">
-                            <span class="fw-bold fs-5">1</span>
+                            <span class="fw-bold fs-5" style="color: #3a037b;">1</span>
                         </div>
                         <div>
-                            <h5 class="mb-0 fw-semibold text-primary">Shift dengan Total Biaya Klinik</h5>
-                            <small class="text-muted">Mencapai minimal Rp 6.000.000</small>
+                            <h5 class="mb-0 fw-semibold" style="color: #3a037b;">Shift dengan Total Biaya Klinik</h5>
+                            <small style="color: #3a037b;">Mencapai minimal Rp 6.000.000</small>
                         </div>
                     </div>
                 </div>
@@ -209,11 +219,11 @@
                         <table class="table align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="fw-semibold">No</th>
-                                    <th class="fw-semibold">Tanggal</th>
-                                    <th class="fw-semibold">Total Biaya</th>
-                                    <th class="fw-semibold">Perawat</th>
-                                    <th class="fw-semibold">Insentif</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">No</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Total Biaya</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Perawat</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Insentif</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -221,43 +231,72 @@
                                 @forelse($data['ShiftTotalBiayaKlinik'] ?? [] as $index => $shift)
                                     {{-- @dd($shift) --}}
                                     <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($shift->created_at)->format('d/m/Y') }}</td>
-                                        <td>Rp {{ number_format($shift->getTransaksi->TotalBayar ?? 0, 0, ',', '.') }}</td>
-                                        <td>{{ $shift->getUser->name ?? '-' }}</td>
-                                        <td>Rp {{ number_format($shift->Nominal ?? 0, 0, ',', '.') }}</td>
+                                        <td style="color: #3a037b;">{{ $index + 1 }}</td>
+                                        <td style="color: #3a037b;">
+                                            {{ \Carbon\Carbon::parse($shift->created_at)->format('d/m/Y') }}</td>
+                                        <td style="color: #3a037b;">Rp
+                                            {{ number_format($shift->getTransaksi->TotalBayar ?? 0, 0, ',', '.') }}</td>
+                                        <td style="color: #3a037b;">{{ $shift->getUser->name ?? '-' }}</td>
+                                        <td style="color: #3a037b;">Rp
+                                            {{ number_format($shift->Nominal ?? 0, 0, ',', '.') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">Tidak ada data shift</td>
+                                        <td colspan="5" class="text-center" style="color: #3a037b;">Tidak ada data
+                                            shift</td>
                                     </tr>
                                 @endforelse
-
-
                             </tbody>
                         </table>
-
                     </div>
+                    @php
+                        // Hitung jumlah shift >= 6jt dan >= 12jt serta total insentif
+                        $totalShift_6jt = 0;
+                        $totalShift_12jt = 0;
+                        $totalInsentif = 0;
+                        foreach ($data['ShiftTotalBiayaKlinik'] ?? [] as $shift) {
+                            $totalBayar = $shift->getTransaksi->TotalBayar ?? 0;
+                            if ($totalBayar >= 12000000) {
+                                $totalShift_12jt++;
+                                $totalInsentif += 100000;
+                            } elseif ($totalBayar >= 6000000) {
+                                $totalShift_6jt++;
+                                $totalInsentif += 50000;
+                            }
+                        }
+                        $totalShift = $totalShift_6jt + $totalShift_12jt;
+                    @endphp
                     <div class="alert alert-primary d-flex justify-content-between align-items-start mt-2" role="alert"
-                        style="background: #f5f6ff; border-color: #d9e0fc;">
+                        style="background-color: #f5f6ff; border-color: #d9e0fc; border-radius: 12px;">
                         <div>
-                            <div class="fw-semibold text-primary mb-2" style="font-size: 15px;">Perhitungan Insentif</div>
-                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #343a40;">
-                                <li>Rp 50.000 untuk setiap shift ≥ Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift ≥ Rp 12.000.000</li>
+                            <div class="fw-semibold mb-2" style="font-size: 14px; color: #3a037b;">
+                                Perhitungan Insentif
+                            </div>
+                            <ul class="mb-0 ps-3" style="font-size: 13px; color: #3a037b; line-height: 1.5;">
+                                <li>Rp 50.000 untuk setiap shift &ge; Rp 6.000.000</li>
+                                <li>Rp 100.000 untuk setiap shift &ge; Rp 12.000.000</li>
                             </ul>
                         </div>
-                        <div class="text-end ms-4">
-                            <div class="fw-semibold text-primary" style="font-size: 15px;">Total Shift Tercapai</div>
-                            <div class="fw-bold" style="font-size: 22px; color:#3a37aa;">3</div>
-                            <div class="mt-2">Total Insentif</div>
-                            <div class="fw-bold text-primary" style="font-size:18px;">Rp 200.000</div>
+                        <div class="text-end ms-4" style="min-width:140px;">
+                            <div class="fw-semibold" style="font-size: 13px; color: #3a037b;">
+                                Total Shift Tercapai
+                                <span class="fw-bold"
+                                    style="font-size:18px; margin-left: 8px; color:#3a037b;">{{ $totalShift }}</span>
+                            </div>
+                            <div class="mt-2" style="font-size:13px; color: #3a037b;">
+                                Total Insentif
+                            </div>
+                            <div class="fw-bold" style="font-size:18px; color: #3a037b;">
+                                Rp {{ number_format($totalInsentif, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
+
 
                 </div>
             </div>
         </div>
+
 
         <!-- Shift dengan Total 8 Pasien Lama -->
         <div class="col-md-4">
@@ -269,8 +308,8 @@
                             <span class="fw-bold fs-5">2</span>
                         </div>
                         <div>
-                            <h5 class="mb-0 fw-semibold text-success">Shift dengan Total 8 Pasien Lama</h5>
-                            <small class="text-muted">dalam 1 Shift</small>
+                            <h5 class="mb-0 fw-semibold" style="color: #166534;">Shift dengan Total 8 Pasien Lama</h5>
+                            <small class="" style="color: #166534;">dalam 1 Shift</small>
                         </div>
                     </div>
                 </div>
@@ -280,10 +319,10 @@
                         <table class="table align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="fw-semibold">Tanggal</th>
-                                    <th class="fw-semibold">Jumlah Pasien Lama</th>
-                                    <th class="fw-semibold">Perawat</th>
-                                    <th class="fw-semibold">Insentif</th>
+                                    <th class="fw-semibold" style="color: #166534;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #166534;">Jumlah Pasien Lama</th>
+                                    <th class="fw-semibold" style="color: #166534;">Perawat</th>
+                                    <th class="fw-semibold" style="color: #166534;">Insentif</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -291,42 +330,61 @@
                                 @if (isset($data['Shift8PasienLama']) && count($data['Shift8PasienLama']) > 0)
                                     @foreach ($data['Shift8PasienLama'] as $row)
                                         <tr>
-                                            <td>{{ $row['tanggal'] }}</td>
-                                            <td>{{ $row['jumlah_pasien_lama'] }} Pasien</td>
-                                            <td>{{ $row['perawat_nama'] }}</td>
-                                            <td class="text-success fw-semibold">Rp 30.000</td>
+                                            <td style="color: #166534;">
+                                                {{ \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') }}
+                                            </td>
+
+                                            <td style="color: #166534;">{{ $row['jumlah_pasien_lama'] }} Pasien</td>
+                                            <td style="color: #166534;">{{ $row['perawat_nama'] }}</td>
+                                            <td class="fw-semibold" style="color: #166534;">Rp 30.000</td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Tidak ada data shift dengan
+                                        <td colspan="4" class="text-center" style="color: #166534;">Tidak ada data
+                                            shift dengan
                                             minimal 8 pasien lama.</td>
                                     </tr>
                                 @endif
-
-
                             </tbody>
                         </table>
                     </div>
+                    @php
+                        // Akumulasi total shift dan total insentif dari data Shift8PasienLama
+                        $totalShiftTercapai =
+                            isset($data['Shift8PasienLama']) && is_iterable($data['Shift8PasienLama'])
+                                ? count($data['Shift8PasienLama'])
+                                : 0;
+                        $insentifPerShift = 30000;
+                        $totalInsentif = $totalShiftTercapai * $insentifPerShift;
+                    @endphp
                     <div class="alert alert-primary d-flex justify-content-between align-items-start" role="alert"
                         style="background: #f5f6ff; border-color: #d9e0fc;">
                         <div>
-                            <div class="fw-semibold text-primary mb-2" style="font-size: 15px;">Perhitungan Insentif</div>
-                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #343a40;">
-                                <li>Rp 50.000 untuk setiap shift ≥ Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift ≥ Rp 12.000.000</li>
+                            <div class="fw-semibold mb-2" style="font-size: 15px; color: #166534;">Perhitungan Insentif
+                            </div>
+                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #166534;">
+                                <li>Rp {{ number_format($insentifPerShift, 0, ',', '.') }} untuk setiap shift<br> dengan
+                                    total 8 pasien lama</li>
                             </ul>
                         </div>
                         <div class="text-end ms-4">
-                            <div class="fw-semibold text-primary" style="font-size: 15px;">Total Shift Tercapai</div>
-                            <div class="fw-bold" style="font-size: 22px; color:#3a37aa;">3</div>
-                            <div class="mt-2">Total Insentif</div>
-                            <div class="fw-bold text-primary" style="font-size:18px;">Rp 200.000</div>
+                            <div class="fw-semibold" style="font-size: 15px; color: #166534;">Total Shift Tercapai
+                                <span class="fw-bold"
+                                    style="font-size: 18px; color:#166534;">{{ $totalShiftTercapai }}</span>
+                            </div>
+                            <div class="mt-2" style="color: #166534;">Total Insentif</div>
+                            <div class="fw-bold" style="font-size:18px; color: #166534;">
+                                Rp {{ number_format($totalInsentif, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
         </div>
+
 
         <!-- Pasien dengan Billing Minimal -->
         <div class="col-md-4">
@@ -335,11 +393,11 @@
                     <div class="d-flex align-items-start">
                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-info text-white me-3"
                             style="width:32px; height:32px;">
-                            <span class="fw-bold fs-5">3</span>
+                            <span class="fw-bold fs-5" style="color: #162878;">3</span>
                         </div>
                         <div>
-                            <h5 class="mb-0 fw-semibold text-info">Pasien dengan Billing Minimal</h5>
-                            <small class="text-muted">Rp 1.000.000 per Transaksi</small>
+                            <h5 class="mb-0 fw-semibold" style="color: #162878;">Pasien dengan Billing Minimal</h5>
+                            <small style="color: #162878;">Rp 1.000.000 per Transaksi</small>
                         </div>
                     </div>
                 </div>
@@ -349,55 +407,78 @@
                         <table class="table align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="fw-semibold">No</th>
-                                    <th class="fw-semibold">Tanggal</th>
-                                    <th class="fw-semibold">Nama Pasien</th>
-                                    <th class="fw-semibold">Total Billing</th>
-                                    <th class="fw-semibold">Insentif</th>
+                                    <th class="fw-semibold" style="color: #162878;">No</th>
+                                    <th class="fw-semibold" style="color: #162878;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #162878;">Nama Pasien</th>
+                                    <th class="fw-semibold" style="color: #162878;">Total Billing</th>
+                                    <th class="fw-semibold" style="color: #162878;">Insentif</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{-- Data dummy untuk tabel --}}
-                                @foreach ($data['pasienBillingMinimal'] ?? [] as $index => $item)
+                                @php
+                                    // Eloquent Collection: use ->take(5) instead of array_slice
+                                    $pasienBillingMinimal = ($data['pasienBillingMinimal'] ?? collect())->take(5);
+                                @endphp
+                                @forelse ($pasienBillingMinimal as $index => $item)
                                     <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>
-                                            {{ isset($item->tanggal) ? \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '-' }}
+                                        <td style="color: #162878;">{{ $index + 1 }}</td>
+                                        <td style="color: #162878;">
+                                            {{ isset($item->created_at) ? \Carbon\Carbon::parse($item->created_at)->translatedFormat('d/m/Y') : '-' }}
                                         </td>
-                                        <td>{{ $item->nama_pasien ?? '-' }}</td>
-                                        <td>Rp
-                                            {{ isset($item->total_billing) ? number_format($item->total_billing, 0, ',', '.') : '0' }}
-                                        </td>
-                                        <td class="text-info fw-semibold">
+                                        <td style="color: #162878;">{{ $item->getTransaksi->NamaPasien ?? '-' }}</td>
+                                        <td style="color: #162878;">
                                             Rp
-                                            {{ isset($item->insentif) ? number_format($item->insentif, 0, ',', '.') : '0' }}
+                                            {{ isset($item->getTransaksi->TotalBayar) ? number_format($item->getTransaksi->TotalBayar, 0, ',', '.') : '0' }}
+                                        </td>
+                                        <td class="fw-semibold" style="color: #162878;">
+                                            Rp
+                                            {{ isset($item->Nominal) ? number_format($item->Nominal, 0, ',', '.') : '0' }}
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center" style="color: #162878;">Tidak ada data
+                                            pasien dengan
+                                            billing minimal.</td>
+                                    </tr>
+                                @endforelse
 
 
                             </tbody>
                         </table>
                     </div>
-                    <div class="alert alert-primary d-flex justify-content-between align-items-start" role="alert"
-                        style="background: #f5f6ff; border-color: #d9e0fc;">
-                        <div>
-                            <div class="fw-semibold text-primary mb-2" style="font-size: 15px;">Perhitungan Insentif</div>
-                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #343a40;">
-                                <li>Rp 50.000 untuk setiap shift ≥ Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift ≥ Rp 12.000.000</li>
-                            </ul>
+                    <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert"
+                        style="background: #f5f6ff; border-color: #d9e0fc; min-height: 90px;">
+                        <div class="d-flex align-items-center" style="flex: 1;">
+                            <div>
+                                <div class="fw-semibold mb-1" style="font-size: 14px; color: #162878;">Perhitungan
+                                    Insentif</div>
+                                <div style="font-size: 13px; color: #376ede;">
+                                    Rp 10.000 untuk setiap pasien dengan<br>
+                                    billing minimal Rp 1.000.000
+                                </div>
+                            </div>
+                            <div class="mx-4 flex-shrink-0 d-none d-md-block">
+                                <i class="fa fa-arrow-up" style="color:#aac6fd; font-size: 35px;"></i>
+                            </div>
                         </div>
-                        <div class="text-end ms-4">
-                            <div class="fw-semibold text-primary" style="font-size: 15px;">Total Shift Tercapai</div>
-                            <div class="fw-bold" style="font-size: 22px; color:#3a37aa;">3</div>
-                            <div class="mt-2">Total Insentif</div>
-                            <div class="fw-bold text-primary" style="font-size:18px;">Rp 200.000</div>
+                        <div class="text-end ms-2" style="min-width:130px;">
+                            <div style="font-size: 13px; color:#376ede;">Total Pasien</div>
+                            <div class="fw-bold" style="font-size: 17px; color:#376ede;">
+                                {{ count($data['pasienBillingMinimal'] ?? []) }}
+                            </div>
+                            <div class="mt-1" style="font-size:13px; color: #376ede;">Total Insentif</div>
+                            <div class="fw-bold" style="font-size:18px; color: #376ede;">
+                                Rp {{ number_format(count($data['pasienBillingMinimal'] ?? []) * 10000, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
+
 
         <div class="col-md-4">
             <div class="card border-0 shadow-sm mb-4">
@@ -405,10 +486,10 @@
                     <div class="d-flex align-items-start mb-2">
                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-info text-white me-3"
                             style="width:32px; height:32px;">
-                            <span class="fw-bold fs-5" style="color: orange;">4</span>
+                            <span class="fw-bold fs-5" style="color: #FF8000;">4</span>
                         </div>
                         <div>
-                            <h5 class="mb-0 fw-semibold" style="color: orange;">Pasien dengan Jenis Perawatan Odontektomi
+                            <h5 class="mb-0 fw-semibold" style="color: #FF8000;">Pasien dengan Jenis Perawatan Odontektomi
                             </h5>
                             {{-- <small class="text-muted">Rp 1.000.000 per Transaksi</small> --}}
                         </div>
@@ -420,59 +501,86 @@
                         <table class="table align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="fw-semibold" style="color: orange;">No</th>
-                                    <th class="fw-semibold" style="color: orange;">Tanggal</th>
-                                    <th class="fw-semibold" style="color: orange;">Nama Pasien</th>
-                                    <th class="fw-semibold" style="color: orange;">Perawat</th>
-                                    <th class="fw-semibold" style="color: orange;">Insentif</th>
+                                    <th class="fw-semibold" style="color: #FF8000;">No</th>
+                                    <th class="fw-semibold" style="color: #FF8000;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #FF8000;">Nama</th>
+                                    <th class="fw-semibold" style="color: #FF8000;">Perawat</th>
+                                    <th class="fw-semibold" style="color: #FF8000;">Insentif</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{-- Data dummy untuk tabel --}}
-                                <tr>
-                                    <td style="color: orange;">1</td>
-                                    <td style="color: orange;">21 Mei 2025</td>
-                                    <td style="color: orange;">Budi Santoso</td>
-                                    <td style="color: orange;">Rp 1.250.000</td>
-                                    <td class="fw-semibold" style="color: orange;">Rp 10.000</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: orange;">2</td>
-                                    <td style="color: orange;">21 Mei 2025</td>
-                                    <td style="color: orange;">Dewi Lestari</td>
-                                    <td style="color: orange;">Rp 1.800.000</td>
-                                    <td class="fw-semibold" style="color: orange;">Rp 10.000</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: orange;">3</td>
-                                    <td style="color: orange;">21 Mei 2025</td>
-                                    <td style="color: orange;">Fikri Ramadhan</td>
-                                    <td style="color: orange;">Rp 2.000.000</td>
-                                    <td class="fw-semibold" style="color: orange;">Rp 10.000</td>
-                                </tr>
+                                @php
+                                    $no = 1;
+                                    $totalOdontektomiPasien = 0;
+                                    $totalOdontektomiInsentif = 0;
+                                @endphp
+                                @foreach ($data['Odontektomi'] ?? [] as $item)
+                                    <tr>
+                                        <td style="color: #FF8000;">{{ $no }}</td>
+                                        <td style="color: #FF8000;">
+                                            {{ $item->created_at ? \Carbon\Carbon::parse($item->getTransaksi->Tanggal)->format('d/m/Y') : '-' }}
+                                        </td>
+                                        <td style="color: #FF8000;">
+                                            {{ $item->getTransaksi && isset($item->getTransaksi->NamaPasien) ? $item->getTransaksi->NamaPasien : '-' }}
+                                        </td>
+                                        <td style="color: #FF8000;">
+                                            {{ $item->getTransaksi && isset($item->getUser->name) ? $item->getUser->name : '-' }}
+                                        </td>
+
+                                        <td class="fw-semibold" style="color: #FF8000;">
+                                            {{ $item->Nominal ? 'Rp ' . number_format($item->Nominal, 0, ',', '.') : '-' }}
+                                        </td>
+                                    </tr>
+                                    @php
+                                        $no++;
+                                        $totalOdontektomiPasien++;
+                                        $totalOdontektomiInsentif += $item->Nominal ?? 0;
+                                    @endphp
+                                @endforeach
+
                             </tbody>
                         </table>
                     </div>
-                    <div class="alert alert-primary d-flex justify-content-between align-items-start" role="alert"
-                        style="background: #f5f6ff; border-color: #d9e0fc;">
+                    <div class="alert alert-primary d-flex justify-content-between align-items-start mt-2" role="alert"
+                        style="background: #fff8f1; border-color: #ffe9cb;">
                         <div>
-                            <div class="fw-semibold mb-2" style="font-size: 15px; color: orange;">Perhitungan Insentif
-                            </div>
-                            <ul class="mb-0 ps-3" style="font-size: 14px; color: orange;">
-                                <li>Rp 50.000 untuk setiap shift ≥ Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift ≥ Rp 12.000.000</li>
+                            <div class="fw-semibold mb-2" style="color: #ff9900;">Perhitungan Insentif</div>
+                            <ul class="mb-0 ps-3" style="color: #ff9900; list-style: disc;">
+                                <li style="margin-bottom: 0;">
+                                    Rp 25.000 untuk setiap pasien<br>
+                                    dengan perawatan Odontektomi
+                                </li>
                             </ul>
                         </div>
                         <div class="text-end ms-4">
-                            <div class="fw-semibold" style="font-size: 15px; color: orange;">Total Shift Tercapai</div>
-                            <div class="fw-bold" style="font-size: 22px; color: orange;">3</div>
-                            <div class="mt-2" style="color: orange;">Total Insentif</div>
-                            <div class="fw-bold" style="font-size:18px; color: orange;">Rp 200.000</div>
+                            @php
+                                // Hitung dari atas, bukan dari variabel di bawah tabel
+                                $totalOdontektomiPasien = isset($data['Odontektomi']) ? count($data['Odontektomi']) : 0;
+                                $totalOdontektomiInsentif = 0;
+                                if (isset($data['Odontektomi']) && is_iterable($data['Odontektomi'])) {
+                                    foreach ($data['Odontektomi'] as $o) {
+                                        $totalOdontektomiInsentif += $o->Nominal ?? 0;
+                                    }
+                                }
+                            @endphp
+                            <div class="fw-semibold" style="font-size: 15px; color: #ff9900;">
+                                Total Pasien
+                                <span class="fw-bold"
+                                    style="font-size: 20px; color: #ff9900; margin-left: 8px;">{{ $totalOdontektomiPasien }}</span>
+                            </div>
+                            <div class="mt-2 fw-semibold" style="color: #ff9900;">Total Insentif</div>
+                            <div class="fw-bold" style="font-size: 20px; color: #ff9900;">Rp
+                                {{ number_format($totalOdontektomiInsentif, 0, ',', '.') }}</div>
                         </div>
                     </div>
+
+
+
                 </div>
             </div>
         </div>
+
 
         <div class="col-md-4">
             <div class="card">
@@ -480,12 +588,13 @@
                     <div class="d-flex align-items-start mb-2">
                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-info text-white me-3"
                             style="width:32px; height:32px;">
-                            <span class="fw-bold fs-5" style="color: orange;">5</span>
+                            <span class="fw-bold fs-5" style="color:#FF2AA0;">5</span>
                         </div>
                         <div>
-                            <h5 class="mb-0 fw-semibold" style="color: orange;">Pasien Baru
+                            <h5 class="mb-0 fw-semibold" style="color:#FF2AA0;">Pasien Baru
                             </h5>
-                            <small class="text-muted">Berdasarkan Tanggal Kedatangan</small>
+                            <small class="text-muted" style="color:#FF2AA0 !important;">Berdasarkan Tanggal
+                                Kedatangan</small>
                         </div>
                     </div>
                 </div>
@@ -495,123 +604,168 @@
                         <table class="table align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="fw-semibold" style="color: orange;">Tanggal</th>
-                                    <th class="fw-semibold" style="color: orange;">Jumlah Pasien baru</th>
-                                    <th class="fw-semibold" style="color: orange;">Perawat</th>
-                                    <th class="fw-semibold" style="color: orange;">Insentif</th>
+                                    <th class="fw-semibold" style="color:#FF2AA0;">Tanggal</th>
+                                    <th class="fw-semibold" style="color:#FF2AA0;">Jumlah</th>
+                                    <th class="fw-semibold" style="color:#FF2AA0;">Perawat</th>
+                                    <th class="fw-semibold" style="color:#FF2AA0;">Insentif</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{-- Data dummy untuk tabel --}}
-                                @forelse ($data['PasienBaru'] as $index => $pasien)
+                                @if (isset($data['PasienBaru']) && is_iterable($data['PasienBaru']) && count($data['PasienBaru']) > 0)
+                                    @foreach (collect($data['PasienBaru'])->take(5) as $index => $pasien)
+                                        <tr>
+                                            <td style="color:#FF2AA0;">
+                                                {{ isset($pasien['tanggal']) ? \Carbon\Carbon::parse($pasien['tanggal'])->translatedFormat('d/m/Y') : '-' }}
+
+                                            </td>
+
+                                            <td style="color:#FF2AA0;">{{ $pasien['jumlah_pasien_baru'] ?? '-' }}</td>
+                                            <td style="color:#FF2AA0;">{{ $pasien['perawat_nama'] ?? '-' }}</td>
+                                            <td style="color:#FF2AA0;">
+                                                {{ isset($pasien['insentif']) ? 'Rp ' . number_format($pasien['insentif'], 0, ',', '.') : '-' }}
+                                            </td>
+
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
-                                        <td style="color: orange;">{{ $pasien['tanggal'] }}</td>
-                                        <td style="color: orange;">{{ $pasien['jumlah_pasien_baru'] }}</td>
-                                        <td style="color: orange;">{{ $pasien['perawat_nama'] ?? '-' }}</td>
-                                        <td style="color: orange;">{{ $pasien['insentif'] }}</td>
+                                        <td colspan="4" class="text-center" style="color:#FF2AA0;">Tidak ada data</td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center" style="color:orange;">Tidak ada data</td>
-                                    </tr>
-                                @endforelse
+                                @endif
 
 
                             </tbody>
                         </table>
                     </div>
-                    <div class="alert alert-primary d-flex justify-content-between align-items-start" role="alert"
-                        style="background: #f5f6ff; border-color: #d9e0fc;">
-                        <div>
-                            <div class="fw-semibold mb-2" style="font-size: 15px; color: orange;">Ringkasan Total Insentif
-                            </div>
-                            <ul class="mb-0 ps-3" style="font-size: 14px; color: orange;">
-                                <li>Rp 50.000 untuk setiap shift ≥ Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift ≥ Rp 12.000.000</li>
+                    @php
+                        // Mengakumulasikan total pasien baru dari array PasienBaru
+                        $totalPasienBaru = 0;
+                        if (isset($data['PasienBaru']) && is_iterable($data['PasienBaru'])) {
+                            foreach ($data['PasienBaru'] as $item) {
+                                $totalPasienBaru += $item['jumlah_pasien_baru'] ?? 0;
+                            }
+                        }
+                    @endphp
+                    <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert"
+                        style="background: #fdf7fd; border-color: #f2d7ef;">
+                        <div class="d-flex flex-column flex-grow-1" style="max-width: 60%;">
+                            <div class="fw-semibold mb-2" style="color:#b80080;">Perhitungan Insentif</div>
+                            <ul class="mb-0 ps-3" style="color:#b80080; font-size: 15px;">
+                                <li>Rp 2.000 untuk setiap pasien baru</li>
                             </ul>
                         </div>
-                        <div class="text-end ms-4">
-                            <div class="fw-semibold" style="font-size: 15px; color: orange;">Total Shift Tercapai</div>
-                            <div class="fw-bold" style="font-size: 22px; color: orange;">3</div>
-                            <div class="mt-2" style="color: orange;">Total Insentif</div>
-                            <div class="fw-bold" style="font-size:18px; color: orange;">Rp 200.000</div>
+                        <div style="border-left: 2px solid #eed1ec; height: 48px; margin: 0 22px 0 22px;"></div>
+                        <div class="text-end ms-2" style="min-width: 160px;">
+                            <div class="mb-1" style="color:#b80080; font-size:15px;">Total Pasien Baru <span
+                                    class="fw-bold" style="font-size:18px;">{{ $totalPasienBaru }}</span></div>
+                            <div style="color:#b80080; font-size: 14px;">Total Insentif</div>
+                            <div class="fw-bold" style="color:#b80080; font-size:18px;">
+                                Rp {{ number_format($totalPasienBaru * 2000, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <div class="d-flex align-items-start mb-2">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-info text-white me-3"
-                            style="width:32px; height:32px;">
-                            <span class="fw-bold fs-5"></span>
+            <div class="card shadow border-0"
+                style="background: linear-gradient(90deg, #665be7 0%, #28c76f 100%); color: white;">
+                <div class="card-body p-0">
+                    <div class="p-3 pb-2"
+                        style="border-radius: 12px 12px 0 0; background: linear-gradient(90deg, #5a58fc 0%, #5ad6ff 100%);">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bx bx-sun fs-4 me-2"></i>
+                            <span class="fw-semibold fs-6">Ringkasan Total Insentif</span>
                         </div>
-                        <div>
-                            <h5 class="mb-0 fw-semibold text-info">Pasien dengan Billing Minimal</h5>
-                            <small class="text-muted">Rp 1.000.000 per Transaksi</small>
+                        <div class="text-white-50" style="font-size: 14px;">
+                            Periode: (Harian)
                         </div>
                     </div>
-                </div>
-                <div class="card-body pb-2">
-
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="fw-semibold">No</th>
-                                    <th class="fw-semibold">Tanggal</th>
-                                    <th class="fw-semibold">Nama Pasien</th>
-                                    <th class="fw-semibold">Total Billing</th>
-                                    <th class="fw-semibold">Insentif</th>
-                                </tr>
-                            </thead>
+                    <div class="px-4 py-3 bg-white" style="color: #222;">
+                        <table class="w-100 align-middle" style="font-size:15px;">
                             <tbody>
-                                {{-- Data dummy untuk tabel --}}
-                                <tr>
-                                    <td>1</td>
-                                    <td>21 Mei 2025</td>
-                                    <td>Budi Santoso</td>
-                                    <td>Rp 1.250.000</td>
-                                    <td class="text-info fw-semibold">Rp 10.000</td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>21 Mei 2025</td>
-                                    <td>Dewi Lestari</td>
-                                    <td>Rp 1.800.000</td>
-                                    <td class="text-info fw-semibold">Rp 10.000</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>21 Mei 2025</td>
-                                    <td>Fikri Ramadhan</td>
-                                    <td>Rp 2.000.000</td>
-                                    <td class="text-info fw-semibold">Rp 10.000</td>
-                                </tr>
+                                @php
+                                    // Mapping JenisRule ke label dan badge style, urutkan sesuai urutan tabel sebelumnya.
+                                    $jenisRuleInfo = [
+                                        'omzet_shift' => [
+                                            'label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000',
+                                            'badge' => 'bg-primary',
+                                            'order' => 1,
+                                        ],
+                                        'pasien_lama' => [
+                                            'label' => 'Shift dengan 8 Pasien Lama',
+                                            'badge' => 'bg-info',
+                                            'order' => 2,
+                                        ],
+                                        'transaksi' => [
+                                            'label' => 'Billing ≥ Rp 1.000.000 per Transaksi',
+                                            'badge' => 'bg-success',
+                                            'order' => 3,
+                                        ],
+                                        'tindakan' => [
+                                            'label' => 'Perawatan Odontektomi',
+                                            'badge' => 'bg-warning text-white',
+                                            'order' => 4,
+                                        ],
+                                        'pasien_baru' => [
+                                            'label' => 'Pasien Baru',
+                                            'badge' => 'bg-danger',
+                                            'order' => 5,
+                                        ],
+                                    ];
+                                    $ringkasan = $data['Ringkasan'] ?? [];
+
+                                    // Ambil mapping [JenisRule] => [nominal] untuk quick display
+                                    $totalByJenisRule = [];
+                                    foreach ($ringkasan as $item) {
+                                        $totalByJenisRule[$item->JenisRule] = $item->total_insentif;
+                                    }
+                                    // Urutan final row output
+                                    $rowOrder = array_keys($jenisRuleInfo);
+                                @endphp
+
+                                @foreach ($rowOrder as $i => $ruleKey)
+                                    <tr>
+                                        <td class="py-2 px-0" style="width:40px;">
+                                            <span class="badge {{ $jenisRuleInfo[$ruleKey]['badge'] }} me-2"
+                                                style="font-size: 1rem; width: 32px; height:32px;display: inline-flex; align-items: center; justify-content: center;">
+                                                {{ $jenisRuleInfo[$ruleKey]['order'] }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $jenisRuleInfo[$ruleKey]['label'] }}</td>
+                                        <td class="text-end fw-semibold" style="white-space:nowrap">
+                                            @php
+                                                $nominal = isset($totalByJenisRule[$ruleKey])
+                                                    ? $totalByJenisRule[$ruleKey]
+                                                    : null;
+                                            @endphp
+                                            {{ $nominal !== null ? 'Rp ' . number_format($nominal, 0, ',', '.') : 'Rp 0' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
-                    </div>
-                    <div class="alert alert-primary d-flex justify-content-between align-items-start" role="alert"
-                        style="background: #f5f6ff; border-color: #d9e0fc;">
-                        <div>
-                            <div class="fw-semibold text-primary mb-2" style="font-size: 15px;">Perhitungan Insentif</div>
-                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #343a40;">
-                                <li>Rp 50.000 untuk setiap shift ≥ Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift ≥ Rp 12.000.000</li>
-                            </ul>
+
+                        @php
+                            // Hitung total insentif dari ringkasan (totalByJenisRule)
+                            $totalInsentifHariIni = array_sum($totalByJenisRule);
+                        @endphp
+                        <div class="mt-4 rounded-3 py-3 text-center fw-bold"
+                            style="background: linear-gradient(90deg,#665be7 0%,#28c76f 100%); font-size: 1.5rem;color:white;">
+                            <div style="font-size:1rem;letter-spacing: 1px;" class="mb-1">
+                                TOTAL INSENTIF HARI INI
+                            </div>
+                            Rp {{ number_format($totalInsentifHariIni, 0, ',', '.') }}
                         </div>
-                        <div class="text-end ms-4">
-                            <div class="fw-semibold text-primary" style="font-size: 15px;">Total Shift Tercapai</div>
-                            <div class="fw-bold" style="font-size: 22px; color:#3a37aa;">3</div>
-                            <div class="mt-2">Total Insentif</div>
-                            <div class="fw-bold text-primary" style="font-size:18px;">Rp 200.000</div>
-                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 @endsection

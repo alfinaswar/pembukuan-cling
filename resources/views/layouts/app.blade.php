@@ -1713,14 +1713,7 @@
                                     <span class="hide-menu">Pembayaran</span>
                                 </a>
                             </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="../main/index6.html" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-music"></i>
-                                    </span>
-                                    <span class="hide-menu">Music</span>
-                                </a>
-                            </li>
+
                             <!-- ---------------------------------- -->
                             <!-- Frontend page -->
                             <!-- ---------------------------------- -->
@@ -1756,20 +1749,48 @@
                                             <span class="hide-menu">Laporan Dokter</span>
                                         </a>
                                     </li>
+
+
+                                </ul>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span class="d-flex">
+                                        <i class="ti ti-database"></i>
+                                    </span>
+                                    <span class="hide-menu">Data Master</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
                                     <li class="sidebar-item">
-                                        <a href="../main/frontend-blogpage.html" class="sidebar-link">
+                                        <a href="{{ route('JenisPerawatan.index') }}" class="sidebar-link">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-user-dollar"></i>
+                                                <i class="ti ti-bandage"></i>
                                             </div>
-                                            <span class="hide-menu">Laporan Kasir</span>
+                                            <span class="hide-menu">Jenis Perawatan</span>
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="../main/frontend-blogdetailpage.html" class="sidebar-link">
+                                        <a href="{{ route('Klinik.index') }}" class="sidebar-link">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-file-text"></i>
+                                                <i class="ti ti-building-hospital"></i>
                                             </div>
-                                            <span class="hide-menu">Blog Details</span>
+                                            <span class="hide-menu">Klinik</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-credit-card"></i>
+                                            </div>
+                                            <span class="hide-menu">Metode Pembayaran</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-clock"></i>
+                                            </div>
+                                            <span class="hide-menu">Shift</span>
                                         </a>
                                     </li>
                                 </ul>
