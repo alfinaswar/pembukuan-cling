@@ -95,9 +95,9 @@ Route::group(['middleware' => ['auth']], function () {
     });
     Route::prefix('laporan')->group(function () {
         Route::get('/umum', [LaporanController::class, 'indexUmum'])->name('laporan-umum.index');
+        Route::post('/data-umum', [LaporanController::class, 'dataDashboardUmum'])->name('laporan-umum.store');
         Route::get('/perawat', [LaporanController::class, 'indexPerawat'])->name('laporan-perawat.index');
-        Route::post('/cari-data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
-
+        Route::post('/data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });
