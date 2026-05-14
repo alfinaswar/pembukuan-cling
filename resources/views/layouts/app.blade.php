@@ -1749,6 +1749,15 @@
                                             <span class="hide-menu">Laporan Dokter</span>
                                         </a>
                                     </li>
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('laporan-resepsionis.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-notebook"></i>
+                                            </div>
+                                            <span class="hide-menu">Laporan Resepsionis</span>
+                                        </a>
+                                    </li>
+
 
 
                                 </ul>
