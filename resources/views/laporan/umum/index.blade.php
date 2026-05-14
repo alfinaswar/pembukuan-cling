@@ -7,14 +7,21 @@
             <small class="text-muted">Ciling Dental Clinic</small>
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12">
-            <div class="input-group mb-3">
-                <input type="text" id="FilterTanggal" class="form-control shawCalRanges" name="FilterTanggal"
-                    data-url="{{ route('laporan-umum.index') }}" readonly />
-                <span class="input-group-text">
-                    <i class="ti ti-calendar fs-5"></i>
-                </span>
-            </div>
+            <form method="POST" action="{{ route('laporan-umum.store') }}">
+                @csrf
+                <div class="input-group mb-3">
+                    <input type="text" id="FilterTanggal" class="form-control shawCalRanges" name="FilterTanggal"
+                        data-url="{{ route('laporan-umum.index') }}" readonly />
+                    <span class="input-group-text">
+                        <i class="ti ti-calendar fs-5"></i>
+                    </span>
+                    <button type="submit" class="btn btn-primary" id="btn-terapkan" style="margin-left: 10px;">
+                        Terapkan
+                    </button>
+                </div>
+            </form>
         </div>
+
     </div>
 
     <div class="row">
@@ -26,21 +33,17 @@
                         <div>
                             <p class="card-subtitle text-uppercase text-purple">Total Biaya</p>
                             <h3 class="fs-6" id="val-total-biaya">
-                                {{ 'Rp ' . number_format($totalBiaya, 0, ',', '.') }}
+                                {{ 'Rp ' . number_format($totalBiaya ?? 0, 0, ',', '.') }}
                             </h3>
                             <small class="text-muted">
                                 <span class="me-1">
                                     @php
-                                        $sign = $totalBiayaPersen > 0 ? '+' : ($totalBiayaPersen < 0 ? '' : '+');
+                                        $persen = $totalBiayaPersen ?? 0;
+                                        $sign = $persen > 0 ? '+' : ($persen < 0 ? '' : '+');
                                         $color =
-                                            $totalBiayaPersen > 0
-                                                ? 'text-success'
-                                                : ($totalBiayaPersen < 0
-                                                    ? 'text-danger'
-                                                    : 'text-muted');
+                                            $persen > 0 ? 'text-success' : ($persen < 0 ? 'text-danger' : 'text-muted');
                                     @endphp
-                                    <span class="{{ $color }}"
-                                        id="persen-biaya">{{ $sign . $totalBiayaPersen }}%</span>
+                                    <span class="{{ $color }}" id="persen-biaya">{{ $sign . $persen }}%</span>
                                 </span>
                                 dibanding bulan kemarin
                             </small>
@@ -68,21 +71,17 @@
                         <div>
                             <p class="card-subtitle text-uppercase text-success">Jumlah Total Pasien</p>
                             <h3 class="fs-6" id="val-total-pasien">
-                                {{ $totalPasien }}
+                                {{ $totalPasien ?? 0 }}
                             </h3>
                             <small class="text-muted">
                                 <span class="me-1">
                                     @php
-                                        $sign = $totalPasienPersen > 0 ? '+' : ($totalPasienPersen < 0 ? '' : '+');
+                                        $persen = $totalPasienPersen ?? 0;
+                                        $sign = $persen > 0 ? '+' : ($persen < 0 ? '' : '+');
                                         $color =
-                                            $totalPasienPersen > 0
-                                                ? 'text-success'
-                                                : ($totalPasienPersen < 0
-                                                    ? 'text-danger'
-                                                    : 'text-muted');
+                                            $persen > 0 ? 'text-success' : ($persen < 0 ? 'text-danger' : 'text-muted');
                                     @endphp
-                                    <span class="{{ $color }}"
-                                        id="persen-pasien">{{ $sign . $totalPasienPersen }}%</span>
+                                    <span class="{{ $color }}" id="persen-pasien">{{ $sign . $persen }}%</span>
                                 </span>
                                 dibanding bulan kemarin
                             </small>
@@ -110,22 +109,17 @@
                         <div>
                             <p class="card-subtitle text-uppercase text-info">Pasien Baru</p>
                             <h3 class="fs-6" id="val-pasien-baru">
-                                {{ $pasienBaru }}
+                                {{ $pasienBaru ?? 0 }}
                             </h3>
                             <small class="text-muted">
                                 <span class="me-1">
                                     @php
-                                        $sign =
-                                            $totalPasienBaruPersen > 0 ? '+' : ($totalPasienBaruPersen < 0 ? '' : '+');
+                                        $persen = $totalPasienBaruPersen ?? 0;
+                                        $sign = $persen > 0 ? '+' : ($persen < 0 ? '' : '+');
                                         $color =
-                                            $totalPasienBaruPersen > 0
-                                                ? 'text-info'
-                                                : ($totalPasienBaruPersen < 0
-                                                    ? 'text-danger'
-                                                    : 'text-muted');
+                                            $persen > 0 ? 'text-info' : ($persen < 0 ? 'text-danger' : 'text-muted');
                                     @endphp
-                                    <span class="{{ $color }}"
-                                        id="persen-pasien-baru">{{ $sign . $totalPasienBaruPersen }}%</span>
+                                    <span class="{{ $color }}" id="persen-pasien-baru">{{ $sign . $persen }}%</span>
                                 </span>
                                 dibanding bulan kemarin
                             </small>
@@ -153,22 +147,18 @@
                         <div>
                             <p class="card-subtitle text-uppercase text-warning">Pasien Lama</p>
                             <h3 class="fs-6" id="val-pasien-lama">
-                                {{ $pasienLama }}
+                                {{ $pasienLama ?? 0 }}
                             </h3>
                             <small class="text-muted">
                                 <span class="me-1">
                                     @php
-                                        $sign =
-                                            $totalPasienLamaPersen > 0 ? '+' : ($totalPasienLamaPersen < 0 ? '' : '+');
+                                        $persen = $totalPasienLamaPersen ?? 0;
+                                        $sign = $persen > 0 ? '+' : ($persen < 0 ? '' : '+');
                                         $color =
-                                            $totalPasienLamaPersen > 0
-                                                ? 'text-warning'
-                                                : ($totalPasienLamaPersen < 0
-                                                    ? 'text-danger'
-                                                    : 'text-muted');
+                                            $persen > 0 ? 'text-warning' : ($persen < 0 ? 'text-danger' : 'text-muted');
                                     @endphp
                                     <span class="{{ $color }}"
-                                        id="persen-pasien-lama">{{ $sign . $totalPasienLamaPersen }}%</span>
+                                        id="persen-pasien-lama">{{ $sign . $persen }}%</span>
                                 </span>
                                 dibanding bulan kemarin
                             </small>
@@ -255,8 +245,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="tabel-transaksi-terbaru"
-                            class="table table-striped table-bordered text-nowrap align-middle dataTable display">
+                        <table id="zero_config" class="table table-striped table-bordered text-nowrap align-middle">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -312,73 +301,144 @@
 @endsection
 @push('scripts')
     <script>
-        $(function() {
+        document.addEventListener('DOMContentLoaded', function() {
 
-            // ── Init daterangepicker ──────────────────────────────────────────
-            var defaultStart = moment().startOf('month');
-            var defaultEnd = moment().endOf('month');
+            // Data dari backend Laravel
+            var paymentChartLabels = @json($paymentChartLabels ?? []);
+            var paymentChartTotals = @json($paymentChartTotals ?? []).map(item => Number(item));
 
-            $('#FilterTanggal').daterangepicker({
-                startDate: defaultStart,
-                endDate: defaultEnd,
-                locale: {
-                    format: 'DD/MM/YYYY',
-                    separator: ' - ',
-                    applyLabel: 'Terapkan',
-                    cancelLabel: 'Batal',
-                    fromLabel: 'Dari',
-                    toLabel: 'Sampai',
-                    customRangeLabel: 'Pilih Sendiri',
-                    daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                    monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                    ],
-                    firstDay: 1
-                },
-                ranges: {
-                    'Hari Ini': [moment(), moment()],
-                    '7 Hari Terakhir': [moment().subtract(6, 'days'), moment()],
-                    'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
-                    'Bulan Lalu': [moment().subtract(1, 'month').startOf('month'),
-                        moment().subtract(1, 'month').endOf('month')
-                    ],
-                    'Tahun Ini': [moment().startOf('year'), moment().endOf('year')],
-                }
-            }, function(start, end) {
-                fetchDashboard(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
-            });
-
-            // ── Chart instance ────────────────────────────────────────────────
             var chart = null;
 
+            function getDistinctColors(count) {
+                const palette = [
+                    '#009EF7', // Biru
+                    '#F79009', // Oranye
+                    '#14B8A6', // Toska
+                    '#EF4444', // Merah
+                    '#84CC16', // Lime
+                    '#7239EA', // Ungu
+                    '#FF8700', // Orange Tua
+                    '#10B981', // Emerald
+                    '#06B6D4', // Cyan
+                    '#F43F5E', // Rose
+                    '#EAB308', // Yellow
+                    '#3B82F6', // Indigo
+                    '#8B5CF6', // Violet
+                    '#43E5F5', // Cyan mudah
+                    '#A855F7', // Deep Purple
+                    '#F97316', // Soft Orange
+                    '#0EA5E9' // Light Blue
+                ];
+                // Kalau jumlah label lebih dari palette, generate warna tambahan
+                if (count <= palette.length) {
+                    return palette.slice(0, count);
+                } else {
+                    // Warnanya di-generate dengan hue berbeda
+                    let colors = palette.slice();
+                    for (let i = palette.length; i < count; i++) {
+                        let hue = Math.floor((i * 360) / count);
+                        colors.push(`hsl(${hue}, 70%, 55%)`);
+                    }
+                    return colors;
+                }
+            }
+
             function renderChart(labels, totals) {
+                const chartColors = getDistinctColors(labels.length);
+
                 var options = {
                     chart: {
                         type: 'donut',
-                        height: 360
-                    },
-                    series: totals,
-                    labels: labels,
-                    colors: ['#009EF7', '#F79009', '#14B8A6', '#98A2B3', '#7239EA', '#43E5F5', '#FF8700'],
-                    legend: {
-                        position: 'right',
-                        fontSize: '11px',
-                        formatter: function(seriesName, opts) {
-                            var value = opts.w.globals.series[opts.seriesIndex];
-                            var percent = opts.w.globals.seriesPercent[opts.seriesIndex][0];
-                            return seriesName + '&nbsp;&nbsp;Rp ' +
-                                value.toLocaleString('id-ID') + '&nbsp;&nbsp;' +
-                                percent.toFixed(1) + '%';
+                        height: 300,
+                        toolbar: {
+                            show: false
                         }
                     },
+
+                    series: totals,
+
+                    labels: labels,
+
+                    colors: chartColors,
+
+                    legend: {
+                        show: true,
+                        position: 'right',
+                        fontSize: '10px',
+
+                        markers: {
+                            width: 10,
+                            height: 10,
+                            radius: 12
+                        },
+
+                        itemMargin: {
+                            horizontal: 5,
+                            vertical: 3
+                        },
+
+                        formatter: function(seriesName, opts) {
+
+                            var value = opts.w.globals.series[opts.seriesIndex];
+
+                            var percent = (
+                                (value / paymentChartTotals.reduce((a, b) => a + b, 0)) * 100
+                            );
+
+                            return `
+                            <div style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:space-between;
+                                width:290px;
+                            ">
+
+                                <span style="
+                                    flex:1;
+                                    color:#252733;
+                                ">
+                                    ${seriesName}
+                                </span>
+
+                                <span style="
+                                    min-width:95px;
+                                    text-align:right;
+                                    font-weight:600;
+                                    color:#111827;
+                                ">
+                                    Rp ${Number(value).toLocaleString('id-ID')}
+                                </span>
+
+                                <span style="
+                                    width:45px;
+                                    text-align:right;
+                                    color:#6B7280;
+                                ">
+                                    ${percent.toFixed(1)}%
+                                </span>
+
+                            </div>
+                        `;
+                        }
+                    },
+
+                    stroke: {
+                        width: 0
+                    },
+
                     dataLabels: {
                         enabled: false
                     },
+
                     tooltip: {
+                        enabled: true,
                         y: {
-                            formatter: v => 'Rp ' + v.toLocaleString('id-ID')
+                            formatter: function(v) {
+                                return 'Rp ' + Number(v).toLocaleString('id-ID');
+                            }
                         }
                     },
+
                     plotOptions: {
                         pie: {
                             donut: {
@@ -386,24 +446,37 @@
                                 labels: {
                                     show: true,
                                     name: {
-                                        show: true
+                                        show: true,
+                                        offsetY: 20,
+                                        fontSize: '14px',
+                                        color: '#6B7280',
+                                        formatter: function() {
+                                            return 'Total';
+                                        }
                                     },
                                     value: {
-                                        show: true,
-                                        formatter: v => 'Rp ' + Number(v).toLocaleString('id-ID')
+                                        show: true
                                     },
                                     total: {
                                         show: true,
-                                        label: 'Total',
-                                        formatter: function(w) {
-                                            var t = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                            return 'Rp ' + t.toLocaleString('id-ID');
+                                        showAlways: true,
+                                        label: 'Tot3232wal',
+                                        fontSize: '14px',
+                                        fontWeight: 500,
+                                        color: '#6B7280',
+
+                                        formatter: function() {
+
+                                            var total = paymentChartTotals.reduce((a, b) => a + b, 0);
+
+                                            return 'Rp ' + total.toLocaleString('id-ID');
                                         }
                                     }
                                 }
                             }
                         }
                     },
+
                     responsive: [{
                         breakpoint: 768,
                         options: {
@@ -415,176 +488,46 @@
                 };
 
                 if (chart) {
+
                     chart.updateOptions({
                         series: totals,
-                        labels: labels
+                        labels: labels,
+                        colors: chartColors
                     });
+
                 } else {
-                    chart = new ApexCharts(document.querySelector('#chart-payment-total'), options);
+
+                    chart = new ApexCharts(
+                        document.querySelector('#chart-payment-total'),
+                        options
+                    );
+
                     chart.render();
                 }
             }
+            renderChart(paymentChartLabels, paymentChartTotals);
 
-            // ── Fetch data via AJAX ───────────────────────────────────────────
-            function fetchDashboard(filterTanggal) {
-                var url = $('#FilterTanggal').data('url');
-
-                $.ajax({
-                    url: url,
-                    method: 'GET',
-                    data: {
-                        FilterTanggal: filterTanggal
-                    },
-                    beforeSend: function() {
-                        // Opsional: loading indicator
-                        $('#dashboard-cards').addClass('opacity-50');
-                    },
-                    success: function(res) {
-                        // Update kartu statistik
-                        $('#val-total-biaya').text('Rp ' + res.totalBiaya.toLocaleString('id-ID')
-                            .replace(/,/g, '.'));
-
-                        $('#val-total-pasien').text(res.totalPasien);
-                        $('#val-pasien-baru').text(res.pasienBaru);
-                        $('#val-pasien-lama').text(res.pasienLama);
-
-                        updatePersen('#persen-biaya', res.totalBiayaPersen, 'text-success',
-                            'text-danger');
-                        updatePersen('#persen-pasien', res.totalPasienPersen, 'text-success',
-                            'text-danger');
-                        updatePersen('#persen-pasien-baru', res.totalPasienBaruPersen, 'text-info',
-                            'text-danger');
-                        updatePersen('#persen-pasien-lama', res.totalPasienLamaPersen, 'text-warning',
-                            'text-danger');
-                        // Update daftar jenis perawatan terbanyak
-                        var $jenisPerawatanList = $('.card-body ul.list-group');
-                        var $jenisPerawatanEmpty = $(
-                            '.card-body .text-muted:contains("Tidak ada data jenis perawatan terbanyak")'
-                        );
-                        if (Array.isArray(res.jenisPerawatanTerbanyak) && res.jenisPerawatanTerbanyak
-                            .length > 0) {
-                            if ($jenisPerawatanList.length) {
-                                $jenisPerawatanList.empty();
-                                res.jenisPerawatanTerbanyak.forEach(function(perawatan) {
-                                    var nama = perawatan.JenisPerawatan ? perawatan
-                                        .JenisPerawatan : '-';
-                                    var jumlah = typeof perawatan.jumlah !== "undefined" ?
-                                        perawatan.jumlah : 0;
-                                    var li = `
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span>${nama}</span>
-                                            <span class="badge bg-primary rounded-pill">${jumlah} Pasien</span>
-                                        </li>
-                                    `;
-                                    $jenisPerawatanList.append(li);
-                                });
-                            }
-                            $jenisPerawatanList.show();
-                            $jenisPerawatanEmpty.hide();
-                        } else {
-                            $jenisPerawatanList.empty().hide();
-                            $jenisPerawatanEmpty.show();
-                        }
-
-
-                        // Update chart
-                        renderChart(res.paymentChartLabels, res.paymentChartTotals);
-
-                        // Update datatable
-                        var $tbody = $('#tabel-transaksi-terbaru tbody');
-                        $tbody.empty();
-
-                        if (res.transaksiTerbaru.length > 0) {
-                            $.each(res.transaksiTerbaru, function(i, tr) {
-                                var namaPasien = tr.NamaPasien ? tr.NamaPasien : '-';
-
-                                // Jenis Perawatan list
-                                var jenisPerawatanHtml = '-';
-                                if (Array.isArray(tr.TransaksiDetail) && tr.TransaksiDetail
-                                    .length > 0) {
-                                    jenisPerawatanHtml = '<ul class="list-unstyled mb-0">';
-                                    tr.TransaksiDetail.forEach(function(td) {
-                                        var namaPerawatan = (td.MasterJenisPerawatan &&
-                                                td.MasterJenisPerawatan.Nama) ? td
-                                            .MasterJenisPerawatan.Nama : '-';
-                                        var biaya = 'Rp ' + Number(td.Biaya ?? 0)
-                                            .toLocaleString('id-ID');
-                                        jenisPerawatanHtml +=
-                                            `<li>${namaPerawatan}: <span class="text-secondary">${biaya}</span></li>`;
-                                    });
-                                    jenisPerawatanHtml += '</ul>';
-                                }
-
-                                // Total Bayar
-                                var totalBayar = 'Rp ' + Number(tr.TotalBayar ?? 0)
-                                    .toLocaleString('id-ID');
-
-                                // Cara Bayar
-                                var caraBayar = '-';
-                                if (tr.rel_metode_pembayaran && tr.rel_metode_pembayaran.Nama) {
-                                    caraBayar = tr.rel_metode_pembayaran.Nama;
-                                } else if (tr.MetodePembayaran) {
-                                    caraBayar = tr.MetodePembayaran;
-                                }
-
-                                // Tanggal
-                                var tanggal = '-';
-                                if (tr.created_at) {
-                                    var tanggalObj = moment(tr.created_at);
-                                    tanggal = tanggalObj.isValid() ? tanggalObj.format(
-                                        'DD/MM/YYYY HH:mm') : '-';
-                                }
-
-                                // Cabang
-                                var cabang = '-';
-                                if (tr.rel_cabang && tr.rel_cabang.Nama) {
-                                    cabang = tr.rel_cabang.Nama;
-                                } else if (tr.Cabang) {
-                                    cabang = tr.Cabang;
-                                }
-
-                                var row = `
-                                    <tr>
-                                        <td>${i + 1}</td>
-                                        <td>${namaPasien}</td>
-                                        <td>${jenisPerawatanHtml}</td>
-                                        <td>${totalBayar}</td>
-                                        <td>${caraBayar}</td>
-                                        <td>${tanggal}</td>
-                                        <td>${cabang}</td>
-                                    </tr>
-                                `;
-                                $tbody.append(row);
-                            });
-                        } else {
-                            $tbody.append(
-                                `<tr>
-                                    <td colspan="7" class="text-center text-muted">Data tidak tersedia.</td>
-                                </tr>`
-                            );
-                        }
-                    },
-
-                    complete: function() {
-                        $('#dashboard-cards').removeClass('opacity-50');
-                    },
-                    error: function() {
-                        alert('Gagal memuat data. Silakan coba lagi.');
-                    }
-                });
-            }
-
-            function updatePersen(selector, persen, colorPos, colorNeg) {
-                var sign = persen > 0 ? '+' : '';
-                var color = persen > 0 ? colorPos : (persen < 0 ? colorNeg : 'text-muted');
-                $(selector)
-                    .text(sign + persen + '%')
-                    .removeClass('text-success text-danger text-info text-warning text-muted')
-                    .addClass(color);
-            }
-
-            // ── Load awal dengan nilai default ───────────────────────────────
-            renderChart(@json($paymentChartLabels), @json($paymentChartTotals));
         });
+    </script>
+    <script>
+        // Gantikan confirm form resubmission dengan SweetAlert
+        if (window.performance && window.performance.navigation && window.performance.navigation.type === 2) {
+            // Terjadi reload/refresh yang berpotensi menyebabkan resubmission
+            Swal.fire({
+                title: 'Konfirmasi Resubmission Form',
+                text: 'Halaman yang Anda tuju menggunakan informasi dari data yang telah Anda input. Kembali ke halaman ini bisa menyebabkan aksi yang Anda lakukan sebelumnya terulang kembali. Apakah Anda ingin melanjutkan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                allowOutsideClick: false
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    // Redirect atau tutup halaman jika dibatalkan
+                    window.history.go(-1);
+                }
+            });
+        }
     </script>
 @endpush
