@@ -101,6 +101,10 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/resepsionis', [LaporanController::class, 'indexResepsionis'])->name('laporan-resepsionis.index');
         Route::post('/cari-data-resepsionis', [LaporanController::class, 'dataDashboardResepsionis'])->name('laporan-resepsionis.store');
+
+        Route::get('/dokter', [LaporanController::class, 'indexDokter'])->name('laporan-dokter.index');
+        Route::post('/cari-data-dokter', [LaporanController::class, 'dataDashboardDokter'])->name('laporan-dokter.store');
+
         // Route::post('/data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');

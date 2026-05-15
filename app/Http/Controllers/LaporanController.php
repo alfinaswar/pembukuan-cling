@@ -6,6 +6,7 @@ use App\Models\InsentifKaryawan;
 use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
 use App\Models\Transaksi;
+use App\Models\TransaksiDetail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -521,17 +522,103 @@ class LaporanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function indexDokter(Request $request)
     {
-        //
+        $dokter = User::role('Dokter')->get();
+        $perawat = User::role('Perawat')->get();
+        $kasir = User::role('Kasir / Resepsionis')->get();
+        $shift = MasterShift::get();
+        // dd($OmsetSatuShift);
+        return view('laporan.dokter.index', compact('dokter', 'perawat', 'kasir', 'shift'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function dataDashboardDokter(Request $request)
     {
-        //
+        $dokter = User::role('Dokter')->get();
+        $perawat = User::role('Perawat')->get();
+        $kasir = User::role('Kasir / Resepsionis')->get();
+        $shift = MasterShift::get();
+
+        if ($request->filled('dokter') && $request->filled('FilterTanggal')) {
+            $parts = explode(' - ', $request->FilterTanggal);
+
+            $startDate = Carbon::createFromFormat('m/d/Y', trim($parts[0]))->startOfDay();
+            $endDate = Carbon::createFromFormat('m/d/Y', trim($parts[1]))->endOfDay();
+
+            $perawatId = $request->perawat;
+        } elseif ($request->filled('FilterTanggal')) {
+            $parts = explode(' - ', $request->FilterTanggal);
+
+            $startDate = Carbon::createFromFormat('m/d/Y', trim($parts[0]))->startOfDay();
+            $endDate = Carbon::createFromFormat('m/d/Y', trim($parts[1]))->endOfDay();
+        } else {
+            $startDate = Carbon::now()->startOfMonth();
+            $endDate = Carbon::now()->endOfMonth();
+        }
+
+        $TotalPasienBaru = Transaksi::where('JenisPasien', 'Baru')->where('KodeCabang', auth()->user()->kodeperusahaan);
+        $TotalPasienLama = Transaksi::where('JenisPasien', 'Lama')->where('KodeCabang', auth()->user()->kodeperusahaan);
+
+        if ($request->filled('dokter')) {
+            $TotalPasienBaru = $TotalPasienBaru->where('IdDokter', $request->dokter);
+            $TotalPasienLama = $TotalPasienLama->where('IdDokter', $request->dokter);
+        }
+        if ($request->filled('shift')) {
+            $TotalPasienBaru = $TotalPasienBaru->where('Shift', $request->shift);
+            $TotalPasienLama = $TotalPasienLama->where('Shift', $request->shift);
+        }
+        $TotalPasienBaru = $TotalPasienBaru->count();
+        $TotalPasienLama = $TotalPasienLama->count();
+        $TotalPasien = $TotalPasienBaru + $TotalPasienLama;
+
+        $TotalPerawatan = TransaksiDetail::query();
+        if ($request->filled('KodeCabang') || $request->filled('dokter') || $request->filled('shift') || (isset($startDate) && isset($endDate))) {
+            $TotalPerawatan = $TotalPerawatan->whereHas('getTransaksi', function ($query) use ($request, $startDate, $endDate) {
+                $query->where('KodeCabang', auth()->user()->kodeperusahaan);
+                if ($request->filled('dokter')) {
+                    $query->where('IdDokter', $request->dokter);
+                }
+                if ($request->filled('shift')) {
+                    $query->where('Shift', $request->shift);
+                }
+                if (isset($startDate) && isset($endDate)) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                }
+            });
+
+        }
+        $TotalPerawatan = $TotalPerawatan->whereNotNull('JenisPerawatan')->count();
+
+        // Correct usage: just build the builder, don't call ->query() on a builder
+        $TotalBiayaPerawatan = Transaksi::where('KodeCabang', auth()->user()->kodeperusahaan);
+
+        if ($request->filled('dokter')) {
+            $TotalBiayaPerawatan = $TotalBiayaPerawatan->where('IdDokter', $request->dokter);
+        }
+        if ($request->filled('shift')) {
+            $TotalBiayaPerawatan = $TotalBiayaPerawatan->where('Shift', $request->shift);
+        }
+        if (isset($startDate) && isset($endDate)) {
+            $TotalBiayaPerawatan = $TotalBiayaPerawatan->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        $TotalBiayaPerawatan = $TotalBiayaPerawatan->sum('TotalBayar');
+        // dd($TotalBiayaPerawatan);
+
+        $dataTransaksi = Transaksi::with('TransaksiDetail')
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->when($request->filled('dokter'), function ($query) use ($request) {
+                $query->where('IdDokter', $request->dokter);
+            })
+            ->when($request->filled('shift'), function ($query) use ($request) {
+                $query->where('Shift', $request->shift);
+            })
+            ->get();
+
+        return view('laporan.dokter.index', compact('TotalPasienBaru', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
     }
 
     /**

@@ -1096,13 +1096,14 @@
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="../main/frontend-contactpage.html" class="sidebar-link">
+                                        <a href="{{ route('laporan-dokter.index') }}" class="sidebar-link">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-stethoscope"></i>
                                             </div>
                                             <span class="hide-menu">Laporan Dokter</span>
                                         </a>
                                     </li>
+
                                     <li class="sidebar-item">
                                         <a href="{{ route('laporan-resepsionis.index') }}" class="sidebar-link">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
@@ -1199,7 +1200,18 @@
 
 
         </div>
+
     </div>
+    <footer class="footer mt-4 py-3 shadow-sm" style="border-top: 1px solid #ececec; background-color: #fff;">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="text-muted" style="font-size: 14px; color: #333 !important;">
+                &copy; {{ date('Y') }} Klinik Gigi. All rights reserved.
+            </span>
+            <span class="text-muted" style="font-size: 14px; color: #333 !important;">
+                Dibangun dengan <i class="ti ti-heart text-danger"></i> oleh Tim Developer
+            </span>
+        </div>
+    </footer>
     <div class="dark-transparent sidebartoggler"></div>
     <script src="{{ asset('') }}assets/js/vendor.min.js"></script>
     <!-- Import Js Files -->

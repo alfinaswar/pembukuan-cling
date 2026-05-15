@@ -17,5 +17,9 @@ class TransaksiDetail extends Model
     {
         return $this->belongsTo(MasterJenisPerawatan::class, 'JenisPerawatan', 'id');
     }
+    public function getTransaksi()
+    {
+        return $this->belongsTo(Transaksi::class, 'IdTransaksi', 'id');
+    }
 
 }
