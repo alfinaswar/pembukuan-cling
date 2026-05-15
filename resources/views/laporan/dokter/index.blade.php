@@ -398,94 +398,53 @@
                     </div>
                     <div class="d-flex flex-column gap-3">
                         <!-- Scaling Gigi -->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div
-                                    style="width:32px; height:32px; background:#e8f7f1; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="ti ti-tooth" style="color:#26c17e; font-size:18px;"></i>
+                        @if (isset($RincianJenisPerawatan) && count($RincianJenisPerawatan) > 0)
+                            @php
+                                $colorVariants = [
+                                    ['bg' => '#e8f7f1', 'icon' => '#26c17e'],
+                                    ['bg' => '#eaefff', 'icon' => '#4665d6'],
+                                    ['bg' => '#fdf6e5', 'icon' => '#faa43a'],
+                                    ['bg' => '#ffeaea', 'icon' => '#eb5757'],
+                                    ['bg' => '#eaf2ff', 'icon' => '#5688fd'],
+                                    ['bg' => '#f5e6ff', 'icon' => '#a259fd'],
+                                ];
+                                $i = 0;
+                            @endphp
+                            @foreach ($RincianJenisPerawatan as $item)
+                                @php
+                                    $color = $colorVariants[$i % count($colorVariants)];
+                                    $i++;
+                                @endphp
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div
+                                            style="width:32px; height:32px; background:{{ $color['bg'] }}; border-radius:6px; display:flex; align-items:center; justify-content:center;">
+                                            <i class="ti ti-tooth"
+                                                style="color:{{ $color['icon'] }}; font-size:18px;"></i>
+                                        </div>
+                                        <span
+                                            style="font-size:14px; color:#4f4f4f;">{{ $item->MasterJenisPerawatan->Nama ?? '-' }}</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <div style="font-size:13px; color:#333; font-weight:600;">
+                                            Rp {{ number_format($item->rata_rata_biaya ?? 0, 0, ',', '.') }}
+                                        </div>
+                                        <div style="font-size:12px; color:#868686;">
+                                            {{ $item->jumlah ?? 0 }}x
+                                        </div>
+                                    </div>
                                 </div>
-                                <span style="font-size:14px; color:#4f4f4f;">Scaling Gigi</span>
+                            @endforeach
+                        @else
+                            <div class="text-center py-4" style="color:#868686; font-size:14px;">
+                                Data tidak ada
                             </div>
-                            <div class="text-end">
-                                <div style="font-size:13px; color:#333; font-weight:600;">Rp 1.250.000</div>
-                                <div style="font-size:12px; color:#868686;">18x</div>
-                            </div>
-                        </div>
+                        @endif
 
-                        <!-- Tambal Gigi Resin -->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div
-                                    style="width:32px; height:32px; background:#eaefff; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="ti ti-tools" style="color:#4665d6; font-size:18px;"></i>
-                                </div>
-                                <span style="font-size:14px; color:#4f4f4f;">Tambal Gigi Resin</span>
-                            </div>
-                            <div class="text-end">
-                                <div style="font-size:13px; color:#333; font-weight:600;">Rp 2.800.000</div>
-                                <div style="font-size:12px; color:#868686;">20x</div>
-                            </div>
-                        </div>
 
-                        <!-- Pembersihan Karang Gigi -->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div
-                                    style="width:32px; height:32px; background:#fff3cd; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="ti ti-sparkles" style="color:#f59e0b; font-size:18px;"></i>
-                                </div>
-                                <span style="font-size:14px; color:#4f4f4f;">Pembersihan Karang Gigi</span>
-                            </div>
-                            <div class="text-end">
-                                <div style="font-size:13px; color:#333; font-weight:600;">Rp 1.200.000</div>
-                                <div style="font-size:12px; color:#868686;">10x</div>
-                            </div>
-                        </div>
 
-                        <!-- Bleaching -->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div
-                                    style="width:32px; height:32px; background:#fee2e2; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="ti ti-brightness-high" style="color:#ef4444; font-size:18px;"></i>
-                                </div>
-                                <span style="font-size:14px; color:#4f4f4f;">Bleaching</span>
-                            </div>
-                            <div class="text-end">
-                                <div style="font-size:13px; color:#333; font-weight:600;">Rp 1.500.000</div>
-                                <div style="font-size:12px; color:#868686;">5x</div>
-                            </div>
-                        </div>
 
-                        <!-- Fluoride Treatment -->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div
-                                    style="width:32px; height:32px; background:#fce7f3; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="ti ti-droplet" style="color:#ec4899; font-size:18px;"></i>
-                                </div>
-                                <span style="font-size:14px; color:#4f4f4f;">Fluoride Treatment</span>
-                            </div>
-                            <div class="text-end">
-                                <div style="font-size:13px; color:#333; font-weight:600;">Rp 600.000</div>
-                                <div style="font-size:12px; color:#868686;">6x</div>
-                            </div>
-                        </div>
 
-                        <!-- Konsultasi -->
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
-                                <div
-                                    style="width:32px; height:32px; background:#f3e8ff; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="ti ti-message-circle" style="color:#8b5cf6; font-size:18px;"></i>
-                                </div>
-                                <span style="font-size:14px; color:#4f4f4f;">Konsultasi</span>
-                            </div>
-                            <div class="text-end">
-                                <div style="font-size:13px; color:#333; font-weight:600;">Rp 300.000</div>
-                                <div style="font-size:12px; color:#868686;">6x</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -520,14 +479,18 @@
                         <!-- Item 1: Total Pasien Baru -->
                         <div class="text-center px-2" style="border-right: 1px solid #f0f0f0; min-width: 110px;">
                             <div style="font-size: 12px; color: #868686; margin-bottom: 4px;">Total Pasien Baru</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #27ae60;">18</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #27ae60;">
+                                {{ $TotalPasienBaru ?? 0 }}
+                            </div>
                             <div style="font-size: 12px; color: #484848;">Pasien</div>
                         </div>
 
                         <!-- Item 2: Total Pasien Lama -->
                         <div class="text-center px-2" style="border-right: 1px solid #f0f0f0; min-width: 110px;">
                             <div style="font-size: 12px; color: #868686; margin-bottom: 4px;">Total Pasien Lama</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #27ae60;">27</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #27ae60;">
+                                {{ $TotalPasienLama ?? 0 }}
+                            </div>
                             <div style="font-size: 12px; color: #484848;">Pasien</div>
                         </div>
 
@@ -535,14 +498,18 @@
                         <div class="text-center px-2" style="border-right: 1px solid #f0f0f0; min-width: 110px;">
                             <div style="font-size: 12px; color: #868686; margin-bottom: 4px;">Total Pasien (1 Shift)
                             </div>
-                            <div style="font-size: 22px; font-weight: 700; color: #333;">45</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #333;">
+                                {{ $TotalPasien ?? 0 }}
+                            </div>
                             <div style="font-size: 12px; color: #484848;">Pasien</div>
                         </div>
 
                         <!-- Item 4: Total Perawatan -->
                         <div class="text-center px-2" style="border-right: 1px solid #f0f0f0; min-width: 110px;">
                             <div style="font-size: 12px; color: #868686; margin-bottom: 4px;">Total Perawatan</div>
-                            <div style="font-size: 22px; font-weight: 700; color: #333;">83</div>
+                            <div style="font-size: 22px; font-weight: 700; color: #333;">
+                                {{ $TotalPerawatan ?? 0 }}
+                            </div>
                             <div style="font-size: 12px; color: #484848;">Perawatan</div>
                         </div>
 
@@ -550,7 +517,9 @@
                         <div class="text-center px-2" style="border-right: 1px solid #f0f0f0; min-width: 140px;">
                             <div style="font-size: 12px; color: #868686; margin-bottom: 4px;">Total Biaya
                                 Perawatan<br>(Semua Pasien)</div>
-                            <div style="font-size: 15px; font-weight: 700; color: #333;">Rp 8.650.000</div>
+                            <div style="font-size: 15px; font-weight: 700; color: #333;">
+                                Rp {{ number_format($TotalBiayaPerawatan ?? 0, 0, ',', '.') }}
+                            </div>
                         </div>
 
                         <!-- Item 6: Total Biaya Admin -->
@@ -558,9 +527,13 @@
                             <div style="font-size: 12px; color: #868686; margin-bottom: 4px;">Total Biaya
                                 Admin<br>(Semua
                                 Pasien)</div>
-                            <div style="font-size: 15px; font-weight: 700; color: #6d7ff8;">Rp 3.200.000</div>
+                            <div style="font-size: 15px; font-weight: 700; color: #6d7ff8;">
+                                {{-- Belum ada data biaya admin di controller, set Rp 0 dulu --}}
+                                Rp 0
+                            </div>
                         </div>
                     </div>
+
 
                     <!-- Grand Total (Right Block) -->
                     <div class="d-flex align-items-center px-4 py-3 text-white"
