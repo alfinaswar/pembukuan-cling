@@ -509,25 +509,4 @@
 
         });
     </script>
-    <script>
-        // Gantikan confirm form resubmission dengan SweetAlert
-        if (window.performance && window.performance.navigation && window.performance.navigation.type === 2) {
-            // Terjadi reload/refresh yang berpotensi menyebabkan resubmission
-            Swal.fire({
-                title: 'Konfirmasi Resubmission Form',
-                text: 'Halaman yang Anda tuju menggunakan informasi dari data yang telah Anda input. Kembali ke halaman ini bisa menyebabkan aksi yang Anda lakukan sebelumnya terulang kembali. Apakah Anda ingin melanjutkan?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Lanjutkan',
-                cancelButtonText: 'Batal',
-                reverseButtons: true,
-                allowOutsideClick: false
-            }).then((result) => {
-                if (!result.isConfirmed) {
-                    // Redirect atau tutup halaman jika dibatalkan
-                    window.history.go(-1);
-                }
-            });
-        }
-    </script>
 @endpush

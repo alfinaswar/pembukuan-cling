@@ -37,7 +37,7 @@
     </style>
     <div class="row mb-3 align-items-center">
         <div class="col-lg-6 col-md-6 col-sm-12">
-            <h5 class="mb-0 fw-semibold">Dashboard Report Insentif Perawat</h5>
+            <h3 class="mb-0 fw-semibold">Dashboard Report Insentif Perawat</h3>
             <small class="text-muted">Ringkasan pencapaian dan perhitungan insentif berdasarkan performa</small>
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-end align-items-center">
