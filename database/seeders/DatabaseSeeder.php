@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\MasterShift;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,6 +17,13 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionTableSeeder::class,
             CreateAdminUserSeeder::class,
+            MasterKlinikSeeder::class,
+            MasterMetodePembayaranSeeder::class,
+            MasterShiftSeeder::class,
+            MasterDokterSeeder::class,
+            UserResepsionisSeeder::class,
+            UserPerawatSeeder::class,
+
         ]);
     }
 }
