@@ -269,6 +269,19 @@ class TransaksiController extends Controller
         $Perawatan = MasterJenisPerawatan::where('Status', 'Y')
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get();
+        $shift = MasterShift::whereTime('JamMulai', '<=', now()->format('H:i:s'))
+            ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
+            ->first();
+        $totalPasienBaru = Transaksi::where('JenisPasien', 'Baru')
+            ->where('Shift', optional($shift)->id)
+            ->whereDate('created_at', today())
+            ->count();
+
+        // Hitung total pasien lama pada shift ini
+        $totalPasienLama = Transaksi::where('JenisPasien', 'Lama')
+            ->where('Shift', optional($shift)->id)
+            ->whereDate('created_at', today())
+            ->count();
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
@@ -281,7 +294,10 @@ class TransaksiController extends Controller
             'MetodePembayaran',
             'dokter',
             'perawat',
-            'kasir'
+            'kasir',
+            'totalPasienBaru',
+            'totalPasienLama',
+            'shift'
         ));
     }
 

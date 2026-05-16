@@ -401,6 +401,7 @@
                                                 <th style="width:4%;">No.</th>
                                                 <th>Jenis Perawatan</th>
                                                 <th style="width:26%;">Biaya Perawatan</th>
+                                                <th>Keterangan</th>
                                                 <th style="width:8%;">Aksi</th>
                                             </tr>
                                         </thead>
@@ -415,44 +416,48 @@
                                             @endphp
                                             @if (is_array($perawatanLama) && count($perawatanLama) > 0)
                                                 @foreach ($perawatanLama as $idx => $perawatan)
-                                                    <tr>
-                                                        <td class="text-center align-middle">{{ $loop->iteration }}</td>
-                                                        <td>
-                                                            <select class="form-control perawatan-select"
-                                                                name="JenisPerawatan[{{ $idx }}][id]">
-                                                                <option value="">Pilih Jenis Perawatan</option>
-                                                                @foreach ($Perawatan as $row)
-                                                                    <option value="{{ $row->id }}"
-                                                                        data-harga="{{ $row->Tarif }}"
-                                                                        {{ (isset($perawatan['JenisPerawatan']) && $perawatan['JenisPerawatan'] == $row->id) || (isset($perawatan['id']) && $perawatan['id'] == $row->id) ? 'selected' : '' }}>
-                                                                        {{ $row->Nama }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <input type="text"
-                                                                class="form-control biaya-perawatan bg-light"
-                                                                name="JenisPerawatan[{{ $idx }}][Biaya]"
-                                                                placeholder="Rp 0"
-                                                                value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : (isset($perawatan['biaya']) ? $perawatan['biaya'] : '') }}">
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <button type="button"
-                                                                class="btn btn-link btn-remove-perawatan p-1"
-                                                                title="Hapus">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18"
-                                                                    height="18" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M3 6h18" />
-                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                                                    <path d="M10 11v6" />
-                                                                    <path d="M14 11v6" />
-                                                                </svg>
-                                                            </button>
-                                                        </td>
+                                                    <td class="text-center align-middle">{{ $loop->iteration }}</td>
+                                                    <td>
+                                                        <select class="form-control perawatan-select"
+                                                            name="JenisPerawatan[{{ $idx }}][id]">
+                                                            <option value="">Pilih Jenis Perawatan</option>
+                                                            @foreach ($Perawatan as $row)
+                                                                <option value="{{ $row->id }}"
+                                                                    data-harga="{{ $row->Tarif }}"
+                                                                    {{ (isset($perawatan['JenisPerawatan']) && $perawatan['JenisPerawatan'] == $row->id) || (isset($perawatan['id']) && $perawatan['id'] == $row->id) ? 'selected' : '' }}>
+                                                                    {{ $row->Nama }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control biaya-perawatan bg-light"
+                                                            name="JenisPerawatan[{{ $idx }}][Biaya]"
+                                                            placeholder="Rp 0"
+                                                            value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : (isset($perawatan['biaya']) ? $perawatan['biaya'] : '') }}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control"
+                                                            name="JenisPerawatan[{{ $idx }}][Keterangan]"
+                                                            placeholder="Keterangan"
+                                                            value="{{ isset($perawatan['Keterangan']) ? $perawatan['Keterangan'] : (isset($perawatan['keterangan']) ? $perawatan['keterangan'] : '') }}">
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-link btn-remove-perawatan p-1"
+                                                            title="Hapus">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                height="18" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                <path d="M10 11v6" />
+                                                                <path d="M14 11v6" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
                                                     </tr>
                                                 @endforeach
                                             @else
@@ -474,8 +479,8 @@
                                                             name="JenisPerawatan[0][Biaya]" placeholder="Rp 0">
                                                     </td>
                                                     <td class="text-center">
-                                                        <button type="button" class="btn btn-link btn-remove-perawatan p-1"
-                                                            title="Hapus">
+                                                        <button type="button"
+                                                            class="btn btn-link btn-remove-perawatan p-1" title="Hapus">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="18"
                                                                 height="18" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -499,6 +504,7 @@
                             </div>
 
                             <!-- Biaya Admin -->
+                            <!-- Biaya Admin -->
                             <div class="biaya-admin-row mb-3">
                                 <span class="biaya-admin-label">
                                     Biaya Admin
@@ -508,9 +514,8 @@
                                     <input type="text"
                                         class="form-control text-end @error('BiayaAdmin') is-invalid @enderror"
                                         id="biaya_admin" name="BiayaAdmin"
-                                        style="width:130px;display:inline-block;background:#f9fafb;border:none;font-weight:600;color:#111827;"
-                                        placeholder="Rp 0" value="{{ old('BiayaAdmin', $transaksi->BiayaAdmin) }}"
-                                        readonly>
+                                        style="width:130px;display:inline-block;background:#fff;border:1px solid #ced4da;font-weight:600;color:#111827;"
+                                        placeholder="Rp 0" value="{{ old('BiayaAdmin') }}" autocomplete="off">
                                 </div>
                                 @error('BiayaAdmin')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
@@ -675,11 +680,16 @@
 
 @push('scripts')
     <script>
-        let perawatanCount = $('#body-perawatan tr').length;
+        let perawatanCount = 1;
+        let adminAutoFilled = false;
 
         function rupiahFormat(num) {
-            if (!num) return 'Rp 0';
+            if (!num && num !== 0) return 'Rp 0';
             return 'Rp ' + Number(num).toLocaleString('id-ID');
+        }
+
+        function parseRupiah(str) {
+            return Number((str + '').replace(/[^0-9]/g, '')) || 0;
         }
 
         function isPasienBaru() {
@@ -689,58 +699,79 @@
         function recalculateTotal() {
             let total = 0;
             $('.biaya-perawatan').each(function() {
-                let val = ($(this).val() + '').replace(/[^0-9]/g, '');
-                total += +val;
+                total += parseRupiah($(this).val());
             });
-            let admin = +($('#biaya_admin').val() + '').replace(/[^0-9]/g, '');
-            if (isNaN(admin)) admin = 0;
+            let admin = parseRupiah($('#biaya_admin').val());
             total += admin;
-            $('#info-pasien-baru').html(isPasienBaru() ? " (Rp 50.000 untuk pasien baru)" : "");
+
+            if (isPasienBaru()) {
+                $('#info-pasien-baru').html(adminAutoFilled ? " (Rp 50.000 auto)" : " (Biaya Admin disesuaikan)");
+            } else {
+                $('#info-pasien-baru').html("");
+            }
+
             $('#total-biaya').text(total.toLocaleString('id-ID'));
             $('#total-bayar').text(total.toLocaleString('id-ID'));
-            $('#total-biaya-input').val(total); // ← Set value ke input hidden
+            $('#total-biaya-input').val(total);
         }
 
+        // Format Rupiah REAL-TIME saat mengetik di Biaya Admin
         $('#biaya_admin').on('input', function() {
-            let value = $(this).val().replace(/[^0-9]/g, '');
-            if (!value) value = '0';
-            $(this).val(rupiahFormat(value));
-            recalculateTotal();
+            let val = parseRupiah($(this).val());
+            adminAutoFilled = false; // Tandai sebagai input manual
+            $(this).val(rupiahFormat(val));
+            recalculateTotal(); // Langsung hitung total
         });
 
+        // Handle submit form
         $('#formTransaksiKasir').on('submit', function() {
-            $('#biaya_admin').val(($('#biaya_admin').val() + '').replace(/[^0-9]/g, ''));
+            $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
             $('.biaya-perawatan').each(function() {
-                $(this).val(($(this).val() + '').replace(/[^0-9]/g, ''));
+                $(this).val(parseRupiah($(this).val()));
             });
         });
 
         $(document).ready(function() {
+            // Init Select2
             $('.perawatan-select').select2({
                 dropdownParent: $('#table-perawatan').parent()
             });
             $('.staff-select').select2({
-                dropdownParent: $('.card-body:has(#Kasir)')
+                dropdownParent: $('.card-body:has(#Kasir)').length ? $('.card-body:has(#Kasir)') : $(
+                    document.body)
             });
 
+            // Handle change Jenis Pasien
             $('input[name="JenisPasien"]').on('change', function() {
+                let currentAdmin = parseRupiah($('#biaya_admin').val());
+
                 if (isPasienBaru()) {
-                    $('#biaya_admin').prop('readonly', true).val(rupiahFormat(50000));
+                    if (currentAdmin === 0 || adminAutoFilled) {
+                        $('#biaya_admin').val(rupiahFormat(50000));
+                        adminAutoFilled = true;
+                    }
                 } else {
-                    $('#biaya_admin').val(rupiahFormat(0)).prop('readonly', true);
+                    if (currentAdmin === 0 || adminAutoFilled) {
+                        $('#biaya_admin').val(rupiahFormat(0));
+                        adminAutoFilled = true;
+                    }
                 }
                 recalculateTotal();
             });
 
-            let jenisPasienChecked = $('input[name="JenisPasien"]:checked').val();
-            if (jenisPasienChecked === "Baru") {
-                $('#biaya_admin').val(rupiahFormat(50000)).prop('readonly', true);
-            } else {
-                $('#biaya_admin').val(rupiahFormat(0)).prop('readonly', true);
+            // Initial check
+            let initialAdmin = parseRupiah($('#biaya_admin').val());
+            let initialJenis = $('input[name="JenisPasien"]:checked').val();
+            if (initialJenis === "Baru" && initialAdmin === 0) {
+                $('#biaya_admin').val(rupiahFormat(50000));
+                adminAutoFilled = true;
+            } else if (initialAdmin !== 0) {
+                adminAutoFilled = false;
             }
             recalculateTotal();
         });
 
+        // Tambah baris perawatan
         $('#btn-tambah-perawatan').on('click', function() {
             let idx = perawatanCount;
             let options = @json($Perawatan);
@@ -753,12 +784,15 @@
             <tr>
                 <td class="text-center align-middle"></td>
                 <td>
-                    <select class="form-control perawatan-select" name="JenisPerawatan[${idx}][id]" >
+                    <select class="form-control perawatan-select" name="JenisPerawatan[${idx}][id]">
                         ${selectOpt}
                     </select>
                 </td>
                 <td>
                     <input type="text" class="form-control biaya-perawatan bg-light" name="JenisPerawatan[${idx}][Biaya]" placeholder="Rp 0">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="JenisPerawatan[${idx}][Keterangan]" placeholder="Keterangan">
                 </td>
                 <td class="text-center">
                     <button type="button" class="btn btn-link btn-remove-perawatan p-1" title="Hapus">
@@ -773,15 +807,18 @@
 
             $('#body-perawatan').append(html);
             perawatanCount++;
+
             $('#body-perawatan tr:last .perawatan-select').select2({
                 dropdownParent: $('#table-perawatan').parent()
             });
+
             $('#body-perawatan tr').each(function(i) {
                 $(this).find('td:first').text(i + 1);
             });
             recalculateTotal();
         });
 
+        // Hapus baris
         $('#body-perawatan').on('click', '.btn-remove-perawatan', function() {
             $(this).closest('tr').remove();
             $('#body-perawatan tr').each(function(i) {
@@ -790,39 +827,33 @@
             recalculateTotal();
         });
 
-        // When Jenis Perawatan select changes, update the biaya accordingly
+        // Auto-fill biaya perawatan
         $(document).on('change', '.perawatan-select', function() {
             let harga = $(this).find('option:selected').data('harga') ?? 0;
             $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
             recalculateTotal();
         });
 
+        // Format biaya perawatan REAL-TIME
         $('#body-perawatan').on('input', '.biaya-perawatan', function() {
-            let val = ($(this).val() + '').replace(/[^0-9]/g, '');
-            if (!val) val = '0';
+            let val = parseRupiah($(this).val());
             $(this).val(rupiahFormat(val));
             recalculateTotal();
         });
 
-        // Initial setup for the displayed values from model
+        // Initial setup
         $(function() {
             $('.perawatan-select').each(function() {
                 let harga = $(this).find('option:selected').data('harga') ?? 0;
-                // if biaya-perawatan sudah terisi, jangan timpa (untuk editing)
-                let $input = $(this).closest('tr').find('.biaya-perawatan');
-                let v = $input.val();
-                if (!v || v == '0') {
-                    $input.val(rupiahFormat(harga));
-                } else {
-                    $input.val(rupiahFormat(v.replace(/[^0-9]/g, '')));
-                }
+                $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
             });
             $('#body-perawatan tr').each(function(i) {
                 $(this).find('td:first').text(i + 1);
             });
-            let adminCurrent = $('#biaya_admin').val();
-            if (adminCurrent && !adminCurrent.match(/Rp/)) {
-                $('#biaya_admin').val(rupiahFormat(adminCurrent.replace(/[^0-9]/g, '')));
+
+            let adminVal = $('#biaya_admin').val();
+            if (adminVal && !adminVal.includes('Rp')) {
+                $('#biaya_admin').val(rupiahFormat(adminVal));
             }
             recalculateTotal();
         });

@@ -31,15 +31,8 @@ class HomeController extends Controller
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
 
-        $roleId = auth()->user()->roles->first()->id ?? null;
-        if ($roleId == 5) { // Kasir / Resepsionis
-            return view('dashboard.kasir', compact('dokter', 'perawat', 'kasir', 'shift'));
-        } elseif ($roleId == 3) { // Dokter
-            return view('dashboard.dokter', compact('dokter', 'perawat', 'kasir', 'shift'));
-        } elseif ($roleId == 4) { // Perawat
-            return view('dashboard.perawat', compact('dokter', 'perawat', 'kasir', 'shift'));
-        } else {
-            return view('dashboard.umum', compact('dokter', 'perawat', 'kasir', 'shift'));
-        }
+
+        return view('home', compact('dokter', 'perawat', 'kasir', 'shift'));
+
     }
 }
