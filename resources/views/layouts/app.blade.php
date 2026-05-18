@@ -103,6 +103,57 @@
         .fixed-profile span {
             color: #5a7a9a !important;
         }
+
+        /* Hamburger styles */
+        .sidebar-hamburger {
+            display: none;
+            background: none;
+            border: none;
+            outline: none;
+            padding: 0.25rem 0.5rem;
+            font-size: 2rem;
+            line-height: 1;
+            color: #1e3a5f;
+            cursor: pointer;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar-hamburger {
+                display: block;
+            }
+
+            .left-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 1040;
+                width: 270px;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.2s ease;
+                background: #0f1623 !important;
+                box-shadow: 2px 0 8px rgba(43, 55, 75, .1);
+            }
+
+            .left-sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                z-index: 1039;
+                left: 0;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(44, 62, 80, 0.20);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
     </style>
 </head>
 
@@ -112,22 +163,30 @@
         <img src="{{ asset('') }}assets/images/logos/favicon.png" alt="loader" class="lds-ripple img-fluid" />
     </div>
     <div id="main-wrapper">
+
+        <!-- Hamburger button for mobile sidebar toggle -->
+        <button class="sidebar-hamburger d-lg-none position-fixed top-0 start-0 z-1031 m-3" id="sidebarHamburgerBtn"
+            aria-label="Toggle sidebar">
+            <i class="ti ti-menu-2"></i>
+        </button>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <!-- Sidebar Start -->
-        <aside class="left-sidebar with-vertical">
+        <aside class="left-sidebar with-vertical" id="sidebarMain">
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
-                    <a href="../main/index.html" class="text-nowrap logo-img">
+                    <a href="{{ route('home') }}" class="text-nowrap logo-img">
                         <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px" class="dark-logo"
                             alt="Logo-Dark" />
                         <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px" class="light-logo"
                             alt="Logo-light" />
                     </a>
                     <a href="javascript:void(0)"
-                        class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none">
+                        class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
+                        id="sidebarCloseBtnMain" style="display: none;">
                         <i class="ti ti-x"></i>
                     </a>
                 </div>
-
                 <nav class="sidebar-nav scroll-sidebar" data-simplebar>
                     <ul id="sidebarnav">
                         <li class="nav-small-cap">
@@ -135,7 +194,7 @@
                             <span class="hide-menu">Menu</span>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="" aria-expanded="false">
+                            <a class="sidebar-link" href="{{ route('home') }}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-layout-dashboard"></i>
                                 </span>
@@ -276,7 +335,6 @@
                         </li>
                     </ul>
                 </nav>
-
                 <div class="fixed-profile p-3 mx-4 mb-2 bg-secondary-subtle rounded mt-3">
                     <div class="hstack gap-3">
                         <div class="john-img">
@@ -287,7 +345,6 @@
                             <h6 class="mb-0 fs-4 fw-semibold">{{ session('name', 'User') }}</h6>
                             <span class="fs-2">{{ session('role', '') }}</span>
                         </div>
-
                         <button class="border-0 bg-transparent text-primary ms-auto" tabindex="0" type="button"
                             aria-label="logout" data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-title="logout">
@@ -308,13 +365,22 @@
                     <nav class="navbar navbar-expand-lg p-0">
                         <ul class="navbar-nav"></ul>
                         <div class="d-block d-lg-none py-4">
-                            <a href="../main/index.html" class="text-nowrap logo-img">
-                                <img src="{{ asset('') }}assets/images/logos/dark-logo.svg" class="dark-logo"
-                                    alt="Logo-Dark" />
-                                <img src="{{ asset('') }}assets/images/logos/light-logo.svg" class="light-logo"
-                                    alt="Logo-light" />
-                            </a>
+                            <div class="d-flex align-items-center">
+                                <a href="{{ route('home') }}" class="text-nowrap logo-img me-2">
+                                    <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
+                                        class="dark-logo" alt="Logo-Dark" />
+                                    <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
+                                        class="light-logo" alt="Logo-light" />
+                                </a>
+                            </div>
+
                         </div>
+                        <!-- Hamburger for mobile in header -->
+                        <button class="sidebar-hamburger d-lg-none ms-3" id="sidebarHamburgerBtnHeader"
+                            aria-label="Toggle sidebar">
+                            <i class="ti ti-menu-2"></i>
+                        </button>
+
                         <a class="navbar-toggler nav-icon-hover-bg rounded-circle p-0 mx-0 border-0"
                             href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -349,8 +415,6 @@
                                 </ul>
                             </div>
                         </div>
-
-
                     </nav>
                     <!-- Mobilenavbar complete menu -->
                     <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="mobilenavbar"
@@ -364,12 +428,13 @@
                             </div>
                             <div class="offcanvas-body h-n80" data-simplebar>
                                 <ul id="sidebarnav">
+                                    <!-- ... unchanged ... -->
                                     <li class="nav-small-cap">
                                         <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                                         <span class="hide-menu">Menu</span>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a class="sidebar-link" href="" aria-expanded="false">
+                                        <a class="sidebar-link" href="{{ route('home') }}" aria-expanded="false">
                                             <span>
                                                 <i class="ti ti-layout-dashboard"></i>
                                             </span>
@@ -539,21 +604,21 @@
             </header>
             <!--  Header End -->
             {{-- Sidebar Samping --}}
-            <aside class="left-sidebar with-vertical">
+            <aside class="left-sidebar with-vertical" id="sidebarSamping">
                 <div>
                     <div class="brand-logo d-flex align-items-center justify-content-between">
-                        <a href="../main/index.html" class="text-nowrap logo-img">
+                        <a href="{{ route('home') }}" class="text-nowrap logo-img">
                             <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
                                 class="dark-logo" alt="Logo-Dark" />
                             <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
                                 class="light-logo" alt="Logo-light" />
                         </a>
                         <a href="javascript:void(0)"
-                            class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none">
+                            class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
+                            id="sidebarCloseBtnSamping" style="display: none;">
                             <i class="ti ti-x"></i>
                         </a>
                     </div>
-
                     <nav class="sidebar-nav scroll-sidebar" data-simplebar>
                         <ul id="sidebarnav">
                             <li class="nav-small-cap">
@@ -561,7 +626,8 @@
                                 <span class="hide-menu">Home</span>
                             </li>
                             <li class="sidebar-item">
-                                <a class="sidebar-link" href="" id="get-url" aria-expanded="false">
+                                <a class="sidebar-link" href="{{ route('home') }}" id="get-url"
+                                    aria-expanded="false">
                                     <span>
                                         <i class="ti ti-layout-dashboard"></i>
                                     </span>
@@ -592,16 +658,22 @@
                                     <span class="hide-menu">Jadwal</span>
                                 </a>
                             </li>
+
                             <li class="sidebar-item">
-                                <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
+                                <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"
+                                    href="{{ route('Transaksi.index') }}" aria-expanded="false">
                                     <span>
                                         <i class="ti ti-cash"></i>
                                     </span>
                                     <span class="hide-menu">Pembayaran</span>
                                 </a>
+
                             </li>
+
                             <li class="sidebar-item">
-                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                <a class="sidebar-link has-arrow {{ request()->segment(1) == 'laporan' ? 'active' : '' }}"
+                                    href="javascript:void(0)" aria-expanded="false">
+
                                     <span class="d-flex">
                                         <i class="ti ti-file-chart"></i>
                                     </span>
@@ -609,45 +681,62 @@
                                 </a>
                                 <ul aria-expanded="false" class="collapse first-level">
                                     <li class="sidebar-item">
-                                        <a href="{{ route('laporan-umum.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-report"></i>
-                                            </div>
-                                            <span class="hide-menu">Laporan Umum</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-perawat.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-user-nurse"></i>
+                                        <a href="{{ route('laporan-umum.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'umum' ? 'active' : '' }}">
+                                            <div class="round-16 d-flex justify-content-center align-items-center"
+                                                style="height: 32px; width: 32px;">
+                                                <span
+                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
                                             </div>
                                             <span class="hide-menu">
-                                                <i class="ti ti-user-nurse me-1"></i>
-                                                Laporan Perawat
+                                                Laporan Umum
                                             </span>
                                         </a>
+
                                     </li>
 
+
                                     <li class="sidebar-item">
-                                        <a href="{{ route('laporan-dokter.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-stethoscope"></i>
+                                        <a href="{{ route('laporan-perawat.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'perawat' ? 'active' : '' }}">
+                                            <div class="round-16 d-flex justify-content-center align-items-center"
+                                                style="height: 32px; width: 32px;">
+                                                <span
+                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                            </div>
+                                            <span class="hide-menu">Laporan Perawat</span>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('laporan-dokter.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'dokter' ? 'active' : '' }}">
+                                            <div class="round-16 d-flex justify-content-center align-items-center"
+                                                style="height: 32px; width: 32px;">
+                                                <span
+                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
                                             </div>
                                             <span class="hide-menu">Laporan Dokter</span>
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="{{ route('laporan-resepsionis.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-notebook"></i>
+                                        <a href="{{ route('laporan-resepsionis.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'resepsionis' ? 'active' : '' }}">
+                                            <div class="round-16 d-flex justify-content-center align-items-center"
+                                                style="height: 32px; width: 32px;">
+                                                <span
+                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
                                             </div>
                                             <span class="hide-menu">Laporan Resepsionis</span>
                                         </a>
                                     </li>
+
+
+
                                 </ul>
                             </li>
                             <li class="sidebar-item">
-                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                <a class="sidebar-link has-arrow {{ request()->segment(1) === 'master' ? 'active' : '' }}"
+                                    href="javascript:void(0)" aria-expanded="false">
                                     <span class="d-flex">
                                         <i class="ti ti-database"></i>
                                     </span>
@@ -655,7 +744,8 @@
                                 </a>
                                 <ul aria-expanded="false" class="collapse first-level">
                                     <li class="sidebar-item">
-                                        <a href="{{ route('JenisPerawatan.index') }}" class="sidebar-link">
+                                        <a href="{{ route('JenisPerawatan.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-bandage"></i>
                                             </div>
@@ -663,7 +753,8 @@
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="{{ route('Klinik.index') }}" class="sidebar-link">
+                                        <a href="{{ route('Klinik.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'klinik' ? 'active' : '' }}">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-building-hospital"></i>
                                             </div>
@@ -671,7 +762,8 @@
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
+                                        <a href="{{ route('MetodePembayaran.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'metode-pembayaran' ? 'active' : '' }}">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-credit-card"></i>
                                             </div>
@@ -679,7 +771,8 @@
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
+                                        <a href="{{ route('MasterShift.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'shift' ? 'active' : '' }}">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-clock"></i>
                                             </div>
@@ -687,7 +780,8 @@
                                         </a>
                                     </li>
                                     <li class="sidebar-item">
-                                        <a href="{{ route('users.index') }}" class="sidebar-link">
+                                        <a href="{{ route('users.index') }}"
+                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'pengguna' ? 'active' : '' }}">
                                             <div class="round-16 d-flex align-items-center justify-content-center">
                                                 <i class="ti ti-clock"></i>
                                             </div>
@@ -696,6 +790,7 @@
                                     </li>
                                 </ul>
                             </li>
+
                             <li class="sidebar-item">
                                 <a class="sidebar-link" href="{{ route('Insentif.index') }}" aria-expanded="false">
                                     <span>
@@ -741,13 +836,8 @@
                             </form>
                         </div>
                     </div>
-
-
-
-
                 </div>
             </aside>
-
             <div class="body-wrapper">
                 <div class="container-fluid">
                     @yield('content')
@@ -755,19 +845,6 @@
             </div>
         </div>
     </div>
-
-    {{-- <footer class="footer shadow-sm"
-        style="position: fixed; left: 0; bottom: 0; width: 100%; border-top: 1px solid #ececec; background-color: #fff; z-index: 1; padding: 14px 0;">
-        <div class="container ">
-            <div class="text-start">
-                <span class="text-muted" style="font-size: 14px; color: #333 !important;">
-                    &copy; {{ date('Y') }} Klinik Gigi. All rights reserved.
-                </span>
-            </div>
-
-
-        </div>
-    </footer> --}}
 
     <div class="dark-transparent sidebartoggler"></div>
     <script src="{{ asset('') }}assets/js/vendor.min.js"></script>
@@ -803,6 +880,58 @@
     <script src="{{ asset('') }}assets/libs/sweetalert2/dist/sweetalert2.min.js"></script>
     <script src="{{ asset('') }}assets/js/forms/sweet-alert.init.js"></script>
 
+    <script>
+        // Sidebar toggle logic for mobile
+        function showSidebar() {
+            var sidebar = document.getElementById('sidebarMain') || document.getElementById('sidebarSamping');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.add('sidebar-open');
+            if (overlay) overlay.classList.add('active');
+            // show close button only in mobile
+            var closeBtnMain = document.getElementById('sidebarCloseBtnMain');
+            var closeBtnSamping = document.getElementById('sidebarCloseBtnSamping');
+            if (closeBtnMain) closeBtnMain.style.display = 'block';
+            if (closeBtnSamping) closeBtnSamping.style.display = 'block';
+        }
+
+        function hideSidebar() {
+            var sidebar = document.getElementById('sidebarMain') || document.getElementById('sidebarSamping');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.remove('sidebar-open');
+            if (overlay) overlay.classList.remove('active');
+            // hide close button
+            var closeBtnMain = document.getElementById('sidebarCloseBtnMain');
+            var closeBtnSamping = document.getElementById('sidebarCloseBtnSamping');
+            if (closeBtnMain) closeBtnMain.style.display = 'none';
+            if (closeBtnSamping) closeBtnSamping.style.display = 'none';
+        }
+        // Main hamburger buttons
+        var hamburgerBtn = document.getElementById('sidebarHamburgerBtn');
+        var hamburgerBtnHeader = document.getElementById('sidebarHamburgerBtnHeader');
+        if (hamburgerBtn) {
+            hamburgerBtn.onclick = showSidebar;
+        }
+        if (hamburgerBtnHeader) {
+            hamburgerBtnHeader.onclick = showSidebar;
+        }
+        // Close buttons
+        var closeBtnMain = document.getElementById('sidebarCloseBtnMain');
+        var closeBtnSamping = document.getElementById('sidebarCloseBtnSamping');
+        if (closeBtnMain) {
+            closeBtnMain.onclick = hideSidebar;
+        }
+        if (closeBtnSamping) {
+            closeBtnSamping.onclick = hideSidebar;
+        }
+        // Overlay click
+        var overlay = document.getElementById('sidebarOverlay');
+        if (overlay) {
+            overlay.onclick = hideSidebar;
+        }
+
+        // Hide by default on load
+        hideSidebar();
+    </script>
 </body>
 @stack('scripts')
 

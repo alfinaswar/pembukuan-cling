@@ -242,7 +242,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="zero_config" class="table table-striped table-bordered text-nowrap align-middle"
+                            <table id="zero_config" class="table table-striped table-bordered  align-middle"
                                 style="width: 100%;">
                                 <thead>
                                     <tr>
@@ -267,71 +267,70 @@
                                 </thead>
                                 <tbody>
                                     {{-- Example static data, replace with @foreach for dynamic content --}}
-                                    @forelse($dataTransaksi as $i => $transaksi)
-                                        <tr>
-                                            <td class="text-center">{{ $i + 1 }}</td>
-                                            <td class="text-center" style="white-space:nowrap;">
-                                                {{ optional($transaksi->created_at)->format('H:i') ?? '-' }}<br>
-                                                <span style="font-size:12px; color:#868686;">
-                                                    {{ optional($transaksi->created_at)->format('d M Y') ?? '-' }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <span style="font-weight:600; color:#222;">
-                                                        {{ $transaksi->NamaPasien ?? '-' }}
-                                                    </span><br>
-                                                    <span style="color:#27ae60; font-size:13px; font-weight:600;">
-                                                        {{ strtoupper($transaksi->JenisPasien ?? '-') }}
-                                                    </span><br>
-                                                    <span style="font-size:12px; color:#484848;">
-                                                        {{ $transaksi->NoRM ?? '-' }}
+                                    @if (isset($dataTransaksi) && count($dataTransaksi))
+                                        @foreach ($dataTransaksi as $i => $transaksi)
+                                            <tr>
+                                                <td class="text-center">{{ $i + 1 }}</td>
+                                                <td class="text-center" style="white-space:nowrap;">
+                                                    {{ optional($transaksi->created_at)->format('H:i') ?? '-' }}<br>
+                                                    <span style="font-size:12px; color:#868686;">
+                                                        {{ optional($transaksi->created_at)->format('d M Y') ?? '-' }}
                                                     </span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <ol class="mb-0 ps-3" style="font-size:13px;">
-                                                    @if ($transaksi->TransaksiDetail && count($transaksi->TransaksiDetail))
-                                                        @foreach ($transaksi->TransaksiDetail as $detail)
-                                                            <li>{{ $detail->MasterJenisPerawatan->Nama ?? '-' }}</li>
-                                                        @endforeach
-                                                    @else
-                                                        <li>-</li>
-                                                    @endif
-                                                </ol>
-                                            </td>
-                                            <td>
-                                                <div style="font-size:13px;">
-                                                    @if ($transaksi->TransaksiDetail && count($transaksi->TransaksiDetail))
-                                                        @foreach ($transaksi->TransaksiDetail as $detail)
-                                                            <div>
-                                                                Rp
-                                                                {{ number_format($detail->Biaya ?? 0, 0, ',', '.') }}
-                                                            </div>
-                                                        @endforeach
-                                                    @else
-                                                        <div>-</div>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="text-center" style="font-size:13px;">
-                                                Rp {{ number_format($transaksi->BiayaAdmin ?? 0, 0, ',', '.') }}
-                                            </td>
-                                            <td class="fw-bold text-primary text-center" style="font-size:15px;">
-                                                Rp {{ number_format($transaksi->TotalBayar ?? 0, 0, ',', '.') }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ $transaksi->getPerawat->name ?? '-' }}
-                                            </td>
-                                            <td class="text-center">
-                                                {{ $transaksi->getResepsionis->name ?? '-' }}
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="9" class="text-center text-muted">Data tidak tersedia</td>
-                                        </tr>
-                                    @endforelse
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <span style="font-weight:600; color:#222;">
+                                                            {{ $transaksi->NamaPasien ?? '-' }}
+                                                        </span><br>
+                                                        <span style="color:#27ae60; font-size:13px; font-weight:600;">
+                                                            {{ strtoupper($transaksi->JenisPasien ?? '-') }}
+                                                        </span><br>
+                                                        <span style="font-size:12px; color:#484848;">
+                                                            {{ $transaksi->NoRM ?? '-' }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <ol class="mb-0 ps-3" style="font-size:13px;">
+                                                        @if ($transaksi->TransaksiDetail && count($transaksi->TransaksiDetail))
+                                                            @foreach ($transaksi->TransaksiDetail as $detail)
+                                                                <li>{{ $detail->MasterJenisPerawatan->Nama ?? '-' }}</li>
+                                                            @endforeach
+                                                        @else
+                                                            <li>-</li>
+                                                        @endif
+                                                    </ol>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size:13px;">
+                                                        @if ($transaksi->TransaksiDetail && count($transaksi->TransaksiDetail))
+                                                            @foreach ($transaksi->TransaksiDetail as $detail)
+                                                                <div>
+                                                                    Rp
+                                                                    {{ number_format($detail->Biaya ?? 0, 0, ',', '.') }}
+                                                                </div>
+                                                            @endforeach
+                                                        @else
+                                                            <div>-</div>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td class="text-center" style="font-size:13px;">
+                                                    Rp {{ number_format($transaksi->BiayaAdmin ?? 0, 0, ',', '.') }}
+                                                </td>
+                                                <td class="fw-bold text-primary text-center" style="font-size:15px;">
+                                                    Rp {{ number_format($transaksi->TotalBayar ?? 0, 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">
+                                                    {{ $transaksi->getPerawat->name ?? '-' }}
+                                                </td>
+                                                <td class="text-center">
+                                                    {{ $transaksi->getResepsionis->name ?? '-' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+
 
 
                                 </tbody>

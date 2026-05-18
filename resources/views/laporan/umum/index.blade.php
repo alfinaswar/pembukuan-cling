@@ -3,7 +3,7 @@
 @section('content')
     <div class="row mb-3 align-items-center">
         <div class="col-lg-6 col-md-6 col-sm-12">
-            <h5 class="mb-0 fw-semibold">General Report</h5>
+            <h2 class="mb-0 fw-bold">General Report</h2>
             <small class="text-muted">Ciling Dental Clinic</small>
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12">
@@ -205,24 +205,23 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (isset($jenisPerawatanTerbanyak) && count($jenisPerawatanTerbanyak) > 0)
-                        <ul class="list-group list-group-flush">
-                            @foreach ($jenisPerawatanTerbanyak as $perawatan)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        {{ $perawatan['JenisPerawatan'] ?? '-' }}
-                                    </span>
-                                    <span class="badge bg-primary rounded-pill">
-                                        {{ $perawatan['jumlah'] ?? 0 }} Pasien
-                                    </span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <div class="text-muted">
-                            Tidak ada data jenis perawatan terbanyak untuk periode ini.
-                        </div>
-                    @endif
+                    <ul class="list-group list-group-flush">
+                        @forelse ($jenisPerawatanTerbanyak as $perawatan)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    {{ $perawatan['JenisPerawatan'] ?? '-' }}
+                                </span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ $perawatan['jumlah'] ?? 0 }} Pasien
+                                </span>
+                            </li>
+                        @empty
+                            <div class="text-muted">
+                                Tidak ada data jenis perawatan terbanyak untuk periode ini.
+                            </div>
+                        @endforelse
+                    </ul>
+
 
                 </div>
             </div>
@@ -258,43 +257,65 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($transaksiTerbaru as $i => $tr)
-                                    <tr>
-                                        <td>{{ $i + 1 }}</td>
-                                        <td>{{ $tr->NamaPasien ?? '-' }}</td>
-                                        <td>
-                                            @if (!empty($tr->TransaksiDetail) && count($tr->TransaksiDetail) > 0)
-                                                <ul class="list-unstyled mb-0">
-                                                    @foreach ($tr->TransaksiDetail as $td)
-                                                        <li>
-                                                            {{ $td->MasterJenisPerawatan->Nama ?? '-' }}:
-                                                            <span class="text-secondary">
-                                                                {{ 'Rp ' . number_format($td->Biaya ?? 0, 0, ',', '.') }}
-                                                            </span>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td>{{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}</td>
-                                        <td>{{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
-                                        <td>{{ $tr->getCabang->Nama ?? '-' }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">Data tidak tersedia.</td>
-                                    </tr>
-                                @endforelse
+                                @if (isset($transaksiTerbaru) && count($transaksiTerbaru) > 0)
+                                    @foreach ($transaksiTerbaru as $i => $tr)
+                                        @php
+                                            $detailCount = !empty($tr->TransaksiDetail)
+                                                ? count($tr->TransaksiDetail)
+                                                : 0;
+                                            $rowspan = $detailCount > 0 ? $detailCount : 1;
+                                        @endphp
+                                        @if ($detailCount > 0)
+                                            @foreach ($tr->TransaksiDetail as $j => $td)
+                                                <tr>
+                                                    @if ($j == 0)
+                                                        <td rowspan="{{ $rowspan }}">{{ $i + 1 }}</td>
+                                                        <td rowspan="{{ $rowspan }}">{{ $tr->NamaPasien ?? '-' }}
+                                                        </td>
+                                                    @endif
+                                                    <td>
+                                                        {{ $td->MasterJenisPerawatan->Nama ?? '-' }}:
+                                                        <span class="text-secondary">
+                                                            {{ 'Rp ' . number_format($td->Biaya ?? 0, 0, ',', '.') }}
+                                                        </span>
+                                                    </td>
+                                                    @if ($j == 0)
+                                                        <td rowspan="{{ $rowspan }}">
+                                                            {{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}
+                                                        </td>
+                                                        <td rowspan="{{ $rowspan }}">
+                                                            {{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}
+                                                        </td>
+                                                        <td rowspan="{{ $rowspan }}">
+                                                            {{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}
+                                                        </td>
+                                                        <td rowspan="{{ $rowspan }}">
+                                                            {{ $tr->getCabang->Nama ?? '-' }}
+                                                        </td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td>{{ $i + 1 }}</td>
+                                                <td>{{ $tr->NamaPasien ?? '-' }}</td>
+                                                <td>-</td>
+                                                <td>{{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}</td>
+                                                <td>{{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}
+                                                </td>
+                                                <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
+                                                <td>{{ $tr->getCabang->Nama ?? '-' }}</td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                @endif
+
                             </tbody>
                         </table>
-
                     </div>
                 </div>
-
             </div>
+
         </div>
 
     </div>

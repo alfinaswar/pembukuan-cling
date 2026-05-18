@@ -102,12 +102,6 @@ class TransaksiController extends Controller
                     }
                     return '-';
                 })
-
-
-
-
-
-
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '

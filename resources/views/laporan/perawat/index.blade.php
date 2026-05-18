@@ -60,7 +60,7 @@
                     <form id="perawatFilterForm" class="row align-items-end g-2" method="POST"
                         action="{{ route('laporan-perawat.store') }}" style="font-size: 0.925rem;">
                         @csrf
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Perawat</label>
                             <div class="input-group mb-2">
@@ -76,8 +76,28 @@
                             </div>
                         </div>
 
+                        <!-- Pilih Shift -->
+                        <div class="col-md-4">
+                            <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
+                            <div class="input-group mb-2">
+                                <select id="shiftSelect" name="shift" class="select2 form-control"
+                                    style="width:100%; font-size: 0.96em; min-height:36px;">
+                                    <option value="">Pilih Shift</option>
+                                    @foreach ($shift as $s)
+                                        <option value="{{ $s->id }}"
+                                            {{ request('shift') == $s->id ? 'selected' : '' }}>
+                                            {{ $s->Nama ?? ($s->name ?? '-') }}
+                                            ({{ \Carbon\Carbon::parse($s->JamMulai)->format('H:i') }} -
+                                            {{ \Carbon\Carbon::parse($s->JamSelesai)->format('H:i') }})
+                                        </option>
+                                    @endforeach
+
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Pilih Periode -->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="periodeInput" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Periode</label>
                             <div class="input-group mb-2">
@@ -97,6 +117,7 @@
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
     <div class="row gx-3 mb-2">
