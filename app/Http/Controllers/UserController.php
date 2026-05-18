@@ -37,14 +37,15 @@ class UserController extends Controller
                     }
                     return '-';
                 })
+
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
                         <a href="' . route('users.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i> Edit
+                            <i class="fa fa-edit"></i>
                         </a>
                         <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                            <i class="fa fa-trash"></i> Hapus
+                            <i class="fa fa-trash"></i>
                         </button>
                     ';
                 })
@@ -112,9 +113,10 @@ class UserController extends Controller
         $id = decrypt($id);
         $user = User::findOrFail($id);
         $roles = Role::all();
+        $perusahaan = MasterKlinik::get();
         $userRole = $user->roles->pluck('name')->toArray();
 
-        return view('users.edit', compact('user', 'roles', 'userRole'));
+        return view('users.edit', compact('user', 'roles', 'userRole', 'perusahaan'));
     }
 
     /**

@@ -6,7 +6,7 @@
         <div class="page-title-head d-flex align-items-center flex-wrap gap-2 mb-4">
             <div class="flex-grow-1">
                 <h4 class="page-main-title m-0 fw-semibold">
-                    <i class="ti ti-plus me-2 text-primary"></i>Tambah Rule Insentif
+                    <i class="ti ti-edit me-2 text-warning"></i>Edit Rule Insentif
                 </h4>
             </div>
             <nav aria-label="breadcrumb">
@@ -17,7 +17,7 @@
                     <li class="breadcrumb-item">
                         <a href="{{ route('Insentif.index') }}" class="text-decoration-none text-reset">Insentif</a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Tambah Rule</li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Rule</li>
                 </ol>
             </nav>
         </div>
@@ -29,14 +29,15 @@
                     <!-- Card Header -->
                     <div class="card-header bg-white py-3 border-bottom">
                         <h5 class="card-title mb-0 fw-semibold">
-                            <i class="ti ti-file-text me-2"></i>Form Data Rule Insentif
+                            <i class="ti ti-file-text me-2"></i>Form Edit Rule Insentif
                         </h5>
                     </div>
 
                     <!-- Card Body -->
                     <div class="card-body p-4">
-                        <form action="{{ route('Insentif.store') }}" method="POST" id="formRuleInsentif">
+                        <form action="{{ route('Insentif.update', $insentif->id) }}" method="POST" id="formRuleInsentif">
                             @csrf
+                            @method('PUT')
 
                             <!-- Info Box -->
                             <div class="alert alert-light border mb-4 d-flex align-items-center gap-2">
@@ -44,7 +45,6 @@
                                 <small class="mb-0 text-dark">Kolom dengan tanda <span class="text-danger">*</span> wajib
                                     diisi.</small>
                             </div>
-
 
                             <!-- Role (Readonly) -->
                             <div class="mb-4">
@@ -55,12 +55,14 @@
                                     <span class="input-group-text bg-light">
                                         <i class="ti ti-user-circle text-muted"></i>
                                     </span>
-                                    <input type="text" class="form-control" value="{{ $role->name ?? '' }}" readonly
-                                        disabled placeholder="Role akan terpilih otomatis">
-                                    <input type="hidden" name="Role" id="Role" value="{{ $role->id ?? '' }}">
+                                    <input type="text" class="form-control"
+                                        value="{{ $role->name ?? ($insentif->role->name ?? '') }}" readonly disabled
+                                        placeholder="Role akan terpilih otomatis">
+                                    <input type="hidden" name="Role" id="Role"
+                                        value="{{ $role->id ?? ($insentif->role_id ?? '') }}">
                                 </div>
                                 <small class="text-muted d-block mt-1">
-                                    <i class="ti ti-help me-1"></i>Role ditentukan dari halaman sebelumnya
+                                    <i class="ti ti-help me-1"></i>Role ditentukan dari data
                                 </small>
                                 @error('Role')
                                     <div class="invalid-feedback d-block mt-1">
@@ -83,16 +85,20 @@
                                             class="form-select @error('JenisRule') is-invalid @enderror" required>
                                             <option value="">Pilih Jenis Rule</option>
                                             <option value="omzet_shift"
-                                                {{ old('JenisRule') == 'omzet_shift' ? 'selected' : '' }}>Omzet Shift
+                                                {{ old('JenisRule', $insentif->JenisRule) == 'omzet_shift' ? 'selected' : '' }}>
+                                                Omzet Shift
                                             </option>
                                             <option value="omzet_harian"
-                                                {{ old('JenisRule') == 'omzet_harian' ? 'selected' : '' }}>Omzet Harian
+                                                {{ old('JenisRule', $insentif->JenisRule) == 'omzet_harian' ? 'selected' : '' }}>
+                                                Omzet Harian
                                             </option>
                                             <option value="jumlah_pasien"
-                                                {{ old('JenisRule') == 'jumlah_pasien' ? 'selected' : '' }}>Jumlah Pasien
+                                                {{ old('JenisRule', $insentif->JenisRule) == 'jumlah_pasien' ? 'selected' : '' }}>
+                                                Jumlah Pasien
                                             </option>
                                             <option value="prosedur_tertentu"
-                                                {{ old('JenisRule') == 'prosedur_tertentu' ? 'selected' : '' }}>Prosedur
+                                                {{ old('JenisRule', $insentif->JenisRule) == 'prosedur_tertentu' ? 'selected' : '' }}>
+                                                Prosedur
                                                 Tertentu</option>
                                         </select>
                                     </div>
@@ -102,7 +108,6 @@
                                         </div>
                                     @enderror
                                 </div>
-
 
                                 <div class="col-md-6">
                                     <label for="Operator" class="form-label fw-semibold mb-2">
@@ -115,15 +120,23 @@
                                         <select id="Operator" name="Operator"
                                             class="form-select @error('Operator') is-invalid @enderror" required>
                                             <option value="">Pilih Operator</option>
-                                            <option value=">=" {{ old('Operator') == '>=' ? 'selected' : '' }}>≥ Lebih
+                                            <option value=">="
+                                                {{ old('Operator', $insentif->Operator) == '>=' ? 'selected' : '' }}>≥
+                                                Lebih
                                                 dari atau sama dengan</option>
-                                            <option value="=" {{ old('Operator') == '=' ? 'selected' : '' }}>= Sama
+                                            <option value="="
+                                                {{ old('Operator', $insentif->Operator) == '=' ? 'selected' : '' }}>= Sama
                                                 dengan</option>
-                                            <option value="<=" {{ old('Operator') == '<=' ? 'selected' : '' }}>≤ Kurang
+                                            <option value="<="
+                                                {{ old('Operator', $insentif->Operator) == '<=' ? 'selected' : '' }}>≤
+                                                Kurang
                                                 dari atau sama dengan</option>
-                                            <option value=">" {{ old('Operator') == '>' ? 'selected' : '' }}>＞ Lebih
+                                            <option value=">"
+                                                {{ old('Operator', $insentif->Operator) == '>' ? 'selected' : '' }}>＞ Lebih
                                                 dari</option>
-                                            <option value="<" {{ old('Operator') == '<' ? 'selected' : '' }}>＜ Kurang
+                                            <option value="<"
+                                                {{ old('Operator', $insentif->Operator) == '<' ? 'selected' : '' }}>＜
+                                                Kurang
                                                 dari</option>
                                         </select>
                                     </div>
@@ -147,8 +160,8 @@
                                         </span>
                                         <input type="number" id="Nilai" name="Nilai"
                                             class="form-control @error('Nilai') is-invalid @enderror"
-                                            value="{{ old('Nilai') }}" required placeholder="Contoh: 6000000"
-                                            min="0" inputmode="numeric">
+                                            value="{{ old('Nilai', $insentif->Nilai) }}" required
+                                            placeholder="Contoh: 6000000" min="0" inputmode="numeric">
                                         <span class="input-group-text bg-light text-muted small">IDR</span>
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -172,9 +185,11 @@
                                         <select id="TipeNominal" name="TipeNominal"
                                             class="form-select @error('TipeNominal') is-invalid @enderror" required>
                                             <option value="">Pilih Tipe Nominal</option>
-                                            <option value="rupiah" {{ old('TipeNominal') == 'rupiah' ? 'selected' : '' }}>
+                                            <option value="rupiah"
+                                                {{ old('TipeNominal', $insentif->TipeNominal) == 'rupiah' ? 'selected' : '' }}>
                                                 💰 Rupiah (Fixed)</option>
-                                            <option value="persen" {{ old('TipeNominal') == 'persen' ? 'selected' : '' }}>
+                                            <option value="persen"
+                                                {{ old('TipeNominal', $insentif->TipeNominal) == 'persen' ? 'selected' : '' }}>
                                                 📊 Persen (% dari omzet)</option>
                                         </select>
                                     </div>
@@ -200,8 +215,9 @@
                                     </span>
                                     <input type="number" id="Nominal" name="Nominal"
                                         class="form-control @error('Nominal') is-invalid @enderror"
-                                        value="{{ old('Nominal') }}" required placeholder="Masukkan nominal"
-                                        min="0" step="any" inputmode="decimal">
+                                        value="{{ old('Nominal', $insentif->Nominal) }}" required
+                                        placeholder="Masukkan nominal" min="0" step="any"
+                                        inputmode="decimal">
                                     <span class="input-group-text bg-light text-muted small" id="nominalSuffix">IDR</span>
                                 </div>
                                 <small class="text-muted d-block mt-1" id="nominalHint">
@@ -227,14 +243,18 @@
                                         <select id="BerlakuPer" name="BerlakuPer"
                                             class="form-select @error('BerlakuPer') is-invalid @enderror" required>
                                             <option value="">Pilih frekuensi</option>
-                                            <option value="shift" {{ old('BerlakuPer') == 'shift' ? 'selected' : '' }}>
+                                            <option value="shift"
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'shift' ? 'selected' : '' }}>
                                                 Shift</option>
-                                            <option value="harian" {{ old('BerlakuPer') == 'harian' ? 'selected' : '' }}>
+                                            <option value="harian"
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'harian' ? 'selected' : '' }}>
                                                 Harian</option>
                                             <option value="mingguan"
-                                                {{ old('BerlakuPer') == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'mingguan' ? 'selected' : '' }}>
+                                                Mingguan</option>
                                             <option value="bulanan"
-                                                {{ old('BerlakuPer') == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'bulanan' ? 'selected' : '' }}>
+                                                Bulanan</option>
                                         </select>
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -247,8 +267,8 @@
                                     @enderror
                                 </div>
 
-
-                                {{-- <div class="col-md-6">
+                                {{-- Uncomment and adapt if needed
+                                <div class="col-md-6">
                                     <label for="KondisiTambahan" class="form-label fw-semibold mb-2">
                                         Kondisi Tambahan
                                     </label>
@@ -258,7 +278,7 @@
                                         </span>
                                         <input type="text" id="KondisiTambahan" name="KondisiTambahan"
                                             class="form-control @error('KondisiTambahan') is-invalid @enderror"
-                                            value="{{ old('KondisiTambahan') }}"
+                                            value="{{ old('KondisiTambahan', $insentif->KondisiTambahan) }}"
                                             placeholder="Opsional: syarat tambahan rule">
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -269,7 +289,8 @@
                                             <i class="ti ti-alert-circle me-1"></i>{{ $message }}
                                         </div>
                                     @enderror
-                                </div> --}}
+                                </div>
+                                --}}
                             </div>
 
                             <!-- Keterangan -->
@@ -282,7 +303,7 @@
                                         <i class="ti ti-notebook text-muted"></i>
                                     </span>
                                     <textarea id="Keterangan" name="Keterangan" class="form-control @error('Keterangan') is-invalid @enderror"
-                                        rows="3" placeholder="Jelaskan rule insentif ini secara singkat">{{ old('Keterangan') }}</textarea>
+                                        rows="3" placeholder="Jelaskan rule insentif ini secara singkat">{{ old('Keterangan', $insentif->Keterangan) }}</textarea>
                                 </div>
                                 @error('Keterangan')
                                     <div class="invalid-feedback d-block mt-1">
@@ -299,8 +320,8 @@
                                 <a href="{{ route('Insentif.index') }}" class="btn btn-light px-4">
                                     <i class="ti ti-arrow-left me-1"></i>Batal
                                 </a>
-                                <button type="submit" class="btn btn-primary px-4">
-                                    <i class="ti ti-device-floppy me-1"></i>Simpan Rule
+                                <button type="submit" class="btn btn-warning px-4">
+                                    <i class="ti ti-device-floppy me-1"></i>Update Rule
                                 </button>
                             </div>
                         </form>
@@ -456,6 +477,9 @@
                     // this.value = rawNilai ? new Intl.NumberFormat('id-ID').format(rawNilai) : '';
                 });
             }
+
+            // trigger correct dynamic label if already have value on edit load
+            updateNominalField();
         });
     </script>
 @endpush

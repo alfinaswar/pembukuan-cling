@@ -14,25 +14,9 @@ class RuleInsentifController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            $data = RuleInsentif::latest();
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('action', function ($row) {
-                    $encryptedId = encrypt($row->id);
-                    return '
-                        <a href="' . route('Insentif.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i> Edit
-                        </a>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                            <i class="fa fa-trash"></i> Hapus
-                        </button>
-                    ';
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
-        return view('insentif.index');
+        $role = Role::with('getRuleInsentif')->get();
+        // dd($role);
+        return view('insentif.index', compact('role'));
     }
 
     /**
@@ -85,9 +69,8 @@ class RuleInsentifController extends Controller
      */
     public function edit($id)
     {
-        $id = decrypt($id);
-        $ruleInsentif = RuleInsentif::findOrFail($id);
-        return view('insentif.edit', compact('ruleInsentif'));
+        $insentif = Role::with('getRuleInsentif')->findOrFail($id);
+        return view('insentif.edit', compact('insentif'));
     }
 
     /**

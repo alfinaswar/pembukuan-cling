@@ -84,10 +84,12 @@ class InsentifService
 
             if ($rule->JenisRule == 'tindakan') {
                 foreach ($value as $tindakan) {
-                    if (str_contains(
-                        strtolower($tindakan),
-                        strtolower($rule->Nilai)
-                    )) {
+                    if (
+                        str_contains(
+                            strtolower($tindakan),
+                            strtolower($rule->Nilai)
+                        )
+                    ) {
                         $isValid = true;
                         break;
                     }
@@ -175,13 +177,13 @@ class InsentifService
     {
         return match ((int) $role) {
             // RESEPSIONIS
-            5 => $transaksi->IdResepsionis,
+            3 => $transaksi->IdResepsionis,
 
             // PERAWAT
             4 => $transaksi->IdPerawat,
 
             // DOKTER
-            3 => $transaksi->IdDokter,
+            2 => $transaksi->IdDokter,
 
             default => null
         };

@@ -23,10 +23,10 @@ class MasterJenisPerawatanController extends Controller
                     $encryptedId = encrypt($row->id);
                     return '
                         <a href="' . route('JenisPerawatan.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i> Edit
+                            <i class="fa fa-edit"></i>
                         </a>
                         <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                            <i class="fa fa-trash"></i> Hapus
+                            <i class="fa fa-trash"></i>
                         </button>
                     ';
                 })

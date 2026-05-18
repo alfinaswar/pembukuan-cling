@@ -1,288 +1,350 @@
 @extends('layouts.app')
 
 @section('content')
-    @push('css')
-        <style>
-            .custom-upload-area:hover,
-            .custom-upload-area:focus-within {
-                box-shadow: 0 0 8px #b8cdfa !important;
-                background: linear-gradient(135deg, #eef4fe 20%, #e9f3fc 100%);
-            }
-
-            .custom-upload-area img {
-                border: 2px solid #e3ebff;
-                background: #fff;
-            }
-        </style>
-    @endpush
-    <div class="page-header">
-        <div class="row">
-            <div class="col">
-                <h3 class="page-title">Manajemen Akun</h3>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Edit User</li>
-                </ul>
+    <div class="container-fluid">
+        <!-- Page Title Header -->
+        <div class="page-title-head d-flex align-items-center flex-wrap gap-2 mb-4">
+            <div class="flex-grow-1">
+                <h4 class="page-main-title m-0 fw-semibold">
+                    <i class="ti ti-edit me-2 text-primary"></i>Edit User
+                </h4>
             </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0 py-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('home') }}" class="text-decoration-none text-reset">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('users.index') }}" class="text-decoration-none text-reset">Users</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit User</li>
+                </ol>
+            </nav>
         </div>
-    </div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header bg-dark">
-                    <h4 class="card-title mb-0">Formulir Edit Akun</h4>
-                    <p class="card-text mb-0">
-                        Silakan perbarui data pengguna di bawah ini.
-                    </p>
+        <!-- Form Card -->
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card shadow-sm border-0">
+                    <!-- Card Header -->
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h5 class="card-title mb-0 fw-semibold">
+                            <i class="ti ti-file-text me-2"></i>Edit Data User
+                        </h5>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body p-4">
+                        <form action="{{ route('users.update', $user->id) }}" method="POST" id="formUser">
+                            @csrf
+                            @method('PUT')
+
+                            <!-- Info Box -->
+                            <div class="alert alert-light border mb-4 d-flex align-items-center gap-2 text-black">
+                                <i class="ti ti-info-circle text-primary"></i>
+                                <small class="mb-0 text-black">Kolom dengan tanda <span class="text-danger">*</span> wajib
+                                    diisi.</small>
+                            </div>
+
+                            <div class="row g-4">
+                                <!-- Left Column: Identity & Branch -->
+                                <div class="col-md-6">
+                                    <!-- Nama -->
+                                    <div class="mb-4">
+                                        <label for="name" class="form-label fw-semibold mb-2">
+                                            Nama Lengkap <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="ti ti-user text-muted"></i>
+                                            </span>
+                                            <input type="text" id="name" name="name"
+                                                class="form-control @error('name') is-invalid @enderror"
+                                                value="{{ old('name', $user->name) }}" required
+                                                placeholder="Contoh: Dr. Andi Wijaya, S.KG" autocomplete="name">
+                                        </div>
+                                        @error('name')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="mb-4">
+                                        <label for="email" class="form-label fw-semibold mb-2">
+                                            Email <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="ti ti-mail text-muted"></i>
+                                            </span>
+                                            <input type="email" id="email" name="email"
+                                                class="form-control @error('email') is-invalid @enderror"
+                                                value="{{ old('email', $user->email) }}" required
+                                                placeholder="user@klinik.com" autocomplete="email">
+                                        </div>
+                                        @error('email')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Cabang (Select2 Default Style) -->
+                                    <div class="mb-4">
+                                        <label for="cabang_id" class="form-label fw-semibold mb-2">
+                                            Cabang <span class="text-danger">*</span>
+                                        </label>
+                                        <select id="cabang_id" name="cabang_id"
+                                            class="form-select @error('cabang_id') is-invalid @enderror"
+                                            data-toggle="select2" required>
+                                            <option value="">Pilih Cabang</option>
+                                            @foreach ($perusahaan as $cabang)
+                                                <option value="{{ $cabang->id }}"
+                                                    {{ old('cabang_id', $user->cabang_id) == $cabang->id ? 'selected' : '' }}>
+                                                    {{ $cabang->Nama }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="ti ti-help me-1"></i>Pilih cabang tempat user bekerja
+                                        </small>
+                                        @error('cabang_id')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Credentials & Role -->
+                                <div class="col-md-6">
+                                    <!-- Password -->
+                                    <div class="mb-4">
+                                        <label for="password" class="form-label fw-semibold mb-2">
+                                            Kata Sandi <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="ti ti-lock text-muted"></i>
+                                            </span>
+                                            <input type="password" id="password" name="password"
+                                                class="form-control @error('password') is-invalid @enderror"
+                                                placeholder="Biarkan kosong jika tidak ingin mengubah"
+                                                autocomplete="new-password" minlength="8">
+                                            <button type="button"
+                                                class="input-group-text bg-light border-start-0 btn-toggle-password"
+                                                title="Tampilkan password">
+                                                <i class="ti ti-eye text-muted toggle-icon"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="ti ti-help me-1"></i>Isi hanya jika ingin mengganti password. Minimal
+                                            8 karakter.
+                                        </small>
+                                        @error('password')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Password Confirmation -->
+                                    <div class="mb-4">
+                                        <label for="password_confirmation" class="form-label fw-semibold mb-2">
+                                            Konfirmasi Kata Sandi
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="ti ti-lock-check text-muted"></i>
+                                            </span>
+                                            <input type="password" id="password_confirmation"
+                                                name="password_confirmation"
+                                                class="form-control @error('password_confirmation') is-invalid @enderror"
+                                                placeholder="Ulangi kata sandi baru" autocomplete="new-password">
+                                            <button type="button"
+                                                class="input-group-text bg-light border-start-0 btn-toggle-password"
+                                                title="Tampilkan password">
+                                                <i class="ti ti-eye text-muted toggle-icon"></i>
+                                            </button>
+                                        </div>
+                                        @error('password_confirmation')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Role (Select2 Default Style - Multiple) -->
+                                    <div class="mb-4">
+                                        <label for="roles" class="form-label fw-semibold mb-2">
+                                            Role / Hak Akses <span class="text-danger">*</span>
+                                        </label>
+                                        <select id="roles" name="roles[]"
+                                            class="form-select @error('roles') is-invalid @enderror" data-toggle="select2"
+                                            required>
+                                            @php
+                                                $userRoleNames = old('roles', $user->roles->pluck('name')->toArray());
+                                            @endphp
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role->name }}"
+                                                    {{ in_array($role->name, $userRoleNames) ? 'selected' : '' }}>
+                                                    {{ $role->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="ti ti-help me-1"></i>Tahan Ctrl/Cmd untuk memilih multiple role
+                                        </small>
+                                        @error('roles')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <hr class="my-4 text-muted opacity-25">
+
+                            <!-- Actions -->
+                            <div class="d-flex justify-content-end gap-2 pt-2">
+                                <a href="{{ route('users.index') }}" class="btn btn-light px-4">
+                                    <i class="ti ti-arrow-left me-1"></i>Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="ti ti-device-floppy me-1"></i>Update User
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('users.update', $user->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-                        <div class="row g-3">
 
-                            <div class="col-md-6">
-                                <label for="name" class="form-label"><strong>Nama</strong></label>
-                                <input type="text" name="name"
-                                    class="form-control @error('name') is-invalid @enderror" id="name"
-                                    placeholder="Nama" value="{{ old('name', $user->name) }}">
-                                @error('name')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="email" class="form-label"><strong>Email</strong></label>
-                                <input type="email" name="email"
-                                    class="form-control @error('email') is-invalid @enderror" id="email"
-                                    placeholder="Email" value="{{ old('email', $user->email) }}">
-                                @error('email')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="password" class="form-label"><strong>Password</strong></label>
-                                <input type="password" name="password"
-                                    class="form-control @error('password') is-invalid @enderror" id="password"
-                                    placeholder="Biarkan kosong jika tidak ingin mengubah password">
-                                @error('password')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                                <small class="text-muted">Kosongkan jika tidak ingin mengubah password.</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="kodeperusahaan" class="form-label"><strong>Kode Perusahaan</strong></label>
-                                <select name="kodeperusahaan" id="kodeperusahaan"
-                                    class="select2 @error('kodeperusahaan') is-invalid @enderror">
-                                    <option value="">Pilih Kode Perusahaan</option>
-                                    @foreach ($perusahaan as $prsh)
-                                        <option value="{{ $prsh->Kode }}"
-                                            {{ old('kodeperusahaan', $user->kodeperusahaan) == $prsh->Kode ? 'selected' : '' }}>
-                                            {{ $prsh->Kode }} - {{ $prsh->Nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('kodeperusahaan')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-3">
-                                <label for="departemen" class="form-label"><strong>Departemen</strong></label>
-                                <select name="departemen"
-                                    class="select2 form-control @error('departemen') is-invalid @enderror" id="departemen">
-                                    <option value="">Pilih Departemen</option>
-                                    @foreach ($departemen as $dpt)
-                                        <option value="{{ $dpt->id }}"
-                                            {{ old('departemen', $user->departemen) == $dpt->id ? 'selected' : '' }}>
-                                            {{ $dpt->Nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('departemen')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            <div class="col-md-3">
-                                <label for="jabatan" class="form-label"><strong>Jabatan</strong></label>
-                                <select name="jabatan" id="jabatan"
-                                    class="select2 form-control @error('jabatan') is-invalid @enderror">
-                                    <option value="">Pilih Jabatan</option>
-                                    @foreach ($jabatan as $jbt)
-                                        <option value="{{ $jbt->id }}"
-                                            {{ old('jabatan', $user->jabatan) == $jbt->id ? 'selected' : '' }}>
-                                            {{ $jbt->Nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('jabatan')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="roles" class="form-label"><strong>Peran / Toles</strong></label>
-                                <select name="roles[]" id="roles"
-                                    class="form-control select2 @error('roles') is-invalid @enderror" style="width: 100%;">
-                                    <option value="">Pilih Peran / Toles</option>
-                                    @foreach ($roles as $role)
-                                        <option value="{{ $role }}"
-                                            {{ collect(old('roles', $user->roles->pluck('name') ?? []))->contains($role) ? 'selected' : '' }}>
-                                            {{ $role }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('roles')
-                                    <div class="text-danger mt-1">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                                <small class="form-text text-muted ms-1">
-                                    Pilih satu atau lebih peran/toles untuk user ini.
-                                </small>
-                            </div>
-                            <script>
-                                $(document).ready(function() {
-                                    $('#roles').select2({
-                                        placeholder: "Pilih Peran / Toles",
-                                        allowClear: true,
-                                        width: '100%'
-                                    });
-                                });
-                            </script>
-
-                            <div class="col-md-6 mb-4">
-                                <label for="foto" class="form-label"><strong>Foto</strong></label>
-                                <div class="custom-upload-area border rounded-4 shadow-sm p-3 d-flex flex-column align-items-center justify-content-center mb-2 position-relative"
-                                    id="foto-drop-area"
-                                    style="min-height: 130px; cursor: pointer; background: linear-gradient(135deg, #f7fafc 40%, #f0f4ff 100%); transition: box-shadow .2s;"
-                                    onclick="document.getElementById('foto').click()" ondrop="handleDrop(event, 'foto')"
-                                    ondragover="event.preventDefault()"
-                                    onmouseenter="this.style.boxShadow='0 0 8px #e3ebff'"
-                                    onmouseleave="this.style.boxShadow='none'">
-                                    <i class="fa fa-camera fa-2x mb-2 text-primary" aria-hidden="true"></i>
-                                    <span id="foto-preview-text" class="text-secondary" style="font-size: 1em;">
-                                        <span class="fw-bold">Klik</span> atau <span class="fw-bold">drag & drop</span>
-                                        file
-                                        di sini
-                                    </span>
-                                    <img id="foto-preview"
-                                        src="{{ $user->foto ? asset('storage/upload/foto/' . $user->foto) : '#' }}"
-                                        alt="Preview Foto" class="rounded-circle border mt-2"
-                                        style="{{ $user->foto ? 'display:block;' : 'display:none;' }} max-width: 100px; max-height: 100px; object-fit: cover;">
-                                </div>
-                                @if ($user->foto)
-                                    <small class="form-text text-muted ms-1">Foto saat ini ditampilkan di atas. Upload file
-                                        baru jika ingin mengganti.</small>
-                                @else
-                                    <small class="form-text text-muted ms-1">Gunakan foto wajah (jpg/png, max 2MB).</small>
-                                @endif
-                                <input type="file" name="foto"
-                                    class="form-control @error('foto') is-invalid @enderror" id="foto"
-                                    style="display: none;" accept="image/*" onchange="previewFile('foto')">
-                                @error('foto')
-                                    <div class="text-danger mt-1">
-                                        <i class="fa fa-exclamation-circle me-1"></i>{{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-4">
-                                <label for="tandatangan" class="form-label"><strong>Tanda Tangan</strong></label>
-                                <div class="custom-upload-area border rounded-4 shadow-sm p-3 d-flex flex-column align-items-center justify-content-center mb-2 position-relative"
-                                    id="tandatangan-drop-area"
-                                    style="min-height: 130px; cursor: pointer; background: linear-gradient(135deg,#f0f6fa 40%,#eef5fb 100%); transition: box-shadow .2s;"
-                                    onclick="document.getElementById('tandatangan').click()"
-                                    ondrop="handleDrop(event, 'tandatangan')" ondragover="event.preventDefault()"
-                                    onmouseenter="this.style.boxShadow='0 0 8px #e3ebff'"
-                                    onmouseleave="this.style.boxShadow='none'">
-                                    <i class="fa fa-pen-fancy fa-2x mb-2 text-primary" aria-hidden="true"></i>
-                                    <span id="tandatangan-preview-text" class="text-secondary" style="font-size: 1em;">
-                                        <span class="fw-bold">Klik</span> atau <span class="fw-bold">drag & drop</span>
-                                        file di sini
-                                    </span>
-                                    <img id="tandatangan-preview"
-                                        src="{{ $user->tandatangan ? asset('storage/upload/tandatangan/' . $user->tandatangan) : '#' }}"
-                                        alt="Preview Tanda Tangan" class="rounded border mt-2"
-                                        style="{{ $user->tandatangan ? 'display:block;' : 'display:none;' }} max-width: 140px; max-height: 60px; object-fit: contain;">
-                                </div>
-                                @if ($user->tandatangan)
-                                    <small class="form-text text-muted ms-1">Tanda tangan saat ini ditampilkan di atas.
-                                        Upload file baru jika ingin mengganti.</small>
-                                @else
-                                    <small class="form-text text-muted ms-1">Unggah tanda tangan sesuai dokumen resmi
-                                        (jpg/png, max 2MB).</small>
-                                @endif
-                                <input type="file" name="tandatangan"
-                                    class="form-control @error('tandatangan') is-invalid @enderror" id="tandatangan"
-                                    style="display: none;" accept="image/*" onchange="previewFile('tandatangan')">
-                                @error('tandatangan')
-                                    <div class="text-danger mt-1">
-                                        <i class="fa fa-exclamation-circle me-1"></i>{{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-
-
-
-
-
-                            <div class="col-12 text-end mt-3">
-                                <a href="{{ route('users.index') }}" class="btn btn-secondary me-2"><i
-                                        class="fa fa-arrow-left"></i> Kembali</a>
-                                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Simpan
-                                    Perubahan</button>
-                            </div>
-                        </div>
-                    </form>
+                <!-- Back Link (Mobile Friendly) -->
+                <div class="text-center mt-3 d-lg-none">
+                    <a href="{{ route('users.index') }}" class="text-muted small text-decoration-none">
+                        <i class="ti ti-arrow-back-up me-1"></i>Kembali ke daftar
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 @endsection
-@push('js')
+
+@push('styles')
+    <style>
+        /* Fokus input yang lebih halus */
+        .form-control:focus,
+        .input-group:focus-within {
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+            border-color: #2196f3;
+        }
+
+        /* Input group icon styling */
+        .input-group-text {
+            border-right: none;
+            min-width: 45px;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+        }
+
+        /* Smooth transition untuk feedback */
+        .invalid-feedback {
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Password toggle button */
+        .btn-toggle-password {
+            border-left: none !important;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-toggle-password:hover {
+            color: #2196f3 !important;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <!-- Select2 JS -->
+    <script src="{{ asset('assets/libs/select2/dist/js/select2.full.min.js') }}"></script>
+
     <script>
-        function previewFile(inputId) {
-            const input = document.getElementById(inputId);
-            const preview = document.getElementById(inputId + '-preview');
-            const previewText = document.getElementById(inputId + '-preview-text');
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== Password Toggle Functionality =====
+            function setupPasswordToggle(inputId, toggleBtn) {
+                const input = document.getElementById(inputId);
+                const icon = toggleBtn.querySelector('.toggle-icon');
 
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    previewText.style.display = 'none';
-                }
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                preview.src = "#";
-                preview.style.display = 'none';
-                previewText.style.display = 'block';
-            }
-        }
+                if (!input || !icon) return;
 
-        function handleDrop(event, inputId) {
-            event.preventDefault();
-            const input = document.getElementById(inputId);
-            if (event.dataTransfer.files.length > 0) {
-                input.files = event.dataTransfer.files;
-                previewFile(inputId);
+                toggleBtn.addEventListener('click', function() {
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+                    icon.className = isPassword ? 'ti ti-eye-off text-muted toggle-icon' :
+                        'ti ti-eye text-muted toggle-icon';
+                    toggleBtn.title = isPassword ? 'Sembunyikan password' : 'Tampilkan password';
+                });
             }
-        }
+
+            // Setup toggle for both password fields
+            document.querySelectorAll('.btn-toggle-password').forEach((btn, index) => {
+                const inputId = index === 0 ? 'password' : 'password_confirmation';
+                setupPasswordToggle(inputId, btn);
+            });
+
+            // ===== Auto-focus =====
+            document.getElementById('name')?.focus();
+
+            // ===== Password Match Validation (client-side hint) =====
+            const password = document.getElementById('password');
+            const passwordConfirm = document.getElementById('password_confirmation');
+
+            if (password && passwordConfirm) {
+                passwordConfirm.addEventListener('input', function() {
+                    // Only require match if one of fields is filled
+                    if (password.value || passwordConfirm.value) {
+                        if (this.value && this.value !== password.value) {
+                            this.setCustomValidity('Kata sandi tidak cocok');
+                        } else {
+                            this.setCustomValidity('');
+                        }
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+
+                password.addEventListener('input', function() {
+                    if (password.value || passwordConfirm.value) {
+                        if (passwordConfirm.value && passwordConfirm.value !== this.value) {
+                            passwordConfirm.setCustomValidity('Kata sandi tidak cocok');
+                        } else {
+                            passwordConfirm.setCustomValidity('');
+                        }
+                    } else {
+                        passwordConfirm.setCustomValidity('');
+                    }
+                });
+            }
+        });
     </script>
 @endpush
