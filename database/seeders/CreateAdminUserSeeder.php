@@ -13,7 +13,6 @@ class CreateAdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Buat role Superadmin jika belum ada
         $role = Role::firstOrCreate(['name' => 'Superadmin']);
 
         // Buat hanya satu akun untuk Superadmin
@@ -29,6 +28,6 @@ class CreateAdminUserSeeder extends Seeder
         );
 
         // Assign role Superadmin ke user
-        $user->assignRole($role);
+        $user->syncRoles($role);
     }
 }

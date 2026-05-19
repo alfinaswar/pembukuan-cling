@@ -61,7 +61,6 @@ class TransaksiController extends Controller
                     }
                     return '-';
                 })
-
                 ->addColumn('Layanan', function ($row) {
                     if ($row->TransaksiDetail && count($row->TransaksiDetail) > 0) {
                         // Rekap layanan: group by nama, jumlahkan biaya dan hitung count
@@ -124,9 +123,7 @@ class TransaksiController extends Controller
      */
     public function create()
     {
-        $Perawatan = MasterJenisPerawatan::where('Status', 'Y')
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
-            ->get();
+        $Perawatan = MasterJenisPerawatan::get();
 
         // Ambil shift aktif saat ini
         $shift = MasterShift::whereTime('JamMulai', '<=', now()->format('H:i:s'))
@@ -143,7 +140,6 @@ class TransaksiController extends Controller
             ->where('Shift', optional($shift)->id)
             ->whereDate('created_at', today())
             ->count();
-
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();

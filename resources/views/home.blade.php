@@ -126,7 +126,7 @@
     <!-- Main Content: Chart + Recent Activity -->
     <div class="row g-4">
         <!-- Chart Area -->
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-transparent border-0 pb-0">
                     <div class="d-flex align-items-center justify-content-between">
@@ -152,126 +152,92 @@
                 </div>
             </div>
         </div>
-
-        <!-- Quick Actions + Notifications -->
-        <div class="col-lg-4">
-            <!-- Quick Actions -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-transparent border-0 pb-0">
-                    <h5 class="card-title fw-semibold mb-0">
-                        <i class="ti ti-bolt me-2 text-warning"></i>
-                        Aksi Cepat
-                    </h5>
-                </div>
-                <div class="card-body pt-2">
-                    <div class="d-grid gap-2">
-                        <a href="#" class="btn btn-primary d-flex align-items-center px-4">
-                            <i class="ti ti-plus me-2"></i>
-                            Tambah Produk
-                        </a>
-                        <a href="#" class="btn btn-outline-primary d-flex align-items-center px-4">
-                            <i class="ti ti-list-check me-2"></i>
-                            Kelola Pesanan
-                        </a>
-                        <a href="#" class="btn btn-outline-secondary d-flex align-items-center px-4">
-                            <i class="ti ti-users me-2"></i>
-                            Data Pelanggan
-                        </a>
-                        <a href="#" class="btn btn-outline-success d-flex align-items-center px-4">
-                            <i class="ti ti-file-invoice me-2"></i>
-                            Laporan
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Notifications -->
+        <!-- Recent Transactions Table -->
+        <div class="col-lg-12">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-transparent border-0 pb-0">
-                    <h5 class="card-title fw-semibold mb-0">
-                        <i class="ti ti-bell me-2 text-danger"></i>
-                        Notifikasi
-                    </h5>
-                </div>
-                <div class="card-body pt-2">
-                    <div class="d-flex flex-column gap-3">
-                        <!-- Notification Item -->
-                        <div class="d-flex align-items-start">
-                            <div class="rounded-circle bg-success-subtle p-2 me-3">
-                                <i class="ti ti-check text-success"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="mb-0 fw-medium fs-7">Pesanan #ORD-001 selesai</p>
-                                <small class="text-muted">2 menit yang lalu</small>
-                            </div>
-                            <span class="badge bg-success-subtle text-success">Baru</span>
-                        </div>
-
-                        <div class="d-flex align-items-start">
-                            <div class="rounded-circle bg-primary-subtle p-2 me-3">
-                                <i class="ti ti-user-plus text-primary"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="mb-0 fw-medium fs-7">Pelanggan baru terdaftar</p>
-                                <small class="text-muted">15 menit yang lalu</small>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-start">
-                            <div class="rounded-circle bg-warning-subtle p-2 me-3">
-                                <i class="ti ti-alert-triangle text-warning"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="mb-0 fw-medium fs-7">Stok produk menipis</p>
-                                <small class="text-muted">1 jam yang lalu</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3">
-                        <a href="#" class="btn btn-sm btn-link text-decoration-none">
-                            Lihat Semua <i class="ti ti-chevron-right"></i>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title fw-semibold mb-0">
+                            <i class="ti ti-list-check me-2 text-primary"></i>
+                            Transaksi Terbaru
+                        </h5>
+                        <a href="" class="btn btn-sm btn-primary px-4">
+                            <i class="ti ti-eye me-1"></i> Lihat Semua
                         </a>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Orders Table -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
-                    <h5 class="card-title fw-semibold mb-0">
-                        <i class="ti ti-list-details me-2 text-info"></i>
-                        Pesanan Terbaru
-                    </h5>
-                    <a href="#" class="btn btn-sm btn-outline-primary px-4">
-                        <i class="ti ti-eye me-1"></i> Lihat Semua
-                    </a>
-                </div>
-                <div class="card-body p-0">
+                <div class="card-body pt-3">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4 py-3 fw-semibold text-muted fs-7">ID Pesanan</th>
-                                    <th class="py-3 fw-semibold text-muted fs-7">Pelanggan</th>
-                                    <th class="py-3 fw-semibold text-muted fs-7">Tanggal</th>
-                                    <th class="py-3 fw-semibold text-muted fs-7">Total</th>
-                                    <th class="py-3 fw-semibold text-muted fs-7">Status</th>
-                                    <th class="py-3 fw-semibold text-muted fs-7 text-end pe-4">Aksi</th>
+                                    <th class="ps-3">Kode</th>
+                                    <th>Tanggal</th>
+                                    <th>Nama Pasien</th>
+                                    <th>Jenis</th>
+                                    <th>Metode</th>
+                                    <th class="text-end">Total Bayar</th>
+                                    <th class="text-center">Shift</th>
+                                    <th class="text-end pe-3">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="recent-orders-body">
-                                <!-- Dummy data will be inserted here by JS -->
+                            <tbody>
+                                @forelse($recentTransaksi as $trx)
+                                    <tr class="animate-fadein" style="animation-delay: {{ $loop->index * 0.1 }}s">
+                                        <td class="ps-3 fw-semibold text-primary">{{ $trx->Kode }}</td>
+                                        <td>
+                                            <small
+                                                class="d-block">{{ \Carbon\Carbon::parse($trx->Tanggal)->translatedFormat('d M Y') }}</small>
+                                            <small
+                                                class="text-muted">{{ \Carbon\Carbon::parse($trx->Tanggal)->format('H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center me-2"
+                                                    style="width: 32px; height: 32px; font-size: 0.75rem">
+                                                    {{ substr($trx->NamaPasien, 0, 1) }}
+                                                </div>
+                                                <span class="fw-medium">{{ $trx->NamaPasien }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="ti ti-user me-1"></i>{{ $trx->JenisPasien }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <i class="ti ti-wallet me-1"></i>
+                                                {{ $trx->MetodePembayaran }}
+                                            </small>
+                                        </td>
+                                        <td class="text-end fw-bold text-dark" data-raw="{{ $trx->TotalBayar }}">
+                                            {{ number_format($trx->TotalBayar, 0, ',', '.') }}
+                                        </td>
+                                        <td class="text-center">
+                                            {!! $trx->status_badge !!}
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <div class="btn-group btn-group-sm">
+
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4 text-muted">
+                                            <i class="ti ti-inbox fs-1 d-block mb-2"></i>
+                                            Belum ada transaksi
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- End of row g-4 -->
 @endsection
 
 @push('styles')
@@ -344,212 +310,120 @@
         }
     </style>
 @endpush
-
 @push('scripts')
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ===== FORMAT RUPIAH HELPER =====
-            const formatRupiah = (number) => {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
-                }).format(number);
-            };
 
-            // ===== DUMMY DATA =====
-            const dummyStats = {
-                pendapatan: 24750000,
-                pesanan: 156,
-                pelanggan: 89,
-                produkTerjual: 342,
-                persenPendapatan: 12.5,
-                pesananBaru: 5,
-                pelangganOnline: 12,
-                produkTrending: 3
-            };
+            // 💰 Format Rupiah dengan animasi counting
+            function animateValue(element, start, end, duration, prefix = 'Rp ', suffix = '') {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const value = Math.floor(progress * (end - start) + start);
+                    element.textContent = prefix + value.toLocaleString('id-ID') + suffix;
+                    if (progress < 1) window.requestAnimationFrame(step);
+                };
+                window.requestAnimationFrame(step);
+            }
 
-            const dummyOrders = [{
-                    id: 'ORD-001',
-                    customer: 'Budi Santoso',
-                    date: '2024-01-15',
-                    total: 1250000,
-                    status: 'completed'
-                },
-                {
-                    id: 'ORD-002',
-                    customer: 'Siti Nurhaliza',
-                    date: '2024-01-15',
-                    total: 875000,
-                    status: 'processing'
-                },
-                {
-                    id: 'ORD-003',
-                    customer: 'Ahmad Rizki',
-                    date: '2024-01-14',
-                    total: 2100000,
-                    status: 'shipped'
-                },
-                {
-                    id: 'ORD-004',
-                    customer: 'Dewi Lestari',
-                    date: '2024-01-14',
-                    total: 450000,
-                    status: 'pending'
-                },
-                {
-                    id: 'ORD-005',
-                    customer: 'Eko Prasetyo',
-                    date: '2024-01-13',
-                    total: 3200000,
-                    status: 'completed'
-                },
-            ];
+            // Update stats cards dengan data dari controller
+            @if (isset($totalPendapatan))
+                animateValue(document.getElementById('total-pendapatan'), 0, {{ $totalPendapatan }}, 1500, 'Rp ',
+                    '');
+            @endif
+            @if (isset($totalPesanan))
+                animateValue(document.getElementById('total-pesanan'), 0, {{ $totalPesanan }}, 1200, '', '');
+            @endif
+            @if (isset($pelangganAktif))
+                animateValue(document.getElementById('total-pelanggan'), 0, {{ $pelangganAktif }}, 1000, '', '');
+            @endif
+            @if (isset($produkTerjual))
+                animateValue(document.getElementById('produk-terjual'), 0, {{ $produkTerjual }}, 1000, '', '');
+            @endif
 
-            const chartData = {
-                labels: ['Sen', 'Sel', 'Rabu', 'Kam', 'Jum', 'Sab', 'Min'],
-                data: [12, 19, 15, 22, 18, 25, 30]
-            };
+            // Update persen perubahan dengan warna dinamis
+            const persenEl = document.getElementById('persen-pendapatan');
+            const persenValue = @json($persenPerubahan ?? 0);
+            if (persenEl) {
+                persenEl.textContent = (persenValue >= 0 ? '+' : '') + persenValue + '%';
+                persenEl.className = persenValue >= 0 ? 'text-success' : 'text-danger';
+                persenEl.parentElement.querySelector('i').className = persenValue >= 0 ?
+                    'ti ti-trending-up me-1' :
+                    'ti ti-trending-down me-1';
+            }
 
-            // ===== RENDER STATS =====
-            document.getElementById('total-pendapatan').textContent = formatRupiah(dummyStats.pendapatan);
-            document.getElementById('persen-pendapatan').textContent = `+${dummyStats.persenPendapatan}%`;
-            document.getElementById('total-pesanan').textContent = dummyStats.pesanan;
-            document.getElementById('pesanan-baru').textContent = dummyStats.pesananBaru;
-            document.getElementById('total-pelanggan').textContent = dummyStats.pelanggan;
-            document.getElementById('pelanggan-online').textContent = dummyStats.pelangganOnline;
-            document.getElementById('produk-terjual').textContent = dummyStats.produkTerjual;
-            document.getElementById('produk-trending').textContent = dummyStats.produkTrending;
-
-            // ===== RENDER ORDERS TABLE =====
-            const ordersBody = document.getElementById('recent-orders-body');
-            const statusLabels = {
-                'pending': {
-                    text: 'Menunggu',
-                    class: 'status-pending'
-                },
-                'processing': {
-                    text: 'Diproses',
-                    class: 'status-processing'
-                },
-                'shipped': {
-                    text: 'Dikirim',
-                    class: 'status-shipped'
-                },
-                'completed': {
-                    text: 'Selesai',
-                    class: 'status-completed'
-                },
-                'cancelled': {
-                    text: 'Dibatalkan',
-                    class: 'status-cancelled'
-                }
-            };
-
-            dummyOrders.forEach((order, index) => {
-                const status = statusLabels[order.status];
-                const row = document.createElement('tr');
-                row.className = 'animate-fadein';
-                row.style.animationDelay = `${index * 0.1}s`;
-                row.innerHTML = `
-            <td class="ps-4 fw-medium">${order.id}</td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div class="rounded-circle bg-secondary-subtle me-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;">
-                        <i class="ti ti-user fs-7"></i>
-                    </div>
-                    <span class="fw-medium">${order.customer}</span>
-                </div>
-            </td>
-            <td>${new Date(order.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</td>
-            <td class="fw-semibold">${formatRupiah(order.total)}</td>
-            <td><span class="badge ${status.class}">${status.text}</span></td>
-            <td class="text-end pe-4">
-                <a href="#" class="btn btn-sm btn-outline-secondary px-3">
-                    <i class="ti ti-eye"></i>
-                </a>
-            </td>
-        `;
-                ordersBody.appendChild(row);
-            });
-
-            // ===== CHART.JS CONFIGURATION =====
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartData.labels,
-                    datasets: [{
-                        label: 'Penjualan (Juta Rupiah)',
-                        data: chartData.data,
-                        borderColor: '#0d6efd',
-                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#0d6efd',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            titleFont: {
-                                size: 13
-                            },
-                            bodyFont: {
-                                size: 12
-                            },
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Rp ${context.parsed.y} Jt`;
-                                }
-                            }
-                        }
+            // 📊 Inisialisasi Chart.js
+            const ctx = document.getElementById('salesChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($chartLabels),
+                        datasets: [{
+                            label: 'Pendapatan',
+                            data: @json($chartData),
+                            borderColor: '#206bc4',
+                            backgroundColor: 'rgba(32, 107, 196, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#206bc4',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                borderDash: [5, 5],
-                                color: 'rgba(0,0,0,0.05)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + ' Jt';
-                                },
-                                color: '#6c757d',
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
                                 display: false
                             },
-                            ticks: {
-                                color: '#6c757d',
-                                font: {
-                                    size: 11
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                titleColor: '#fff',
+                                bodyColor: '#cbd5e1',
+                                padding: 12,
+                                displayColors: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Rp ' + new Intl.NumberFormat('id-ID').format(context
+                                            .parsed.y);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.05)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Rp ' + (value / 1000) + 'K';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
                                 }
                             }
                         }
                     }
+                });
+            }
+
+            // 🔄 Auto-format Rupiah pada table (untuk konsistensi)
+            document.querySelectorAll('td[data-raw]').forEach(el => {
+                const raw = parseFloat(el.dataset.raw);
+                if (!isNaN(raw)) {
+                    el.textContent = 'Rp ' + raw.toLocaleString('id-ID');
                 }
             });
         });

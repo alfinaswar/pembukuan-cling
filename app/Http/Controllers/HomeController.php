@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\MasterShift;
+use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -26,13 +28,63 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
-        $shift = MasterShift::get();
+        $now = Carbon::now();
 
+        // 📊 Stats Cards Data
+        $totalPendapatan = Transaksi::sum('TotalBayar');
+        $totalPesanan = Transaksi::count();
 
-        return view('home', compact('dokter', 'perawat', 'kasir', 'shift'));
+        // Pelanggan aktif (unik NamaPasien dengan transaksi 30 hari terakhir)
+        $pelangganAktif = Transaksi::where('Tanggal', '>=', $now->copy()->subDays(30))
+            ->distinct('NamaPasien')
+            ->count('NamaPasien');
 
+        // Produk terjual (jumlah transaksi dengan status completed)
+        $produkTerjual = Transaksi::where('TotalBayar', '>', 0)->count();
+
+        // 📈 Data Grafik Penjualan (7 hari terakhir)
+        $chartLabels = [];
+        $chartData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i);
+            $chartLabels[] = $date->translatedFormat('D');
+
+            $revenue = Transaksi::whereDate('Tanggal', $date)
+                ->sum('TotalBayar');
+            $chartData[] = $revenue;
+        }
+
+        // 📋 Recent Transactions (5 terbaru)
+        $recentTransaksi = Transaksi::with(['getResepsionis', 'getPerawat', 'getDokter'])
+            ->latest('Tanggal')
+            ->take(5)
+            ->get();
+
+        // 📉 Persentase perubahan pendapatan (vs minggu lalu)
+        $pendapatanMingguIni = Transaksi::whereBetween('Tanggal', [
+            $now->copy()->startOfWeek(),
+            $now->copy()->endOfWeek()
+        ])->sum('TotalBayar');
+
+        $pendapatanMingguLalu = Transaksi::whereBetween('Tanggal', [
+            $now->copy()->subWeek()->startOfWeek(),
+            $now->copy()->subWeek()->endOfWeek()
+        ])->sum('TotalBayar');
+
+        $persenPerubahan = $pendapatanMingguLalu > 0
+            ? round((($pendapatanMingguIni - $pendapatanMingguLalu) / $pendapatanMingguLalu) * 100, 1)
+            : 0;
+
+        return view('home', compact(
+            'totalPendapatan',
+            'totalPesanan',
+            'pelangganAktif',
+            'produkTerjual',
+            'chartLabels',
+            'chartData',
+            'recentTransaksi',
+            'persenPerubahan'
+        ));
     }
 }

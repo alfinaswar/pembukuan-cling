@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 
 class MasterDokterSeeder extends Seeder
@@ -32,21 +32,18 @@ class MasterDokterSeeder extends Seeder
             ['Sofie Bosoma Syamra', 'KLN-CINERE'],
             ['Mutiara Ayu Sisworini', 'KLN-CINERE'],
             ['Nathassa Astrioni', 'KLN-CINERE'],
-
             // SERPONG
             ['Grace Esther', 'KLN-SERPONG'],
             ['Yessy Josephine Sijabat', 'KLN-SERPONG'],
             ['Meilina Fatimah', 'KLN-SERPONG'],
             ['Niky Ustrina', 'KLN-SERPONG'],
             ['Chintia Herrera', 'KLN-SERPONG'],
-
             // HARAPAN INDAH
             ['Shinta Dewi Ritati', 'KLN-HARAPANINDAH'],
             ['Calvin Pascananda', 'KLN-HARAPANINDAH'],
             ['Annisa Mazaya', 'KLN-HARAPANINDAH'],
             ['Esther Julita Palupi', 'KLN-HARAPANINDAH'],
             ['Aldy Anzhari Ayub', 'KLN-HARAPANINDAH'],
-
             // TEBET
             ['Siti Hanna Yasvitha', 'KLN-TEBET'],
             ['Nada Avaffia', 'KLN-TEBET'],
@@ -57,19 +54,16 @@ class MasterDokterSeeder extends Seeder
             ['Catherine', 'KLN-TEBET'],
             ['Ni Komang P. Pradianty', 'KLN-TEBET'],
             ['Hanna Safira', 'KLN-TEBET'],
-
             // CILEDUG
             ['Putu Natasha Diska Agusjaya', 'KLN-CILEDUG'],
             ['Nathania Chrisnovita M.', 'KLN-CILEDUG'],
             ['Suci Mumpuni Pekerti', 'KLN-CILEDUG'],
             ['Faradina Azzahra', 'KLN-CILEDUG'],
-
             // TAMAN PALEM
             ['Salsa Nabila Evandi', 'KLN-TAMANPALEM'],
             ['Imammuddin Thaariq', 'KLN-TAMANPALEM'],
             ['Putri Askia', 'KLN-TAMANPALEM'],
             ['Raisa Milenia Syukma', 'KLN-TAMANPALEM'],
-
             // JATIASIH
             ['Tri Utomo', 'KLN-JATIASIH'],
             ['Muthia Alifah Khansa', 'KLN-JATIASIH'],
@@ -107,7 +101,7 @@ class MasterDokterSeeder extends Seeder
 
             // 3️⃣ Assign role "Dokter"
             if (!$user->hasRole('Dokter')) {
-                $user->assignRole($roleDokter);
+                $user->syncRoles($roleDokter);
             }
         }
 
