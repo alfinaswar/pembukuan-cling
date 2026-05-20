@@ -10,10 +10,11 @@ class InsentifService
 {
     public function proses($transaksi)
     {
+        // dd($transaksi);
         $tanggal = $transaksi->Tanggal;
         $shift = $transaksi->Shift;
         $kodeCabang = $transaksi->KodeCabang;
-
+        // dd($kodeCabang);
         // =====================================================
         // HITUNG DATA SHIFT
         // =====================================================
@@ -22,7 +23,6 @@ class InsentifService
             ->where('Shift', $shift)
             ->where('KodeCabang', $kodeCabang)
             ->sum('TotalBayar');
-
         $pasienLama = Transaksi::whereDate('Tanggal', $tanggal)
             ->where('Shift', $shift)
             ->where('KodeCabang', $kodeCabang)
@@ -37,6 +37,7 @@ class InsentifService
 
         $totalTransaksi = $transaksi->TotalBayar;
 
+        // dd($totalTransaksi);
         // =====================================================
         // AMBIL NAMA TINDAKAN
         // =====================================================
@@ -47,7 +48,7 @@ class InsentifService
             ->get()
             ->pluck('MasterJenisPerawatan.Nama')
             ->toArray();
-
+        // dd($tindakans);
         // =====================================================
         // CONTEXT RULE
         // =====================================================
@@ -65,10 +66,8 @@ class InsentifService
         // =====================================================
 
         $rules = RuleInsentif::where('Status', 1)
-            ->where('KodeCabang', $kodeCabang)
             ->orderByDesc('Nilai')
             ->get();
-
         foreach ($rules as $rule) {
             $value = $context[$rule->JenisRule] ?? null;
 
@@ -131,7 +130,7 @@ class InsentifService
             // =================================================
             // CEK DUPLICATE
             // =================================================
-
+            // dd($shift);
             if ($rule->BerlakuPer == 'shift') {
                 $exists = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
@@ -150,7 +149,7 @@ class InsentifService
             if ($exists) {
                 continue;
             }
-
+            // dd($rule);
             // =================================================
             // SIMPAN INSENTIF
             // =================================================
@@ -176,14 +175,13 @@ class InsentifService
     private function getUserByRole($transaksi, $role)
     {
         return match ((int) $role) {
+            // DOKTER
+            2 => $transaksi->IdDokter,
             // RESEPSIONIS
             3 => $transaksi->IdResepsionis,
 
             // PERAWAT
             4 => $transaksi->IdPerawat,
-
-            // DOKTER
-            2 => $transaksi->IdDokter,
 
             default => null
         };

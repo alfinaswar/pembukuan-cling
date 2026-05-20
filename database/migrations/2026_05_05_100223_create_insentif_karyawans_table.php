@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->string('Role');
             $table->decimal('Nominal', 15, 2);
             $table->string('JenisRule')->nullable();
+            $table->string('Shift')->nullable();
             $table->string('Keterangan')->nullable();
             $table->string('KodeCabang')->nullable();
             $table->string('UserCreate')->nullable();

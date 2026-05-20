@@ -130,21 +130,27 @@ class TransaksiController extends Controller
             ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
             ->first();
         // dd($shift);
+        $kodeCabang = auth()->user()->kodeperusahaan;
+
         $totalPasienBaru = Transaksi::where('JenisPasien', 'Baru')
             ->where('Shift', optional($shift)->id)
+            ->where('KodeCabang', $kodeCabang)
             ->whereDate('created_at', today())
             ->count();
 
         // Hitung total pasien lama pada shift ini
         $totalPasienLama = Transaksi::where('JenisPasien', 'Lama')
             ->where('Shift', optional($shift)->id)
+            ->where('KodeCabang', $kodeCabang)
             ->whereDate('created_at', today())
             ->count();
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+        $kodeCabang = auth()->user()->kodeperusahaan;
+        $dokter = User::role('Dokter')->where('KodePerusahaan', $kodeCabang)->get();
+        $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
+        $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
+
         return view('transaksi.kasir.create', compact('Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
     }
 

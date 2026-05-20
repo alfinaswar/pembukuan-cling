@@ -104,20 +104,107 @@
             color: #5a7a9a !important;
         }
 
-        /* Hamburger styles */
+        /* ===== HAMBURGER BUTTON ===== */
         .sidebar-hamburger {
             display: none;
-            background: none;
+            background: #1e3a5f;
             border: none;
             outline: none;
-            padding: 0.25rem 0.5rem;
-            font-size: 2rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 1.5rem;
             line-height: 1;
-            color: #1e3a5f;
+            color: #fff !important;
             cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s ease, transform 0.1s ease;
+            z-index: 1050;
         }
 
-        @media (max-width: 991.98px) {
+        .sidebar-hamburger:hover {
+            background: #2196f3 !important;
+            transform: scale(1.05);
+        }
+
+        .sidebar-hamburger:active {
+            transform: scale(0.95);
+        }
+
+        /* Overlay untuk mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1039;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 22, 35, 0.5);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== MOBILE SIDEBAR (max-width: 767.98px) ===== */
+        @media (max-width: 767.98px) {
+            .sidebar-hamburger {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .left-sidebar.with-vertical {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                z-index: 1040;
+                width: 280px;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: #0f1623 !important;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+                overflow-y: auto;
+            }
+
+            .left-sidebar.with-vertical.sidebar-open {
+                transform: translateX(0) !important;
+            }
+
+            /* Close button di dalam sidebar */
+            .sidebartoggler.d-block.d-md-none {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.1);
+                color: #fff !important;
+                transition: background 0.2s;
+            }
+
+            .sidebartoggler.d-block.d-md-none:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            /* Animasi icon hamburger */
+            .sidebar-hamburger i {
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar-hamburger.active i {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* FIX: Ganti breakpoint supaya sidebar selalu muncul di layar full hd (1920px width) & resolusi laptop */
+        /* Turunkan max-width agar sidebar hanya hilang di device < 768px (tablet ke bawah) */
+        @media (max-width: 767.98px) {
             .sidebar-hamburger {
                 display: block;
             }
@@ -165,11 +252,12 @@
     <div id="main-wrapper">
 
         <!-- Hamburger button for mobile sidebar toggle -->
-        <button class="sidebar-hamburger d-lg-none position-fixed top-0 start-0 z-1031 m-3" id="sidebarHamburgerBtn"
-            aria-label="Toggle sidebar">
-            <i class="ti ti-menu-2"></i>
+        <!-- Hamburger button for mobile sidebar toggle -->
+        <button class="sidebar-hamburger position-fixed top-0 start-0 z-1031 m-3" id="sidebarHamburgerBtn"
+            aria-label="Toggle sidebar" aria-expanded="false" aria-controls="sidebarMain">
+            <i class="ti ti-menu-2" id="hamburgerIcon"></i>
         </button>
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="sidebar-overlay" id="sidebarOverlay" tabindex="-1"></div>
 
         <!-- Sidebar Start -->
         <aside class="left-sidebar with-vertical" id="sidebarMain">
@@ -182,8 +270,8 @@
                             alt="Logo-light" />
                     </a>
                     <a href="javascript:void(0)"
-                        class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-                        id="sidebarCloseBtnMain" style="display: none;">
+                        class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-md-none" id="sidebarCloseBtn"
+                        aria-label="Close sidebar">
                         <i class="ti ti-x"></i>
                     </a>
                 </div>
@@ -364,7 +452,7 @@
                 <div class="with-vertical">
                     <nav class="navbar navbar-expand-lg p-0">
                         <ul class="navbar-nav"></ul>
-                        <div class="d-block d-lg-none py-4">
+                        <div class="d-block d-md-none py-4">
                             <div class="d-flex align-items-center">
                                 <a href="{{ route('home') }}" class="text-nowrap logo-img me-2">
                                     <img src="{{ asset('assets/images/logos/logo-cling.png') }}" width="120px"
@@ -373,10 +461,9 @@
                                         class="light-logo" alt="Logo-light" />
                                 </a>
                             </div>
-
                         </div>
                         <!-- Hamburger for mobile in header -->
-                        <button class="sidebar-hamburger d-lg-none ms-3" id="sidebarHamburgerBtnHeader"
+                        <button class="sidebar-hamburger d-md-none ms-3" id="sidebarHamburgerBtnHeader"
                             aria-label="Toggle sidebar">
                             <i class="ti ti-menu-2"></i>
                         </button>
@@ -390,7 +477,7 @@
                         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                             <div class="d-flex align-items-center justify-content-between">
                                 <a href="javascript:void(0)"
-                                    class="nav-link nav-icon-hover-bg rounded-circle mx-0 ms-n1 d-flex d-lg-none align-items-center justify-content-center"
+                                    class="nav-link nav-icon-hover-bg rounded-circle mx-0 ms-n1 d-flex d-md-none align-items-center justify-content-center"
                                     type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar"
                                     aria-controls="offcanvasWithBothOptions">
                                     <i class="ti ti-align-justified fs-7"></i>
@@ -614,7 +701,7 @@
                                 class="light-logo" alt="Logo-light" />
                         </a>
                         <a href="javascript:void(0)"
-                            class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
+                            class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-md-none"
                             id="sidebarCloseBtnSamping" style="display: none;">
                             <i class="ti ti-x"></i>
                         </a>
@@ -695,7 +782,6 @@
 
                                     </li>
 
-
                                     <li class="sidebar-item">
                                         <a href="{{ route('laporan-perawat.index') }}"
                                             class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'perawat' ? 'active' : '' }}">
@@ -729,9 +815,6 @@
                                             <span class="hide-menu">Laporan Resepsionis</span>
                                         </a>
                                     </li>
-
-
-
                                 </ul>
                             </li>
                             <li class="sidebar-item">
@@ -881,56 +964,119 @@
     <script src="{{ asset('') }}assets/js/forms/sweet-alert.init.js"></script>
 
     <script>
-        // Sidebar toggle logic for mobile
-        function showSidebar() {
-            var sidebar = document.getElementById('sidebarMain') || document.getElementById('sidebarSamping');
-            var overlay = document.getElementById('sidebarOverlay');
-            if (sidebar) sidebar.classList.add('sidebar-open');
-            if (overlay) overlay.classList.add('active');
-            // show close button only in mobile
-            var closeBtnMain = document.getElementById('sidebarCloseBtnMain');
-            var closeBtnSamping = document.getElementById('sidebarCloseBtnSamping');
-            if (closeBtnMain) closeBtnMain.style.display = 'block';
-            if (closeBtnSamping) closeBtnSamping.style.display = 'block';
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const sidebars = ['sidebarMain', 'sidebarSamping'].map(id => document.getElementById(id)).filter(
+                Boolean);
+            const hamburgerBtns = ['sidebarHamburgerBtn', 'sidebarHamburgerBtnHeader'].map(id => document
+                .getElementById(id)).filter(Boolean);
+            const closeBtns = ['sidebarCloseBtn', 'sidebarCloseBtnMain', 'sidebarCloseBtnSamping'].map(id =>
+                document.getElementById(id)).filter(Boolean);
+            const overlay = document.getElementById('sidebarOverlay');
+            const hamburgerIcons = document.querySelectorAll('#hamburgerIcon');
 
-        function hideSidebar() {
-            var sidebar = document.getElementById('sidebarMain') || document.getElementById('sidebarSamping');
-            var overlay = document.getElementById('sidebarOverlay');
-            if (sidebar) sidebar.classList.remove('sidebar-open');
-            if (overlay) overlay.classList.remove('active');
-            // hide close button
-            var closeBtnMain = document.getElementById('sidebarCloseBtnMain');
-            var closeBtnSamping = document.getElementById('sidebarCloseBtnSamping');
-            if (closeBtnMain) closeBtnMain.style.display = 'none';
-            if (closeBtnSamping) closeBtnSamping.style.display = 'none';
-        }
-        // Main hamburger buttons
-        var hamburgerBtn = document.getElementById('sidebarHamburgerBtn');
-        var hamburgerBtnHeader = document.getElementById('sidebarHamburgerBtnHeader');
-        if (hamburgerBtn) {
-            hamburgerBtn.onclick = showSidebar;
-        }
-        if (hamburgerBtnHeader) {
-            hamburgerBtnHeader.onclick = showSidebar;
-        }
-        // Close buttons
-        var closeBtnMain = document.getElementById('sidebarCloseBtnMain');
-        var closeBtnSamping = document.getElementById('sidebarCloseBtnSamping');
-        if (closeBtnMain) {
-            closeBtnMain.onclick = hideSidebar;
-        }
-        if (closeBtnSamping) {
-            closeBtnSamping.onclick = hideSidebar;
-        }
-        // Overlay click
-        var overlay = document.getElementById('sidebarOverlay');
-        if (overlay) {
-            overlay.onclick = hideSidebar;
-        }
+            // State
+            let isSidebarOpen = false;
 
-        // Hide by default on load
-        hideSidebar();
+            // Toggle function
+            function toggleSidebar(forceState = null) {
+                const newState = forceState !== null ? forceState : !isSidebarOpen;
+
+                sidebars.forEach(sidebar => {
+                    if (newState) {
+                        sidebar.classList.add('sidebar-open');
+                    } else {
+                        sidebar.classList.remove('sidebar-open');
+                    }
+                });
+
+                // Toggle overlay
+                if (overlay) {
+                    overlay.classList.toggle('active', newState);
+                    overlay.setAttribute('aria-hidden', newState ? 'false' : 'true');
+                }
+
+                // Toggle hamburger icon animation
+                hamburgerIcons.forEach(icon => {
+                    icon.closest('.sidebar-hamburger')?.classList.toggle('active', newState);
+                });
+
+                // Update aria-expanded
+                hamburgerBtns.forEach(btn => btn.setAttribute('aria-expanded', newState));
+
+                // Focus management
+                if (newState) {
+                    // Focus first focusable element in sidebar when opened
+                    const firstFocusable = sidebars[0]?.querySelector(
+                        'a[href], button:not([disabled]), input:not([disabled])');
+                    if (firstFocusable) setTimeout(() => firstFocusable.focus(), 300);
+                    // Prevent body scroll on mobile
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    // Return focus to hamburger when closed
+                    hamburgerBtns[0]?.focus();
+                    document.body.style.overflow = '';
+                }
+
+                isSidebarOpen = newState;
+            }
+
+            // Event Listeners
+            hamburgerBtns.forEach(btn => {
+                btn?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            });
+
+            closeBtns.forEach(btn => {
+                btn?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleSidebar(false);
+                });
+            });
+
+            // Close on overlay click
+            overlay?.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    toggleSidebar(false);
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isSidebarOpen) {
+                    e.preventDefault();
+                    toggleSidebar(false);
+                }
+            });
+
+            // Close sidebar when clicking a nav link (mobile)
+            document.querySelectorAll('.left-sidebar .sidebar-link[href]').forEach(link => {
+                link.addEventListener('click', function() {
+                    // Only close if it's not a dropdown toggle
+                    if (!this.classList.contains('has-arrow') && window.innerWidth < 768) {
+                        setTimeout(() => toggleSidebar(false), 150);
+                    }
+                });
+            });
+
+            // Handle window resize - auto close sidebar when switching to desktop
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (window.innerWidth >= 768 && isSidebarOpen) {
+                        toggleSidebar(false);
+                    }
+                }, 150);
+            });
+
+            // Initialize: ensure sidebar is closed on load for mobile
+            if (window.innerWidth < 768) {
+                toggleSidebar(false);
+            }
+        });
     </script>
 </body>
 @stack('scripts')
