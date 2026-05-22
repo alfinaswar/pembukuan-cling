@@ -232,7 +232,11 @@ class LaporanController extends Controller
      */
     public function dataDashboardPerawat(Request $request)
     {
-        // dd($request->all());
+        $validated = $request->validate([
+            'perawat' => 'required',
+            'FilterTanggal' => 'required',
+        ]);
+
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();

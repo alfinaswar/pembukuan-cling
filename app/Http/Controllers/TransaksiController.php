@@ -20,7 +20,11 @@ class TransaksiController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Transaksi::with('TransaksiDetail')->latest();
+            $kodeCabang = auth()->user()->kodeperusahaan;
+            $data = Transaksi::with('TransaksiDetail')
+                ->where('KodeCabang', $kodeCabang)
+                ->latest();
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('TotalBayar', function ($row) {

@@ -96,16 +96,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('laporan')->group(function () {
         Route::get('/umum', [LaporanController::class, 'indexUmum'])->name('laporan-umum.index');
         Route::post('/data-umum', [LaporanController::class, 'dataDashboardUmum'])->name('laporan-umum.store');
+
         Route::get('/perawat', [LaporanController::class, 'indexPerawat'])->name('laporan-perawat.index');
-        Route::post('/cari-data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
+        Route::POST('/cari-data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
 
         Route::get('/resepsionis', [LaporanController::class, 'indexResepsionis'])->name('laporan-resepsionis.index');
         Route::post('/cari-data-resepsionis', [LaporanController::class, 'dataDashboardResepsionis'])->name('laporan-resepsionis.store');
 
         Route::get('/dokter', [LaporanController::class, 'indexDokter'])->name('laporan-dokter.index');
         Route::post('/cari-data-dokter', [LaporanController::class, 'dataDashboardDokter'])->name('laporan-dokter.store');
-
-        // Route::post('/data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });

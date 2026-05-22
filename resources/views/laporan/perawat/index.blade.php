@@ -59,6 +59,7 @@
                 <div class="card-body pb-2">
                     <form id="perawatFilterForm" class="row align-items-end g-2" method="POST"
                         action="{{ route('laporan-perawat.store') }}" style="font-size: 0.925rem;">
+
                         @csrf
                         <div class="col-md-4">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
