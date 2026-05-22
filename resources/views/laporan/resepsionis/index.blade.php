@@ -63,12 +63,12 @@
                         @csrf
                         <div class="col-md-6">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
-                                Perawat</label>
+                                Kasir / Resepsionis</label>
                             <div class="input-group mb-2">
                                 <select id="perawatSelect" name="perawat" class="select2 form-control"
                                     style="width:100%; font-size: 0.96em; min-height:36px;">
-                                    <option value="">Pilih Perawat</option>
-                                    @foreach ($perawat as $p)
+                                    <option value="">Pilih Kasir / Resepsionis</option>
+                                    @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
                                             {{ request('perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
                                         </option>

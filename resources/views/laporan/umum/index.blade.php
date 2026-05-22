@@ -259,59 +259,35 @@
                             <tbody>
                                 @if (isset($transaksiTerbaru) && count($transaksiTerbaru) > 0)
                                     @foreach ($transaksiTerbaru as $i => $tr)
-                                        @php
-                                            $detailCount = !empty($tr->TransaksiDetail)
-                                                ? count($tr->TransaksiDetail)
-                                                : 0;
-                                            $rowspan = $detailCount > 0 ? $detailCount : 1;
-                                        @endphp
-                                        @if ($detailCount > 0)
-                                            @foreach ($tr->TransaksiDetail as $j => $td)
-                                                <tr>
-                                                    @if ($j == 0)
-                                                        <td rowspan="{{ $rowspan }}">{{ $i + 1 }}</td>
-                                                        <td rowspan="{{ $rowspan }}">{{ $tr->NamaPasien ?? '-' }}
-                                                        </td>
-                                                    @endif
-                                                    <td>
-                                                        {{ $td->MasterJenisPerawatan->Nama ?? '-' }}:
-                                                        <span class="text-secondary">
-                                                            {{ 'Rp ' . number_format($td->Biaya ?? 0, 0, ',', '.') }}
-                                                        </span>
-                                                    </td>
-                                                    @if ($j == 0)
-                                                        <td rowspan="{{ $rowspan }}">
-                                                            {{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}
-                                                        </td>
-                                                        <td rowspan="{{ $rowspan }}">
-                                                            {{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}
-                                                        </td>
-                                                        <td rowspan="{{ $rowspan }}">
-                                                            {{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}
-                                                        </td>
-                                                        <td rowspan="{{ $rowspan }}">
-                                                            {{ $tr->getCabang->Nama ?? '-' }}
-                                                        </td>
-                                                    @endif
-                                                </tr>
-                                            @endforeach
-                                        @else
-                                            <tr>
-                                                <td>{{ $i + 1 }}</td>
-                                                <td>{{ $tr->NamaPasien ?? '-' }}</td>
-                                                <td>-</td>
-                                                <td>{{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}</td>
-                                                <td>{{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}
-                                                </td>
-                                                <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
-                                                <td>{{ $tr->getCabang->Nama ?? '-' }}</td>
-                                            </tr>
-                                        @endif
+                                        <tr>
+                                            <td>{{ $i + 1 }}</td>
+                                            <td>{{ $tr->NamaPasien ?? '-' }}</td>
+                                            <td>
+                                                @if (!empty($tr->TransaksiDetail) && count($tr->TransaksiDetail) > 0)
+                                                    <dl class="mb-0">
+                                                        @foreach ($tr->TransaksiDetail as $td)
+                                                            <dt class="mb-0" style="font-weight: 600;">
+                                                                {{ $td->MasterJenisPerawatan->Nama ?? '-' }}
+                                                            </dt>
+                                                            <dd class="mb-1 ms-2" style="color: #6c757d;">
+                                                                {{ 'Rp ' . number_format($td->Biaya ?? 0, 0, ',', '.') }}
+                                                            </dd>
+                                                        @endforeach
+                                                    </dl>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td>{{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}</td>
+                                            <td>{{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
+                                            <td>{{ $tr->getCabang->Nama ?? '-' }}</td>
+                                        </tr>
                                     @endforeach
                                 @endif
-
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
@@ -468,8 +444,8 @@
                                     show: true,
                                     name: {
                                         show: true,
-                                        offsetY: 20,
-                                        fontSize: '14px',
+                                        offsetY: 0,
+                                        fontSize: '11px',
                                         color: '#6B7280',
                                         formatter: function() {
                                             return 'Total';
@@ -481,7 +457,7 @@
                                     total: {
                                         show: true,
                                         showAlways: true,
-                                        label: 'Tot3232wal',
+                                        label: 'Total',
                                         fontSize: '14px',
                                         fontWeight: 500,
                                         color: '#6B7280',
