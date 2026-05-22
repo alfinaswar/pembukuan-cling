@@ -272,21 +272,9 @@
                         </table>
                     </div>
                     @php
-                        // Hitung jumlah shift >= 6jt dan >= 12jt serta total insentif
-                        $totalShift_6jt = 0;
-                        $totalShift_12jt = 0;
-                        $totalInsentif = 0;
-                        foreach ($data['ShiftTotalBiayaKlinik'] ?? [] as $shift) {
-                            $totalBayar = $shift->getTransaksi->TotalBayar ?? 0;
-                            if ($totalBayar >= 12000000) {
-                                $totalShift_12jt++;
-                                $totalInsentif += 100000;
-                            } elseif ($totalBayar >= 6000000) {
-                                $totalShift_6jt++;
-                                $totalInsentif += 50000;
-                            }
-                        }
-                        $totalShift = $totalShift_6jt + $totalShift_12jt;
+                        // Hitung total shift dan insentif langsung dari kolom insentif pada tabel
+                        $totalShift = isset($data['ShiftTotalBiayaKlinik']) ? count($data['ShiftTotalBiayaKlinik']) : 0;
+                        $totalInsentif = collect($data['ShiftTotalBiayaKlinik'] ?? [])->sum('Nominal');
                     @endphp
                     <div class="alert alert-primary d-flex justify-content-between align-items-start mt-2" role="alert"
                         style="background-color: #f5f6ff; border-color: #d9e0fc; border-radius: 12px;">
@@ -313,6 +301,7 @@
                             </div>
                         </div>
                     </div>
+
 
 
                 </div>
@@ -711,70 +700,32 @@
                         <table class="w-100 align-middle" style="font-size:15px;">
                             <tbody>
                                 @php
-                                    // Mapping JenisRule ke label dan badge style, urutkan sesuai urutan tabel sebelumnya.
-                                    $jenisRuleInfo = [
-                                        'omzet_shift' => [
-                                            'label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000',
-                                            'badge' => 'bg-primary',
-                                            'order' => 1,
-                                        ],
-                                        'pasien_lama' => [
-                                            'label' => 'Shift dengan 8 Pasien Lama',
-                                            'badge' => 'bg-info',
-                                            'order' => 2,
-                                        ],
-                                        'transaksi' => [
-                                            'label' => 'Billing ≥ Rp 1.000.000 per Transaksi',
-                                            'badge' => 'bg-success',
-                                            'order' => 3,
-                                        ],
-                                        'tindakan' => [
-                                            'label' => 'Perawatan Odontektomi',
-                                            'badge' => 'bg-warning text-white',
-                                            'order' => 4,
-                                        ],
-                                        'pasien_baru' => [
-                                            'label' => 'Pasien Baru',
-                                            'badge' => 'bg-danger',
-                                            'order' => 5,
-                                        ],
-                                    ];
+                                    // Ambil Ringkasan dari $data sesuai hasil dari controller (sudah terurut dan lengkap properti)
                                     $ringkasan = $data['Ringkasan'] ?? [];
-
-                                    // Ambil mapping [JenisRule] => [nominal] untuk quick display
-                                    $totalByJenisRule = [];
-                                    foreach ($ringkasan as $item) {
-                                        $totalByJenisRule[$item->JenisRule] = $item->total_insentif;
-                                    }
-                                    // Urutan final row output
-                                    $rowOrder = array_keys($jenisRuleInfo);
                                 @endphp
 
-                                @foreach ($rowOrder as $i => $ruleKey)
+                                @foreach ($ringkasan as $item)
                                     <tr>
                                         <td class="py-2 px-0" style="width:40px;">
-                                            <span class="badge {{ $jenisRuleInfo[$ruleKey]['badge'] }} me-2"
+                                            <span class="badge {{ $item->badge }} me-2"
                                                 style="font-size: 1rem; width: 32px; height:32px;display: inline-flex; align-items: center; justify-content: center;">
-                                                {{ $jenisRuleInfo[$ruleKey]['order'] }}
+                                                {{ $item->order }}
                                             </span>
                                         </td>
-                                        <td>{{ $jenisRuleInfo[$ruleKey]['label'] }}</td>
+                                        <td>{{ $item->label }}</td>
                                         <td class="text-end fw-semibold" style="white-space:nowrap">
-                                            @php
-                                                $nominal = isset($totalByJenisRule[$ruleKey])
-                                                    ? $totalByJenisRule[$ruleKey]
-                                                    : null;
-                                            @endphp
-                                            {{ $nominal !== null ? 'Rp ' . number_format($nominal, 0, ',', '.') : 'Rp 0' }}
+                                            {{ 'Rp ' . number_format($item->total_insentif ?? 0, 0, ',', '.') }}
                                         </td>
                                     </tr>
                                 @endforeach
+
                             </tbody>
                         </table>
 
+
                         @php
                             // Hitung total insentif dari ringkasan (totalByJenisRule)
-                            $totalInsentifHariIni = array_sum($totalByJenisRule);
+                            $totalInsentifHariIni = 0;
                         @endphp
                         <div class="mt-4 rounded-3 py-3 text-center fw-bold"
                             style="background: linear-gradient(90deg,#665be7 0%,#28c76f 100%); font-size: 1.5rem;color:white;">
@@ -791,3 +742,15 @@
 
     </div>
 @endsection
+@push('scripts')
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#665be7'
+            });
+        </script>
+    @endif
+@endpush

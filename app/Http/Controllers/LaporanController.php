@@ -232,147 +232,193 @@ class LaporanController extends Controller
      */
     public function dataDashboardPerawat(Request $request)
     {
-        $validated = $request->validate([
-            'perawat' => 'required',
-            'FilterTanggal' => 'required',
-        ]);
+        // 1. Inisialisasi Variabel Global
+        $kodeCabang = auth()->user()->kodeperusahaan;
+        $shiftFilter = $request->filled('shift') ? $request->shift : null;
 
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
+
+        // 2. Handle Date Filter
         if ($request->filled('perawat') && $request->filled('FilterTanggal')) {
             $parts = explode(' - ', $request->FilterTanggal);
-
             $startDate = Carbon::createFromFormat('m/d/Y', trim($parts[0]))->startOfDay();
             $endDate = Carbon::createFromFormat('m/d/Y', trim($parts[1]))->endOfDay();
-
             $perawatId = $request->perawat;
         } elseif ($request->filled('FilterTanggal')) {
             $parts = explode(' - ', $request->FilterTanggal);
-
             $startDate = Carbon::createFromFormat('m/d/Y', trim($parts[0]))->startOfDay();
             $endDate = Carbon::createFromFormat('m/d/Y', trim($parts[1]))->endOfDay();
         } else {
             $startDate = Carbon::now()->startOfMonth();
             $endDate = Carbon::now()->endOfMonth();
         }
-        $OmsetSatuShift = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->when(isset($perawatId), function ($query) use ($perawatId) {
-                return $query->where('IdPerawat', $perawatId);
-            })
-            ->sum('TotalBayar');
-        // dd($OmsetSatuShift);
-        $TotalInsentif = InsentifKaryawan::whereBetween('created_at', [$startDate, $endDate])
-            ->when(isset($perawatId), function ($query) use ($perawatId) {
-                return $query->where('UserId', $perawatId);
-            })
-            ->sum('Nominal');
-        // Total Pasien Dilayani
-        $totalPasienDilayani = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->when(isset($perawatId), function ($query) use ($perawatId) {
-                return $query->where('IdPerawat', $perawatId);
-            })
-            ->count();
 
-        $ShiftTotalBiayaKlinik = InsentifKaryawan::with('getTransaksi', 'getUser')
+        // 3. Helper Closure untuk Filter (DRY Principle)
+
+        // Filter untuk Tabel Transaksi
+        $filterTransaksi = fn($q) => $q
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('KodeCabang', $kodeCabang)
+            ->when($perawatId, fn($qq) => $qq->where('IdPerawat', $perawatId))
+            ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
+
+        // Filter untuk Tabel InsentifKaryawan (via relasi)
+        $filterInsentif = fn($q) => $q
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->when($perawatId, fn($qq) => $qq->where('UserId', $perawatId))
+            ->whereHas(
+                'getTransaksi',
+                fn($qq) => $qq
+                    ->where('KodeCabang', $kodeCabang)
+                    ->when($shiftFilter, fn($qqq) => $qqq->where('Shift', $shiftFilter))
+            );
+
+        // 4. Query Utama dengan Optimasi
+
+        // 🔹 Omset & Total Shift (Fix: return array agar match view)
+        $omsetQuery = Transaksi::selectRaw('COUNT(DISTINCT CONCAT(DATE(created_at), "-", Shift)) as total_shift, SUM(TotalBayar) as total_omset')
+            ->where($filterTransaksi);
+        $omsetResult = $omsetQuery->first();
+
+        $dataOmset = [
+            'total_shift' => $omsetResult->total_shift ?? 0,
+            'total_omset' => $omsetResult->total_omset ?? 0,
+        ];
+
+        // 🔹 Total Insentif
+        $TotalInsentif = InsentifKaryawan::where($filterInsentif)->sum('Nominal');
+
+        // 🔹 Total Pasien Dilayani
+        $totalPasienDilayani = Transaksi::where($filterTransaksi)->count();
+
+        // 🔹 Validasi Data Kosong
+        $transaksiPeriode = Transaksi::where($filterTransaksi)->get();
+        $hasActiveFilter = $request->filled('FilterTanggal') || $request->filled('perawat') || $request->filled('shift');
+
+        if ($hasActiveFilter && $transaksiPeriode->isEmpty()) {
+            return redirect()->back()->withInput()->with(
+                'error',
+                'Data tidak ditemukan untuk filter: Shift "' . ($shiftFilter ?? 'Semua') . '", Cabang "' . $kodeCabang . '", Tanggal ' . $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y')
+            );
+        }
+
+        // 🔹 ShiftTotalBiayaKlinik (omzet_shift) - Eager Load + Filter Konsisten
+        $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where('JenisRule', 'omzet_shift')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->when(isset($perawatId), function ($query) use ($perawatId) {
-                return $query->where('UserId', $perawatId);
-            })
+            ->where($filterInsentif)
             ->get();
 
-        $transaksiPeriode = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->when(isset($perawatId), function ($query) use ($perawatId) {
-                return $query->where('IdPerawat', $perawatId);
-            })
-            ->get();
-
-        $groupedTransaksi = $transaksiPeriode->groupBy(function ($trx) {
-            return $trx->created_at->format('Y-m-d') . '-' . $trx->Shift . '-' . $trx->IdPerawat;
-        });
-
-        $Shift8PasienLama = InsentifKaryawan::with('getTransaksi')
-            ->where('UserId', $perawatId)
+        // 🔹 Shift8PasienLama - Grouping & Counting di Database Level
+        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where('JenisRule', 'pasien_lama')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get();
-
-        $kodeCabang = auth()->user()->kodeperusahaan;
-
-        $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
-            ->where('UserId', $perawatId)
-            ->where('JenisRule', 'transaksi')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereHas('getTransaksi', function ($query) use ($kodeCabang) {
-                $query->where('KodeCabang', $kodeCabang);
-            })
-            ->get();
-
-        $Odontektomi = InsentifKaryawan::where('UserId', $perawatId)
-            ->where('JenisRule', 'tindakan')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereHas('getTransaksi', function ($query) use ($kodeCabang) {
-                $query->where('KodeCabang', $kodeCabang);
-            })
-            ->get();
-
-        // Ambil 5 data terakhir pasien baru beserta jumlah pasien baru, nama perawat, dan insentif dari tabel transaksi dan insentif karyawan
-        // Hitung jumlah pasien baru per hari di periode yang dipilih untuk perawat terkait
-        // Group InsentifKaryawan 'pasien_baru' by tanggal, menghitung jumlah pasien baru dari getTransaksi->JenisPasien == 'Baru'
-        $PasienBaru = InsentifKaryawan::with('getTransaksi')
-            ->where('UserId', $perawatId)
-            ->where('JenisRule', 'pasien_baru')
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where($filterInsentif)
             ->get()
-            ->groupBy(function ($item) {
-                return \Carbon\Carbon::parse($item->created_at)->format('Y-m-d');
-            })
+            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '-' . ($item->getTransaksi?->Shift ?? 'Unknown'))
             ->map(function ($group) {
-                $jumlahPasienBaru = $group->filter(function ($item) {
-                    return ($item->getTransaksi && isset($item->getTransaksi->JenisPasien) && $item->getTransaksi->JenisPasien === 'Baru');
-                })->count();
-                $perawat_nama = ($group->first() && $group->first()->getUser) ? $group->first()->getUser->name : '-';
-                $insentif = ($group->first() && isset($group->first()->Nominal)) ? $group->first()->Nominal : 0;
                 return [
                     'tanggal' => $group->first()->created_at->format('Y-m-d'),
-                    'jumlah_pasien_baru' => $jumlahPasienBaru,
-                    'perawat_nama' => $perawat_nama,
-                    'insentif' => $insentif,
-                    'items' => $group,
+                    'jumlah_pasien_lama' => $group->count(),
+                    'perawat_nama' => $group->first()?->getUser?->name ?? '-',
+                    'insentif' => $group->first()?->Nominal ?? 0,
+                ];
+            })->filter(fn($item) => $item['jumlah_pasien_lama'] >= 8)->values(); // Hanya yang >= 8 pasien
+        // 🔹 pasienBillingMinimal (transaksi >= 1jt) - Filter di Database
+        $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
+            ->where('JenisRule', 'transaksi')
+            ->where($filterInsentif)
+            ->whereHas('getTransaksi', fn($q) => $q->where('TotalBayar', '>=', 1000000))
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // 🔹 Odontektomi (tindakan)
+        $Odontektomi = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+            ->where('JenisRule', 'tindakan')
+            ->where($filterInsentif)
+            ->get();
+
+        // 🔹 PasienBaru - Optimasi: Filter JenisPasien='Baru' di Database via join
+        $PasienBaru = InsentifKaryawan::with('getTransaksi')
+            ->where('JenisRule', 'pasien_baru')
+            ->where($filterInsentif)
+            ->whereHas('getTransaksi', fn($q) => $q->where('JenisPasien', 'Baru'))
+            ->get()
+            ->groupBy(fn($item) => $item->created_at->format('Y-m-d'))
+            ->map(function ($group) {
+                return [
+                    'tanggal' => $group->first()->created_at->format('Y-m-d'),
+                    'jumlah_pasien_baru' => $group->count(),
+                    'perawat_nama' => $group->first()?->getUser?->name ?? '-',
+                    'insentif' => $group->first()?->Nominal ?? 0,
                 ];
             });
-        // Odontektomi
-        $Odontektomi = InsentifKaryawan::with('getTransaksi')
-            ->where('UserId', $perawatId)
-            ->where('JenisRule', 'tindakan')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereHas('getTransaksi', function ($query) use ($kodeCabang) {
-                $query->where('KodeCabang', $kodeCabang);
-            })
-            ->get();
 
-        // dd($pasienBillingMinimal);
-        $Ringkasan = InsentifKaryawan::selectRaw('
-        JenisRule,
-        SUM(Nominal) as total_insentif,
-        COUNT(*) as total_data
-    ')
-            ->where('UserId', $perawatId)
-            ->whereBetween('created_at', [$startDate, $endDate])
+        $jenisRuleInfo = [
+            'omzet_shift' => [
+                'label' => 'Omset Shift ≥ Rp 6.000.000 (2 Shift ≥ Rp 12.000.000)',
+                'badge' => 'bg-primary',
+                'order' => 1,
+            ],
+            'transaksi' => [
+                'label' => 'Transaksi ≥ Rp 1.000.000',
+                'badge' => 'bg-success',
+                'order' => 2,
+            ],
+            'pasien_lama' => [
+                'label' => '8 Pasien Lama per Shift',
+                'badge' => 'bg-info',
+                'order' => 3,
+            ],
+            'pasien_baru' => [
+                'label' => 'Pasien Baru',
+                'badge' => 'bg-danger',
+                'order' => 4,
+            ],
+            'tindakan' => [
+                'label' => 'Tindakan Odontektomi',
+                'badge' => 'bg-warning text-white',
+                'order' => 5,
+            ],
+        ];
+        dd($filterInsentif);
+        // Ambil data ringkasan dari database
+        $ringkasanDb = InsentifKaryawan::selectRaw('JenisRule, SUM(Nominal) as total_insentif, COUNT(*) as total_data')
+            ->where($filterInsentif)
             ->groupBy('JenisRule')
             ->get();
-        // dd($Odontektomi);
 
-        // dd($Shift8PasienLama);
+        // Jadikan key = JenisRule untuk akses cepat
+        $ringkasanAssoc = [];
+        foreach ($ringkasanDb as $item) {
+            $ringkasanAssoc[$item->JenisRule] = $item;
+        }
+
+        // Buat array ringkasan sesuai urutan dan struktur dari $jenisRuleInfo
+        $Ringkasan = [];
+        foreach (array_keys($jenisRuleInfo) as $ruleKey) {
+            $Ringkasan[] = (object) [
+                'JenisRule' => $ruleKey,
+                'label' => $jenisRuleInfo[$ruleKey]['label'],
+                'badge' => $jenisRuleInfo[$ruleKey]['badge'],
+                'order' => $jenisRuleInfo[$ruleKey]['order'],
+                'total_insentif' => isset($ringkasanAssoc[$ruleKey]) ? $ringkasanAssoc[$ruleKey]->total_insentif : 0,
+                'total_data' => isset($ringkasanAssoc[$ruleKey]) ? $ringkasanAssoc[$ruleKey]->total_data : 0,
+            ];
+        }
+
+        // 5. Prepare Data for View
         $data = [
-            'OmsetSatuShift' => $OmsetSatuShift,
+            'OmsetSatuShift' => $dataOmset, // ✅ Sekarang array: ['total_shift'=>x, 'total_omset'=>y]
             'TotalInsentif' => $TotalInsentif,
             'totalPasienDilayani' => $totalPasienDilayani,
             'startDate' => $startDate,
             'endDate' => $endDate,
-            'perawatId' => isset($perawatId) ? $perawatId : null,
+            'perawatId' => $perawatId ?? null,
+            'shiftFilter' => $shiftFilter,
+            'kodeCabang' => $kodeCabang,
             'ShiftTotalBiayaKlinik' => $ShiftTotalBiayaKlinik,
             'Shift8PasienLama' => $Shift8PasienLama,
             'pasienBillingMinimal' => $pasienBillingMinimal,
@@ -462,18 +508,25 @@ class LaporanController extends Controller
             ->where('UserId', $perawatId)
             ->where('JenisRule', 'pasien_lama')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('Shift', $request->shift)
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get();
 
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
             ->where('UserId', $perawatId)
             ->where('JenisRule', 'transaksi')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('Shift', $request->shift)
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get();
-
+        // dd($pasienBillingMinimal);
         $Odontektomi = InsentifKaryawan::where('UserId', $perawatId)
             ->where('JenisRule', 'tindakan')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('Shift', $request->shift)
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get();
+
         // Ambil 5 data terakhir pasien baru beserta jumlah pasien baru, nama perawat, dan insentif dari tabel transaksi dan insentif karyawan
         // Hitung jumlah pasien baru per hari di periode yang dipilih untuk perawat terkait
         // Group InsentifKaryawan 'pasien_baru' by tanggal, menghitung jumlah pasien baru dari getTransaksi->JenisPasien == 'Baru'
