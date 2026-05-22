@@ -30,6 +30,8 @@
                                     <th>Layanan</th>
                                     <th>Total Bayar</th>
                                     <th>Dokter</th>
+                                    <th>Perawat</th>
+                                    <th>Resepsionis</th>
                                     <th>Shift</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -152,6 +154,14 @@
                     {
                         data: 'Dokter',
                         name: 'Dokter'
+                    },
+                    {
+                        data: 'Perawat',
+                        name: 'Perawat'
+                    },
+                    {
+                        data: 'Resepsionis',
+                        name: 'Resepsionis'
                     },
                     {
                         data: 'Shift',

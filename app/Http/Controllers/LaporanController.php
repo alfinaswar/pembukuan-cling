@@ -348,7 +348,11 @@ class LaporanController extends Controller
             ->where('UserId', $perawatId)
             ->where('JenisRule', 'tindakan')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('getTransaksi', function ($query) use ($kodeCabang) {
+                $query->where('KodeCabang', $kodeCabang);
+            })
             ->get();
+
         // dd($pasienBillingMinimal);
         $Ringkasan = InsentifKaryawan::selectRaw('
         JenisRule,
