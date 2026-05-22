@@ -609,6 +609,21 @@ class LaporanController extends Controller
         if (isset($startDate) && isset($endDate)) {
             $TotalBiayaPerawatan = $TotalBiayaPerawatan->whereBetween('created_at', [$startDate, $endDate]);
         }
+        // Hitung Biaya Admin
+        $TotalBiayaAdmin = Transaksi::where('KodeCabang', auth()->user()->kodeperusahaan);
+
+        if ($request->filled('dokter')) {
+            $TotalBiayaAdmin = $TotalBiayaAdmin->where('IdDokter', $request->dokter);
+        }
+        if ($request->filled('shift')) {
+            $TotalBiayaAdmin = $TotalBiayaAdmin->where('Shift', $request->shift);
+        }
+        if (isset($startDate) && isset($endDate)) {
+            $TotalBiayaAdmin = $TotalBiayaAdmin->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        $TotalBiayaAdmin = $TotalBiayaAdmin->sum('BiayaAdmin');
+
 
         $TotalBiayaPerawatan = $TotalBiayaPerawatan->sum('TotalBayar');
         // dd($TotalBiayaPerawatan);
@@ -624,7 +639,7 @@ class LaporanController extends Controller
             ->get();
         // dd($dataTransaksi);
 
-        return view('laporan.dokter.index', compact('TotalPasienBaru', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
+        return view('laporan.dokter.index', compact('TotalPasienBaru', 'TotalBiayaAdmin', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
     }
 
     /**
@@ -707,7 +722,19 @@ class LaporanController extends Controller
         if (isset($startDate) && isset($endDate)) {
             $TotalBiayaPerawatan = $TotalBiayaPerawatan->whereBetween('created_at', [$startDate, $endDate]);
         }
+        $TotalBiayaAdmin = Transaksi::where('KodeCabang', auth()->user()->kodeperusahaan);
 
+        if ($request->filled('dokter')) {
+            $TotalBiayaAdmin = $TotalBiayaAdmin->where('IdDokter', $request->dokter);
+        }
+        if ($request->filled('shift')) {
+            $TotalBiayaAdmin = $TotalBiayaAdmin->where('Shift', $request->shift);
+        }
+        if (isset($startDate) && isset($endDate)) {
+            $TotalBiayaAdmin = $TotalBiayaAdmin->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        $TotalBiayaAdmin = $TotalBiayaAdmin->sum('BiayaAdmin');
         $TotalBiayaPerawatan = $TotalBiayaPerawatan->sum('TotalBayar');
         // dd($TotalBiayaPerawatan);
 
@@ -751,7 +778,7 @@ class LaporanController extends Controller
 
         // dd($RincianJenisPerawatan);
 
-        return view('laporan.dokter.index', compact('TotalPasienBaru', 'RincianJenisPerawatan', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
+        return view('laporan.dokter.index', compact('TotalPasienBaru', 'TotalBiayaAdmin', 'RincianJenisPerawatan', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
     }
 
     /**

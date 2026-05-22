@@ -527,8 +527,7 @@
                                 Admin<br>(Semua
                                 Pasien)</div>
                             <div style="font-size: 15px; font-weight: 700; color: #6d7ff8;">
-                                {{-- Belum ada data biaya admin di controller, set Rp 0 dulu --}}
-                                Rp 0
+                                Rp {{ number_format($TotalBiayaAdmin ?? 0, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
@@ -541,7 +540,8 @@
                             <div style="font-size: 13px; font-weight: 500; opacity: 0.9; margin-bottom: 5px;">TOTAL
                                 BIAYA
                                 (1 SHIFT)</div>
-                            <div style="font-size: 24px; font-weight: 700;">Rp 12.850.000</div>
+                            <div style="font-size: 24px; font-weight: 700;">Rp
+                                {{ number_format($TotalBiayaPerawatan ?? 0, 0, ',', '.') }}</div>
                         </div>
                     </div>
                 </div>
