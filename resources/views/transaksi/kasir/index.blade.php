@@ -29,6 +29,7 @@
                                     <th>Metode Pembayaran</th>
                                     <th>Layanan</th>
                                     <th>Total Bayar</th>
+                                    <th>Dokter</th>
                                     <th>Shift</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -148,6 +149,10 @@
                         name: 'TotalBayar'
                     },
 
+                    {
+                        data: 'Dokter',
+                        name: 'Dokter'
+                    },
                     {
                         data: 'Shift',
                         name: 'Shift'
