@@ -299,16 +299,25 @@ class LaporanController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get();
 
+        $kodeCabang = auth()->user()->kodeperusahaan;
+
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
             ->where('UserId', $perawatId)
             ->where('JenisRule', 'transaksi')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('getTransaksi', function ($query) use ($kodeCabang) {
+                $query->where('KodeCabang', $kodeCabang);
+            })
             ->get();
 
         $Odontektomi = InsentifKaryawan::where('UserId', $perawatId)
             ->where('JenisRule', 'tindakan')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('getTransaksi', function ($query) use ($kodeCabang) {
+                $query->where('KodeCabang', $kodeCabang);
+            })
             ->get();
+
         // Ambil 5 data terakhir pasien baru beserta jumlah pasien baru, nama perawat, dan insentif dari tabel transaksi dan insentif karyawan
         // Hitung jumlah pasien baru per hari di periode yang dipilih untuk perawat terkait
         // Group InsentifKaryawan 'pasien_baru' by tanggal, menghitung jumlah pasien baru dari getTransaksi->JenisPasien == 'Baru'
