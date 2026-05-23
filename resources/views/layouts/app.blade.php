@@ -298,22 +298,6 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-heartbeat"></i>
-                                </span>
-                                <span class="hide-menu">Perawatan</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="#" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-calendar"></i>
-                                </span>
-                                <span class="hide-menu">Jadwal</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
                             <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-cash"></i>
@@ -536,22 +520,7 @@
                                             <span class="hide-menu">Pasien</span>
                                         </a>
                                     </li>
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link" href="#" aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-heartbeat"></i>
-                                            </span>
-                                            <span class="hide-menu">Perawatan</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link" href="#" aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-calendar"></i>
-                                            </span>
-                                            <span class="hide-menu">Jadwal</span>
-                                        </a>
-                                    </li>
+
                                     <li class="sidebar-item">
                                         <a class="sidebar-link" href="{{ route('Transaksi.index') }}"
                                             aria-expanded="false">
@@ -729,22 +698,7 @@
                                     <span class="hide-menu">Pasien</span>
                                 </a>
                             </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="../main/index3.html" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-medical-cross"></i>
-                                    </span>
-                                    <span class="hide-menu">Perawatan</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="../main/index4.html" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-calendar-time"></i>
-                                    </span>
-                                    <span class="hide-menu">Jadwal</span>
-                                </a>
-                            </li>
+
 
                             <li class="sidebar-item">
                                 <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"

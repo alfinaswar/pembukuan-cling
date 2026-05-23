@@ -11,6 +11,24 @@
     <!-- Core Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}" />
     <title>Masuk | Klinik Cling - Pembukuan Keuangan</title>
+    <style>
+        .password-toggle-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 0 0.25rem;
+            cursor: pointer;
+            z-index: 2;
+            color: #828282;
+        }
+
+        .position-relative-password {
+            position: relative;
+        }
+    </style>
 </head>
 
 <body>
@@ -48,10 +66,26 @@
                                     </div>
                                     <div class="mb-4">
                                         <label for="userPassword" class="form-label">Kata Sandi</label>
-                                        <input type="password"
-                                            class="form-control @error('password') is-invalid @enderror"
-                                            id="userPassword" name="password" required autocomplete="current-password"
-                                            placeholder="Masukkan kata sandi">
+                                        <div class="position-relative-password">
+                                            <input type="password"
+                                                class="form-control @error('password') is-invalid @enderror"
+                                                id="userPassword" name="password" required
+                                                autocomplete="current-password" placeholder="Masukkan kata sandi">
+                                            <button type="button" class="password-toggle-btn" tabindex="-1"
+                                                onclick="togglePasswordVisibility()"
+                                                aria-label="Tampilkan/ Sembunyikan Kata Sandi">
+                                                <span id="passwordEye">
+                                                    <svg width="20px" height="20px" viewBox="0 0 24 24"
+                                                        fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M2 12C2 12 5.63636 5.5 12 5.5C18.3636 5.5 22 12 22 12C22 12 18.3636 18.5 12 18.5C5.63636 18.5 2 12 2 12Z"
+                                                            stroke="currentColor" stroke-width="1.7" />
+                                                        <circle id="eye-dot" cx="12" cy="12" r="3.2"
+                                                            fill="currentColor" />
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
                                         @error('password')
                                             <span class="invalid-feedback d-block" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -92,6 +126,26 @@
         <script>
             function handleColorTheme(e) {
                 document.documentElement.setAttribute("data-color-theme", e);
+            }
+
+            function togglePasswordVisibility() {
+                const passwordInput = document.getElementById('userPassword');
+                const eyeIcon = document.getElementById('passwordEye');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.innerHTML = `<svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.94 17.94C16.0332 19.2025 14.0192 19.8886 12 19.8886C5.63636 19.8886 2 12.9999 2 12.9999C2.86847 11.2852 4.07053 9.77042 5.58187 8.59851M9.87944 6.46489C10.5615 6.31853 11.2809 6.22217 12 6.22217C18.3636 6.22217 22 13.1109 22 13.1109C21.4976 14.1048 20.8698 15.0122 20.1213 15.8354M16.2432 12.6871C16.2432 14.368 14.7965 15.733 12.9999 15.733C11.2034 15.733 9.75674 14.368 9.75674 12.6871C9.75674 11.0062 11.2034 9.64123 12.9999 9.64123C14.7965 9.64123 16.2432 11.0062 16.2432 12.6871Z" stroke="currentColor" stroke-width="1.7"/>
+                        <line x1="3.4142" y1="3.99988" x2="19.9999" y2="20.5856" stroke="currentColor" stroke-width="1.7" />
+                    </svg>`;
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.innerHTML = `<svg width="20px" height="20px" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 12C2 12 5.63636 5.5 12 5.5C18.3636 5.5 22 12 22 12C22 12 18.3636 18.5 12 18.5C5.63636 18.5 2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/>
+                        <circle id="eye-dot" cx="12" cy="12" r="3.2" fill="currentColor"/>
+                    </svg>`;
+                }
             }
         </script>
         <button

@@ -70,7 +70,8 @@
                                     <option value="">Pilih Perawat</option>
                                     @foreach ($perawat as $p)
                                         <option value="{{ $p->id }}"
-                                            {{ request('perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
+                                            {{ old('perawat', request('perawat')) == $p->id ? 'selected' : '' }}>
+                                            {{ $p->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -86,7 +87,7 @@
                                     <option value="">Pilih Shift</option>
                                     @foreach ($shift as $s)
                                         <option value="{{ $s->id }}"
-                                            {{ request('shift') == $s->id ? 'selected' : '' }}>
+                                            {{ old('shift', request('shift')) == $s->id ? 'selected' : '' }}>
                                             {{ $s->Nama ?? ($s->name ?? '-') }}
                                             ({{ \Carbon\Carbon::parse($s->JamMulai)->format('H:i') }} -
                                             {{ \Carbon\Carbon::parse($s->JamSelesai)->format('H:i') }})
@@ -103,13 +104,14 @@
                                 Periode</label>
                             <div class="input-group mb-2">
                                 <input type="text" id="periodeInput" name="FilterTanggal" class="form-control daterange"
-                                    style="font-size:0.96em; min-height:36px;" value="{{ request('FilterTanggal') }}"
-                                    autocomplete="off" />
+                                    style="font-size:0.96em; min-height:36px;"
+                                    value="{{ old('FilterTanggal', request('FilterTanggal')) }}" autocomplete="off" />
                                 <span class="input-group-text" style="font-size: 1em;">
                                     <i class="fa fa-calendar"></i>
                                 </span>
                             </div>
                         </div>
+
                         <div class="col-12 d-flex justify-content-end mt-1">
                             <button type="submit" class="btn btn-primary btn-sm" style="font-size: 0.96em;">
                                 <i class="fa fa-filter"></i> Tampilkan
@@ -631,8 +633,8 @@
 
                                             </td>
 
-                                            <td style="color:#FF2AA0;">{{ $pasien['jumlah_pasien_baru'] ?? '-' }}</td>
-                                            <td style="color:#FF2AA0;">{{ $pasien['perawat_nama'] ?? '-' }}</td>
+                                            <td style="color:#FF2AA0;">{{ $pasien['jumlah'] ?? '-' }}</td>
+                                            <td style="color:#FF2AA0;">{{ $pasien['perawat'] ?? '-' }}</td>
                                             <td style="color:#FF2AA0;">
                                                 {{ isset($pasien['insentif']) ? 'Rp ' . number_format($pasien['insentif'], 0, ',', '.') : '-' }}
                                             </td>
@@ -652,9 +654,13 @@
                     @php
                         // Mengakumulasikan total pasien baru dari array PasienBaru
                         $totalPasienBaru = 0;
+                        $totalInsentifPasienBaru = 0;
                         if (isset($data['PasienBaru']) && is_iterable($data['PasienBaru'])) {
                             foreach ($data['PasienBaru'] as $item) {
-                                $totalPasienBaru += $item['jumlah_pasien_baru'] ?? 0;
+                                $jumlah = $item['jumlah'] ?? ($item['jumlah_pasien_baru'] ?? 0);
+                                $insentif = $item['insentif'] ?? $jumlah * 2000;
+                                $totalPasienBaru += $jumlah;
+                                $totalInsentifPasienBaru += $insentif;
                             }
                         }
                     @endphp
@@ -672,10 +678,11 @@
                                     class="fw-bold" style="font-size:18px;">{{ $totalPasienBaru }}</span></div>
                             <div style="color:#b80080; font-size: 14px;">Total Insentif</div>
                             <div class="fw-bold" style="color:#b80080; font-size:18px;">
-                                Rp {{ number_format($totalPasienBaru * 2000, 0, ',', '.') }}
+                                Rp {{ number_format($totalInsentifPasienBaru, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
+
 
 
                 </div>
@@ -732,7 +739,8 @@
                             <div style="font-size:1rem;letter-spacing: 1px;" class="mb-1">
                                 TOTAL INSENTIF HARI INI
                             </div>
-                            Rp {{ number_format($totalInsentifHariIni, 0, ',', '.') }}
+                            Rp
+                            {{ isset($data['TotalInsentif']) ? 'Rp ' . number_format($data['TotalInsentif'], 0, ',', '.') : 'Rp 0' }}
                         </div>
 
                     </div>
@@ -743,12 +751,12 @@
     </div>
 @endsection
 @push('scripts')
-    @if (session('error'))
+    @if (session('fail_message'))
         <script>
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: '{{ session('error') }}',
+                html: `{!! session('fail_message') !!}`,
                 confirmButtonColor: '#665be7'
             });
         </script>

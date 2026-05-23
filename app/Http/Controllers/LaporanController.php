@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class LaporanController extends Controller
 {
@@ -232,10 +233,48 @@ class LaporanController extends Controller
      */
     public function dataDashboardPerawat(Request $request)
     {
-        // 1. Inisialisasi Variabel Global
+        // Validasi manual agar bisa beri custom error message untuk setiap field
+        // Validasi manual dengan pesan error kustom untuk setiap field form filter perawat
+        $messages = [
+            'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
+            'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
+            'perawat.required' => 'Perawat wajib dipilih.',
+            'perawat.exists' => 'Perawat tidak valid.',
+            'shift.exists' => 'Shift tidak valid.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'FilterTanggal' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
+            ],
+            'perawat' => 'required|exists:users,id',
+            'shift' => 'nullable|exists:transaksis,Shift',
+        ], $messages);
+
+        if ($validator->fails()) {
+            $custom_message = '';
+            $errors = $validator->errors();
+            if ($errors->has('FilterTanggal')) {
+                $custom_message .= $errors->first('FilterTanggal') . '<br>';
+            }
+            if ($errors->has('perawat')) {
+                $custom_message .= $errors->first('perawat') . '<br>';
+            }
+            if ($errors->has('shift')) {
+                $custom_message .= $errors->first('shift') . '<br>';
+            }
+            return redirect()
+                ->route('laporan-perawat.index')
+                ->withErrors($validator)
+                ->withInput() // gunakan old() untuk isi ulang field-form filter
+                ->with('fail_message', $custom_message ?: 'Terjadi kesalahan validasi. Silakan cek kembali input Anda.');
+        }
+
         $kodeCabang = auth()->user()->kodeperusahaan;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
-
+        // dd($shiftFilter);
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
@@ -255,34 +294,28 @@ class LaporanController extends Controller
             $startDate = Carbon::now()->startOfMonth();
             $endDate = Carbon::now()->endOfMonth();
         }
-
         // 3. Helper Closure untuk Filter (DRY Principle)
-
+        // dd(123);
         // Filter untuk Tabel Transaksi
         $filterTransaksi = fn($q) => $q
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->when($perawatId, fn($qq) => $qq->where('IdPerawat', $perawatId))
             ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
-
+        // dd($filterTransaksi);
         // Filter untuk Tabel InsentifKaryawan (via relasi)
         $filterInsentif = fn($q) => $q
             ->whereBetween('created_at', [$startDate, $endDate])
             ->when($perawatId, fn($qq) => $qq->where('UserId', $perawatId))
-            ->whereHas(
-                'getTransaksi',
-                fn($qq) => $qq
-                    ->where('KodeCabang', $kodeCabang)
-                    ->when($shiftFilter, fn($qqq) => $qqq->where('Shift', $shiftFilter))
-            );
+            ->where('KodeCabang', $kodeCabang)
+            ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
 
         // 4. Query Utama dengan Optimasi
-
         // 🔹 Omset & Total Shift (Fix: return array agar match view)
         $omsetQuery = Transaksi::selectRaw('COUNT(DISTINCT CONCAT(DATE(created_at), "-", Shift)) as total_shift, SUM(TotalBayar) as total_omset')
             ->where($filterTransaksi);
         $omsetResult = $omsetQuery->first();
-
+        // dd($omsetQuery);
         $dataOmset = [
             'total_shift' => $omsetResult->total_shift ?? 0,
             'total_omset' => $omsetResult->total_omset ?? 0,
@@ -290,7 +323,7 @@ class LaporanController extends Controller
 
         // 🔹 Total Insentif
         $TotalInsentif = InsentifKaryawan::where($filterInsentif)->sum('Nominal');
-
+        // dd($TotalInsentif);
         // 🔹 Total Pasien Dilayani
         $totalPasienDilayani = Transaksi::where($filterTransaksi)->count();
 
@@ -312,19 +345,14 @@ class LaporanController extends Controller
             ->get();
 
         // 🔹 Shift8PasienLama - Grouping & Counting di Database Level
-        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $Shift8PasienLama = InsentifKaryawan::with('getTransaksi')
+            ->where('UserId', $perawatId)
             ->where('JenisRule', 'pasien_lama')
-            ->where($filterInsentif)
-            ->get()
-            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '-' . ($item->getTransaksi?->Shift ?? 'Unknown'))
-            ->map(function ($group) {
-                return [
-                    'tanggal' => $group->first()->created_at->format('Y-m-d'),
-                    'jumlah_pasien_lama' => $group->count(),
-                    'perawat_nama' => $group->first()?->getUser?->name ?? '-',
-                    'insentif' => $group->first()?->Nominal ?? 0,
-                ];
-            })->filter(fn($item) => $item['jumlah_pasien_lama'] >= 8)->values(); // Hanya yang >= 8 pasien
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('Shift', $request->shift)
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->get();
+        // dd($Shift8PasienLama);
         // 🔹 pasienBillingMinimal (transaksi >= 1jt) - Filter di Database
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
             ->where('JenisRule', 'transaksi')
@@ -340,21 +368,31 @@ class LaporanController extends Controller
             ->where($filterInsentif)
             ->get();
 
-        // 🔹 PasienBaru - Optimasi: Filter JenisPasien='Baru' di Database via join
-        $PasienBaru = InsentifKaryawan::with('getTransaksi')
+
+        $PasienBaru = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+            ->where('UserId', $perawatId)
             ->where('JenisRule', 'pasien_baru')
-            ->where($filterInsentif)
-            ->whereHas('getTransaksi', fn($q) => $q->where('JenisPasien', 'Baru'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('Shift', $request->shift)
+            ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get()
-            ->groupBy(fn($item) => $item->created_at->format('Y-m-d'))
+            ->groupBy(function ($item) {
+                // Grouping berdasarkan tanggal (Y-m-d), UserId (perawat), dan Shift
+                return $item->created_at->format('Y-m-d') . '|' . $item->UserId . '|' . $item->Shift;
+            })
             ->map(function ($group) {
+                $first = $group->first();
+
                 return [
-                    'tanggal' => $group->first()->created_at->format('Y-m-d'),
-                    'jumlah_pasien_baru' => $group->count(),
-                    'perawat_nama' => $group->first()?->getUser?->name ?? '-',
-                    'insentif' => $group->first()?->Nominal ?? 0,
+                    'tanggal' => $first->created_at->format('Y-m-d'),
+                    'jumlah' => $group->count(),
+                    'perawat' => $first->getUser->name,
+                    'insentif' => $group->sum('Nominal'),
                 ];
-            });
+            })
+            ->values();
+
+        // dd($PasienBaru);
 
         $jenisRuleInfo = [
             'omzet_shift' => [
@@ -383,7 +421,7 @@ class LaporanController extends Controller
                 'order' => 5,
             ],
         ];
-        dd($filterInsentif);
+        // dd($filterInsentif);
         // Ambil data ringkasan dari database
         $ringkasanDb = InsentifKaryawan::selectRaw('JenisRule, SUM(Nominal) as total_insentif, COUNT(*) as total_data')
             ->where($filterInsentif)
