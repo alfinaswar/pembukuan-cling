@@ -620,3 +620,15 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+    @if (session('fail_message'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                html: `{!! session('fail_message') !!}`,
+                confirmButtonColor: '#665be7'
+            });
+        </script>
+    @endif
+@endpush
