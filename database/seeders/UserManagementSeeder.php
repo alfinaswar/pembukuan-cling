@@ -65,8 +65,8 @@ class UserManagementSeeder extends Seeder
             );
 
             // 3️⃣ Assign role "Super Admin" (Spatie)
-            if (!$user->hasRole('Super Admin')) {
-                $user->assignRole($roleSuperAdmin);
+            if (!$user->hasRole('Management')) {
+                $user->syncRoles($roleSuperAdmin);
             }
         }
 

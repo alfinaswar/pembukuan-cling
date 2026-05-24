@@ -62,21 +62,31 @@
                         action="{{ route('laporan-dokter.store') }}" style="font-size: 0.925rem;">
                         @csrf
                         <!-- 1. Pilih Dokter -->
+                        @php
+                            $user = Auth::user();
+                            $dokter_id = old('dokter', request('dokter', $user->id ?? ''));
+                            $isSuperadminOrManagement =
+                                $user && ($user->hasRole('Superadmin') || $user->hasRole('Management'));
+                        @endphp
                         <div class="col-md-4">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Dokter</label>
                             <div class="input-group mb-2">
                                 <select id="perawatSelect" name="dokter" class="select2 form-control"
-                                    style="width:100%; font-size: 0.96em; min-height:36px;">
+                                    style="width:100%; font-size: 0.96em; min-height:36px; {{ !$isSuperadminOrManagement ? 'pointer-events: none; background: #f3f3f3;' : '' }}"
+                                    {{ !$isSuperadminOrManagement ? 'tabindex="-1" aria-disabled="true"' : '' }}>
                                     <option value="">Pilih Dokter</option>
                                     @foreach ($dokter as $d)
                                         <option value="{{ $d->id }}"
-                                            {{ request('dokter') == $d->id ? 'selected' : '' }}>{{ $d->name }}
-                                        </option>
+                                            @if ($isSuperadminOrManagement) {{ $dokter_id == $d->id ? 'selected' : '' }}
+                                            @else
+                                                {{ $user && $user->id == $d->id ? 'selected' : '' }} @endif>
+                                            {{ $d->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+
 
                         <!-- 2. Pilih Periode -->
                         <div class="col-md-4">

@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Spatie\Permission\Models\Role; // Hapus baris ini jika tidak pakai Spatie
+use Spatie\Permission\Models\Role;  // Hapus baris ini jika tidak pakai Spatie
 
 class UserResepsionisSeeder extends Seeder
 {
@@ -66,7 +66,7 @@ class UserResepsionisSeeder extends Seeder
             );
 
             if (!$user->hasRole('Kasir / Resepsionis')) {
-                $user->assignRole($roleResepsionis);
+                $user->syncRoles($roleResepsionis);
             }
         }
 
