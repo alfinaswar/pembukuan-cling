@@ -251,16 +251,18 @@
                         </table>
                     </div>
                     @php
-                        // Hitung jumlah shift >= 6jt dan >= 12jt serta total insentif
+                        // Menyesuaikan representasi dari data ShiftTotalBiayaKlinik di atas
                         $totalShift_6jt = 0;
                         $totalShift_12jt = 0;
                         $totalInsentif = 0;
+
                         foreach ($data['ShiftTotalBiayaKlinik'] ?? [] as $shift) {
-                            $totalBayar = $shift->getTransaksi->TotalBayar ?? 0;
-                            if ($totalBayar >= 12000000) {
+                            $totalBiaya = $shift->getTransaksi->TotalBayar ?? 0;
+
+                            if ($totalBiaya >= 12000000) {
                                 $totalShift_12jt++;
                                 $totalInsentif += 100000;
-                            } elseif ($totalBayar >= 6000000) {
+                            } elseif ($totalBiaya >= 6000000) {
                                 $totalShift_6jt++;
                                 $totalInsentif += 50000;
                             }
@@ -284,6 +286,9 @@
                                 <span class="fw-bold"
                                     style="font-size:18px; margin-left: 8px; color:#3a037b;">{{ $totalShift }}</span>
                             </div>
+                            <div style="font-size:13px; color: #3a037b;">
+                                ({{ $totalShift_6jt }} shift ≥ 6jt, {{ $totalShift_12jt }} shift ≥ 12jt)
+                            </div>
                             <div class="mt-2" style="font-size:13px; color: #3a037b;">
                                 Total Insentif
                             </div>
@@ -292,6 +297,7 @@
                             </div>
                         </div>
                     </div>
+
 
 
                 </div>

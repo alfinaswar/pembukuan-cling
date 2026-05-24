@@ -27,12 +27,14 @@ class RuleInsentifController extends Controller
         $role = Role::where('id', $id)->first();
         return view('insentif.create', compact('role'));
     }
+
     public function aturan(Request $request)
     {
         $roles = Role::orderBy('id', 'DESC')->paginate(5);
         return view('insentif.daftar-role', compact('roles'))
             ->with('i', ($request->input('page', 1) - 1) * 5);
     }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -69,7 +71,8 @@ class RuleInsentifController extends Controller
      */
     public function edit($id)
     {
-        $insentif = Role::with('getRuleInsentif')->findOrFail($id);
+        $id = decrypt($id);
+        $insentif = RuleInsentif::with('getRole')->findOrFail($id);
         return view('insentif.edit', compact('insentif'));
     }
 
@@ -82,19 +85,37 @@ class RuleInsentifController extends Controller
         $ruleInsentif = RuleInsentif::findOrFail($id);
 
         $validatedData = $request->validate([
-            'Nama' => 'required|string|max:255',
-            // Tambahkan aturan validasi lain jika diperlukan
+            'Role' => 'required|string|max:255',
+            'JenisRule' => 'required|string|max:255',
+            'Operator' => 'required|string|max:10',
+            'Nilai' => 'required|string|max:50',
+            'TipeNominal' => 'required|string|max:50',
+            'Nominal' => 'required|string|max:50',
+            'BerlakuPer' => 'required|string|max:50',
+            'Keterangan' => 'nullable|string|max:255',
         ]);
 
+        // Buang titik pada Nilai dan Nominal
+        $nilai = str_replace('.', '', $request->Nilai);
+        $nominal = str_replace('.', '', $request->Nominal);
+
         $ruleInsentif->update([
-            'Nama' => $request->Nama,
+            'Role' => $request->Role,
+            'JenisRule' => $request->JenisRule,
+            'Operator' => $request->Operator,
+            'Nilai' => $nilai,
+            'TipeNominal' => $request->TipeNominal,
+            'Nominal' => $nominal,
+            'BerlakuPer' => $request->BerlakuPer,
+            'Keterangan' => $request->Keterangan,
             'UserUpdate' => auth()->user()->name,
         ]);
+
         if (function_exists('activity')) {
             activity('rule-insentif')
                 ->causedBy(auth()->user()->id)
                 ->withProperties(['ip' => request()->ip()])
-                ->log('Mengupdate data rule insentif: ' . $request->Nama);
+                ->log('Mengupdate data rule insentif: ' . $request->JenisRule . ' - ' . $request->Keterangan);
         }
 
         return redirect()->route('Insentif.index')->with('success', 'Rule insentif berhasil diupdate');

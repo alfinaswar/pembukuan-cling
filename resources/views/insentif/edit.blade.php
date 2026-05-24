@@ -35,7 +35,9 @@
 
                     <!-- Card Body -->
                     <div class="card-body p-4">
-                        <form action="{{ route('Insentif.update', $insentif->id) }}" method="POST" id="formRuleInsentif">
+                        <form action="{{ route('Insentif.update', encrypt($insentif->id)) }}" method="POST"
+                            id="formRuleInsentif">
+
                             @csrf
                             @method('PUT')
 
@@ -56,10 +58,10 @@
                                         <i class="ti ti-user-circle text-muted"></i>
                                     </span>
                                     <input type="text" class="form-control"
-                                        value="{{ $role->name ?? ($insentif->role->name ?? '') }}" readonly disabled
+                                        value="{{ $role->name ?? ($insentif->getRole->name ?? '') }}" readonly disabled
                                         placeholder="Role akan terpilih otomatis">
                                     <input type="hidden" name="Role" id="Role"
-                                        value="{{ $role->id ?? ($insentif->role_id ?? '') }}">
+                                        value="{{ $role->Role ?? ($insentif->Role ?? '') }}">
                                 </div>
                                 <small class="text-muted d-block mt-1">
                                     <i class="ti ti-help me-1"></i>Role ditentukan dari data
@@ -158,10 +160,10 @@
                                         <span class="input-group-text bg-light">
                                             <i class="ti ti-target text-muted"></i>
                                         </span>
-                                        <input type="number" id="Nilai" name="Nilai"
-                                            class="form-control @error('Nilai') is-invalid @enderror"
-                                            value="{{ old('Nilai', $insentif->Nilai) }}" required
-                                            placeholder="Contoh: 6000000" min="0" inputmode="numeric">
+                                        <input type="text" id="Nilai" name="Nilai"
+                                            class="form-control rupiah-input @error('Nilai') is-invalid @enderror"
+                                            value="{{ old('Nilai', number_format($insentif->Nilai, 0, ',', '.')) }}"
+                                            required placeholder="Contoh: 6.000.000" inputmode="numeric" autocomplete="off">
                                         <span class="input-group-text bg-light text-muted small">IDR</span>
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -173,6 +175,8 @@
                                         </div>
                                     @enderror
                                 </div>
+
+
 
                                 <div class="col-md-6">
                                     <label for="TipeNominal" class="form-label fw-semibold mb-2">
@@ -186,7 +190,7 @@
                                             class="form-select @error('TipeNominal') is-invalid @enderror" required>
                                             <option value="">Pilih Tipe Nominal</option>
                                             <option value="rupiah"
-                                                {{ old('TipeNominal', $insentif->TipeNominal) == 'rupiah' ? 'selected' : '' }}>
+                                                {{ old('TipeNominal', $insentif->TipeNominal) == 'fixed' ? 'selected' : '' }}>
                                                 💰 Rupiah (Fixed)</option>
                                             <option value="persen"
                                                 {{ old('TipeNominal', $insentif->TipeNominal) == 'persen' ? 'selected' : '' }}>
@@ -213,11 +217,11 @@
                                     <span class="input-group-text bg-light">
                                         <i class="ti ti-cash text-muted" id="nominalIcon"></i>
                                     </span>
-                                    <input type="number" id="Nominal" name="Nominal"
-                                        class="form-control @error('Nominal') is-invalid @enderror"
-                                        value="{{ old('Nominal', $insentif->Nominal) }}" required
-                                        placeholder="Masukkan nominal" min="0" step="any"
-                                        inputmode="decimal">
+                                    <input type="text" id="Nominal" name="Nominal"
+                                        class="form-control rupiah-input @error('Nominal') is-invalid @enderror"
+                                        value="{{ old('Nominal', number_format($insentif->Nominal, 0, ',', '.')) }}"
+                                        required placeholder="Masukkan nominal" min="0" inputmode="numeric"
+                                        autocomplete="off">
                                     <span class="input-group-text bg-light text-muted small" id="nominalSuffix">IDR</span>
                                 </div>
                                 <small class="text-muted d-block mt-1" id="nominalHint">
@@ -229,6 +233,7 @@
                                     </div>
                                 @enderror
                             </div>
+
 
                             <!-- Berlaku Per & Kondisi Tambahan -->
                             <div class="row g-3 mb-3">
@@ -480,6 +485,80 @@
 
             // trigger correct dynamic label if already have value on edit load
             updateNominalField();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function formatRupiah(angka) {
+                let number_string = angka.replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                    let separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+                return rupiah;
+            }
+
+            const input = document.getElementById('Nilai');
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\./g, '');
+                if (value) {
+                    e.target.value = formatRupiah(value);
+                } else {
+                    e.target.value = '';
+                }
+            });
+
+            input.addEventListener('blur', function(e) {
+                let value = e.target.value.replace(/\./g, '');
+                if (value) {
+                    e.target.value = formatRupiah(value);
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function formatRupiah(angka) {
+                let number_string = angka.replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                    let separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+                return rupiah;
+            }
+
+            const nominalInput = document.getElementById('Nominal');
+            if (nominalInput) {
+                nominalInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\./g, '');
+                    if (value) {
+                        e.target.value = formatRupiah(value);
+                    } else {
+                        e.target.value = '';
+                    }
+                });
+
+                nominalInput.addEventListener('blur', function(e) {
+                    let value = e.target.value.replace(/\./g, '');
+                    if (value) {
+                        e.target.value = formatRupiah(value);
+                    }
+                });
+            }
         });
     </script>
 @endpush
