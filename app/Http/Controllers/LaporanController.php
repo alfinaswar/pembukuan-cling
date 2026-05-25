@@ -341,6 +341,7 @@ class LaporanController extends Controller
             ->where('JenisRule', 'pasien_lama')
             ->get();
 
+        // dd($Shift8PasienLama);
         // 5f. Billing minimal 1jt (rule: transaksi, TotalBayar >= 1jt)
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
             ->where($scopeInsentif)
@@ -371,7 +372,23 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
-
+        // 5h. Pasien lama (rule: pasien_lama) — grouped per tanggal+shift
+        $PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+            ->where($scopeInsentif)
+            ->where('JenisRule', 'pasien_lama')
+            ->get()
+            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'tanggal' => $first->created_at->format('Y-m-d'),
+                    'jumlah' => $group->count(),
+                    'perawat' => $first->getUser->name ?? '-',
+                    'insentif' => $group->sum('Nominal'),
+                ];
+            })
+            ->values();
+        dd($PasienLama);
         // 5i. Ringkasan per JenisRule
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Omset Shift ≥ Rp 6.000.000', 'badge' => 'bg-primary', 'order' => 1],

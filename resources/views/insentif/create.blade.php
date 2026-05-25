@@ -83,18 +83,23 @@
                                             class="form-select @error('JenisRule') is-invalid @enderror" required>
                                             <option value="">Pilih Jenis Rule</option>
                                             <option value="omzet_shift"
-                                                {{ old('JenisRule') == 'omzet_shift' ? 'selected' : '' }}>Omzet Shift
+                                                {{ old('JenisRule') == 'omzet_shift' ? 'selected' : '' }}>omzet_shift
                                             </option>
-                                            <option value="omzet_harian"
-                                                {{ old('JenisRule') == 'omzet_harian' ? 'selected' : '' }}>Omzet Harian
+                                            <option value="pasien_lama"
+                                                {{ old('JenisRule') == 'pasien_lama' ? 'selected' : '' }}>pasien_lama
                                             </option>
-                                            <option value="jumlah_pasien"
-                                                {{ old('JenisRule') == 'jumlah_pasien' ? 'selected' : '' }}>Jumlah Pasien
+                                            <option value="pasien_baru"
+                                                {{ old('JenisRule') == 'pasien_baru' ? 'selected' : '' }}>pasien_baru
                                             </option>
-                                            <option value="prosedur_tertentu"
-                                                {{ old('JenisRule') == 'prosedur_tertentu' ? 'selected' : '' }}>Prosedur
-                                                Tertentu</option>
+                                            <option value="transaksi"
+                                                {{ old('JenisRule') == 'transaksi' ? 'selected' : '' }}>transaksi
+                                            </option>
+                                            <option value="tindakan"
+                                                {{ old('JenisRule') == 'tindakan' ? 'selected' : '' }}>
+                                                tindakan
+                                            </option>
                                         </select>
+
                                     </div>
                                     @error('JenisRule')
                                         <div class="invalid-feedback d-block mt-1">
@@ -125,6 +130,12 @@
                                                 dari</option>
                                             <option value="<" {{ old('Operator') == '<' ? 'selected' : '' }}>＜ Kurang
                                                 dari</option>
+                                            <option value="kelipatan"
+                                                {{ old('Operator') == 'kelipatan' ? 'selected' : '' }}>
+                                                <i class="ti ti-chart-bar"></i> X = Y Kelipatan
+                                            </option>
+
+
                                         </select>
                                     </div>
                                     @error('Operator')
@@ -145,10 +156,11 @@
                                         <span class="input-group-text bg-light">
                                             <i class="ti ti-target text-muted"></i>
                                         </span>
-                                        <input type="number" id="Nilai" name="Nilai"
+                                        <input type="text" id="Nilai" name="Nilai"
                                             class="form-control @error('Nilai') is-invalid @enderror"
-                                            value="{{ old('Nilai') }}" required placeholder="Contoh: 6000000"
-                                            min="0" inputmode="numeric">
+                                            value="{{ old('Nilai') ? number_format(old('Nilai'), 0, ',', '.') : '' }}"
+                                            required placeholder="Contoh: 6.000.000" min="0" inputmode="numeric"
+                                            autocomplete="off">
                                         <span class="input-group-text bg-light text-muted small">IDR</span>
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -160,6 +172,8 @@
                                         </div>
                                     @enderror
                                 </div>
+
+
 
                                 <div class="col-md-6">
                                     <label for="TipeNominal" class="form-label fw-semibold mb-2">
@@ -198,10 +212,11 @@
                                     <span class="input-group-text bg-light">
                                         <i class="ti ti-cash text-muted" id="nominalIcon"></i>
                                     </span>
-                                    <input type="number" id="Nominal" name="Nominal"
+                                    <input type="text" id="Nominal" name="Nominal"
                                         class="form-control @error('Nominal') is-invalid @enderror"
-                                        value="{{ old('Nominal') }}" required placeholder="Masukkan nominal"
-                                        min="0" step="any" inputmode="decimal">
+                                        value="{{ old('Nominal') ? number_format(old('Nominal'), 0, ',', '.') : '' }}"
+                                        required placeholder="Masukkan nominal" min="0" inputmode="numeric"
+                                        autocomplete="off">
                                     <span class="input-group-text bg-light text-muted small" id="nominalSuffix">IDR</span>
                                 </div>
                                 <small class="text-muted d-block mt-1" id="nominalHint">
@@ -213,6 +228,8 @@
                                     </div>
                                 @enderror
                             </div>
+
+
 
                             <!-- Berlaku Per & Kondisi Tambahan -->
                             <div class="row g-3 mb-3">
@@ -229,13 +246,11 @@
                                             <option value="">Pilih frekuensi</option>
                                             <option value="shift" {{ old('BerlakuPer') == 'shift' ? 'selected' : '' }}>
                                                 Shift</option>
-                                            <option value="harian" {{ old('BerlakuPer') == 'harian' ? 'selected' : '' }}>
-                                                Harian</option>
-                                            <option value="mingguan"
-                                                {{ old('BerlakuPer') == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
-                                            <option value="bulanan"
-                                                {{ old('BerlakuPer') == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                                            <option value="transaksi"
+                                                {{ old('BerlakuPer') == 'transaksi' ? 'selected' : '' }}>
+                                                Transaksi</option>
                                         </select>
+
                                     </div>
                                     <small class="text-muted d-block mt-1">
                                         <i class="ti ti-help me-1"></i>Frekuensi pemberlakuan rule
@@ -454,6 +469,63 @@
                     rawNilai = this.value.replace(/[^0-9]/g, '');
                     // Optional: show formatted (visual only, submit raw)
                     // this.value = rawNilai ? new Intl.NumberFormat('id-ID').format(rawNilai) : '';
+                });
+            }
+        });
+    </script>
+    <script>
+        // Rupiah input formatting
+        document.addEventListener('DOMContentLoaded', function() {
+            const nilaiInput = document.getElementById('Nilai');
+            if (nilaiInput) {
+                nilaiInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        // Format to rupiah
+                        this.value = parseInt(value).toLocaleString('id-ID');
+                    } else {
+                        this.value = '';
+                    }
+                });
+
+                // On focus, remove formatting
+                nilaiInput.addEventListener('focus', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+
+                // On blur, reformat
+                nilaiInput.addEventListener('blur', function() {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        this.value = parseInt(value).toLocaleString('id-ID');
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        // Format input Nominal as Rupiah while typing
+        document.addEventListener('DOMContentLoaded', function() {
+            const nominalInput = document.getElementById('Nominal');
+            if (nominalInput) {
+                nominalInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        this.value = parseInt(value, 10).toLocaleString('id-ID');
+                    } else {
+                        this.value = '';
+                    }
+                });
+                // Remove formatting on focus for easier editing
+                nominalInput.addEventListener('focus', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+                // Restore formatting on blur
+                nominalInput.addEventListener('blur', function() {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        this.value = parseInt(value, 10).toLocaleString('id-ID');
+                    }
                 });
             }
         });

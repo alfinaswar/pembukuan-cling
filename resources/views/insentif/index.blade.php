@@ -337,6 +337,11 @@
                     const role = btn.dataset.role;
                     const keterangan = btn.dataset.keterangan;
 
+                    // Use Laravel route helper for deletion
+                    // Set the route name sesuai dengan web.php, misal 'Insentif.destroy'.
+                    // Gantilah sesuai kebutuhan jika route berbeda.
+                    let deleteRoute = "{{ route('Insentif.destroy', ':id') }}".replace(':id', id);
+
                     Swal.fire({
                         title: 'Hapus Rule?',
                         html: `Anda akan menghapus rule untuk role <strong>${role}</strong>:<br><span class="text-primary">${keterangan}</span><br><br>Tindakan ini tidak dapat dibatalkan!`,
@@ -357,7 +362,7 @@
                             });
 
                             try {
-                                const response = await fetch(`/rule-insentif/${id}`, {
+                                const response = await fetch(deleteRoute, {
                                     method: 'DELETE',
                                     headers: {
                                         'Accept': 'application/json',

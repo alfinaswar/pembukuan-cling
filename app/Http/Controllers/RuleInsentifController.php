@@ -126,7 +126,6 @@ class RuleInsentifController extends Controller
      */
     public function destroy($id)
     {
-        $id = decrypt($id);
         $ruleInsentif = RuleInsentif::find($id);
 
         if (!$ruleInsentif) {

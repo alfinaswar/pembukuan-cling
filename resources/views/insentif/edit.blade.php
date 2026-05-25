@@ -6,7 +6,7 @@
         <div class="page-title-head d-flex align-items-center flex-wrap gap-2 mb-4">
             <div class="flex-grow-1">
                 <h4 class="page-main-title m-0 fw-semibold">
-                    <i class="ti ti-edit me-2 text-warning"></i>Edit Rule Insentif
+                    <i class="ti ti-pencil text-primary me-2"></i>Edit Rule Insentif
                 </h4>
             </div>
             <nav aria-label="breadcrumb">
@@ -37,7 +37,6 @@
                     <div class="card-body p-4">
                         <form action="{{ route('Insentif.update', encrypt($insentif->id)) }}" method="POST"
                             id="formRuleInsentif">
-
                             @csrf
                             @method('PUT')
 
@@ -47,6 +46,7 @@
                                 <small class="mb-0 text-dark">Kolom dengan tanda <span class="text-danger">*</span> wajib
                                     diisi.</small>
                             </div>
+
 
                             <!-- Role (Readonly) -->
                             <div class="mb-4">
@@ -58,13 +58,13 @@
                                         <i class="ti ti-user-circle text-muted"></i>
                                     </span>
                                     <input type="text" class="form-control"
-                                        value="{{ $role->name ?? ($insentif->getRole->name ?? '') }}" readonly disabled
-                                        placeholder="Role akan terpilih otomatis">
+                                        value="{{ $insentif->getRole->name ?? ($insentif->getRole->name ?? '') }}" readonly
+                                        disabled placeholder="Role akan terpilih otomatis">
                                     <input type="hidden" name="Role" id="Role"
-                                        value="{{ $role->Role ?? ($insentif->Role ?? '') }}">
+                                        value="{{ $insentif->getRole->id ?? ($insentif->getRole->id ?? '') }}">
                                 </div>
                                 <small class="text-muted d-block mt-1">
-                                    <i class="ti ti-help me-1"></i>Role ditentukan dari data
+                                    <i class="ti ti-help me-1"></i>Role ditentukan dari halaman sebelumnya
                                 </small>
                                 @error('Role')
                                     <div class="invalid-feedback d-block mt-1">
@@ -87,22 +87,27 @@
                                             class="form-select @error('JenisRule') is-invalid @enderror" required>
                                             <option value="">Pilih Jenis Rule</option>
                                             <option value="omzet_shift"
-                                                {{ old('JenisRule', $insentif->JenisRule) == 'omzet_shift' ? 'selected' : '' }}>
-                                                Omzet Shift
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'omzet_shift' ? 'selected' : '' }}>
+                                                omzet_shift
                                             </option>
-                                            <option value="omzet_harian"
-                                                {{ old('JenisRule', $insentif->JenisRule) == 'omzet_harian' ? 'selected' : '' }}>
-                                                Omzet Harian
+                                            <option value="pasien_lama"
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'pasien_lama' ? 'selected' : '' }}>
+                                                pasien_lama
                                             </option>
-                                            <option value="jumlah_pasien"
-                                                {{ old('JenisRule', $insentif->JenisRule) == 'jumlah_pasien' ? 'selected' : '' }}>
-                                                Jumlah Pasien
+                                            <option value="pasien_baru"
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'pasien_baru' ? 'selected' : '' }}>
+                                                pasien_baru
                                             </option>
-                                            <option value="prosedur_tertentu"
-                                                {{ old('JenisRule', $insentif->JenisRule) == 'prosedur_tertentu' ? 'selected' : '' }}>
-                                                Prosedur
-                                                Tertentu</option>
+                                            <option value="transaksi"
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'transaksi' ? 'selected' : '' }}>
+                                                transaksi
+                                            </option>
+                                            <option value="tindakan"
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'tindakan' ? 'selected' : '' }}>
+                                                tindakan
+                                            </option>
                                         </select>
+
                                     </div>
                                     @error('JenisRule')
                                         <div class="invalid-feedback d-block mt-1">
@@ -110,6 +115,7 @@
                                         </div>
                                     @enderror
                                 </div>
+
 
                                 <div class="col-md-6">
                                     <label for="Operator" class="form-label fw-semibold mb-2">
@@ -123,23 +129,31 @@
                                             class="form-select @error('Operator') is-invalid @enderror" required>
                                             <option value="">Pilih Operator</option>
                                             <option value=">="
-                                                {{ old('Operator', $insentif->Operator) == '>=' ? 'selected' : '' }}>≥
-                                                Lebih
+                                                {{ old('Operator', $insentif->Operator ?? '') == '>=' ? 'selected' : '' }}>
+                                                ≥ Lebih
                                                 dari atau sama dengan</option>
                                             <option value="="
-                                                {{ old('Operator', $insentif->Operator) == '=' ? 'selected' : '' }}>= Sama
+                                                {{ old('Operator', $insentif->Operator ?? '') == '=' ? 'selected' : '' }}>=
+                                                Sama
                                                 dengan</option>
                                             <option value="<="
-                                                {{ old('Operator', $insentif->Operator) == '<=' ? 'selected' : '' }}>≤
-                                                Kurang
+                                                {{ old('Operator', $insentif->Operator ?? '') == '<=' ? 'selected' : '' }}>
+                                                ≤ Kurang
                                                 dari atau sama dengan</option>
                                             <option value=">"
-                                                {{ old('Operator', $insentif->Operator) == '>' ? 'selected' : '' }}>＞ Lebih
+                                                {{ old('Operator', $insentif->Operator ?? '') == '>' ? 'selected' : '' }}>＞
+                                                Lebih
                                                 dari</option>
                                             <option value="<"
-                                                {{ old('Operator', $insentif->Operator) == '<' ? 'selected' : '' }}>＜
+                                                {{ old('Operator', $insentif->Operator ?? '') == '<' ? 'selected' : '' }}>＜
                                                 Kurang
                                                 dari</option>
+                                            <option value="kelipatan"
+                                                {{ old('Operator', $insentif->Operator ?? '') == 'kelipatan' ? 'selected' : '' }}>
+                                                <i class="ti ti-chart-bar"></i> X = Y Kelipatan
+                                            </option>
+
+
                                         </select>
                                     </div>
                                     @error('Operator')
@@ -161,9 +175,10 @@
                                             <i class="ti ti-target text-muted"></i>
                                         </span>
                                         <input type="text" id="Nilai" name="Nilai"
-                                            class="form-control rupiah-input @error('Nilai') is-invalid @enderror"
-                                            value="{{ old('Nilai', number_format($insentif->Nilai, 0, ',', '.')) }}"
-                                            required placeholder="Contoh: 6.000.000" inputmode="numeric" autocomplete="off">
+                                            class="form-control @error('Nilai') is-invalid @enderror"
+                                            value="{{ old('Nilai', isset($insentif->Nilai) ? number_format($insentif->Nilai, 0, ',', '.') : '') }}"
+                                            required placeholder="Contoh: 6.000.000" min="0" inputmode="numeric"
+                                            autocomplete="off">
                                         <span class="input-group-text bg-light text-muted small">IDR</span>
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -189,11 +204,11 @@
                                         <select id="TipeNominal" name="TipeNominal"
                                             class="form-select @error('TipeNominal') is-invalid @enderror" required>
                                             <option value="">Pilih Tipe Nominal</option>
-                                            <option value="rupiah"
-                                                {{ old('TipeNominal', $insentif->TipeNominal) == 'fixed' ? 'selected' : '' }}>
+                                            <option value="fixed"
+                                                {{ old('TipeNominal', $insentif->TipeNominal ?? '') == 'fixed' ? 'selected' : '' }}>
                                                 💰 Rupiah (Fixed)</option>
                                             <option value="persen"
-                                                {{ old('TipeNominal', $insentif->TipeNominal) == 'persen' ? 'selected' : '' }}>
+                                                {{ old('TipeNominal', $insentif->TipeNominal ?? '') == 'persen' ? 'selected' : '' }}>
                                                 📊 Persen (% dari omzet)</option>
                                         </select>
                                     </div>
@@ -218,8 +233,8 @@
                                         <i class="ti ti-cash text-muted" id="nominalIcon"></i>
                                     </span>
                                     <input type="text" id="Nominal" name="Nominal"
-                                        class="form-control rupiah-input @error('Nominal') is-invalid @enderror"
-                                        value="{{ old('Nominal', number_format($insentif->Nominal, 0, ',', '.')) }}"
+                                        class="form-control @error('Nominal') is-invalid @enderror"
+                                        value="{{ old('Nominal', isset($insentif->Nominal) ? number_format($insentif->Nominal, 0, ',', '.') : '') }}"
                                         required placeholder="Masukkan nominal" min="0" inputmode="numeric"
                                         autocomplete="off">
                                     <span class="input-group-text bg-light text-muted small" id="nominalSuffix">IDR</span>
@@ -233,6 +248,7 @@
                                     </div>
                                 @enderror
                             </div>
+
 
 
                             <!-- Berlaku Per & Kondisi Tambahan -->
@@ -249,18 +265,13 @@
                                             class="form-select @error('BerlakuPer') is-invalid @enderror" required>
                                             <option value="">Pilih frekuensi</option>
                                             <option value="shift"
-                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'shift' ? 'selected' : '' }}>
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer ?? '') == 'shift' ? 'selected' : '' }}>
                                                 Shift</option>
-                                            <option value="harian"
-                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'harian' ? 'selected' : '' }}>
-                                                Harian</option>
-                                            <option value="mingguan"
-                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'mingguan' ? 'selected' : '' }}>
-                                                Mingguan</option>
-                                            <option value="bulanan"
-                                                {{ old('BerlakuPer', $insentif->BerlakuPer) == 'bulanan' ? 'selected' : '' }}>
-                                                Bulanan</option>
+                                            <option value="transaksi"
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer ?? '') == 'transaksi' ? 'selected' : '' }}>
+                                                Transaksi</option>
                                         </select>
+
                                     </div>
                                     <small class="text-muted d-block mt-1">
                                         <i class="ti ti-help me-1"></i>Frekuensi pemberlakuan rule
@@ -272,7 +283,8 @@
                                     @enderror
                                 </div>
 
-                                {{-- Uncomment and adapt if needed
+                                {{-- Jika ingin aktifkan kondisi tambahan edit, uncomment dan sesuaikan kolom database --}}
+                                {{--
                                 <div class="col-md-6">
                                     <label for="KondisiTambahan" class="form-label fw-semibold mb-2">
                                         Kondisi Tambahan
@@ -283,7 +295,7 @@
                                         </span>
                                         <input type="text" id="KondisiTambahan" name="KondisiTambahan"
                                             class="form-control @error('KondisiTambahan') is-invalid @enderror"
-                                            value="{{ old('KondisiTambahan', $insentif->KondisiTambahan) }}"
+                                            value="{{ old('KondisiTambahan', $insentif->KondisiTambahan ?? '') }}"
                                             placeholder="Opsional: syarat tambahan rule">
                                     </div>
                                     <small class="text-muted d-block mt-1">
@@ -308,7 +320,7 @@
                                         <i class="ti ti-notebook text-muted"></i>
                                     </span>
                                     <textarea id="Keterangan" name="Keterangan" class="form-control @error('Keterangan') is-invalid @enderror"
-                                        rows="3" placeholder="Jelaskan rule insentif ini secara singkat">{{ old('Keterangan', $insentif->Keterangan) }}</textarea>
+                                        rows="3" placeholder="Jelaskan rule insentif ini secara singkat">{{ old('Keterangan', $insentif->Keterangan ?? '') }}</textarea>
                                 </div>
                                 @error('Keterangan')
                                     <div class="invalid-feedback d-block mt-1">
@@ -325,7 +337,7 @@
                                 <a href="{{ route('Insentif.index') }}" class="btn btn-light px-4">
                                     <i class="ti ti-arrow-left me-1"></i>Batal
                                 </a>
-                                <button type="submit" class="btn btn-warning px-4">
+                                <button type="submit" class="btn btn-primary px-4">
                                     <i class="ti ti-device-floppy me-1"></i>Update Rule
                                 </button>
                             </div>
@@ -456,7 +468,7 @@
             // Event: Update nominal field when tipe changes
             tipeNominalSelect?.addEventListener('change', updateNominalField);
 
-            // Init on load (if old value exists)
+            // Init on load (if old value exists or if edit)
             if (tipeNominalSelect?.value) {
                 updateNominalField();
             }
@@ -472,90 +484,69 @@
 
                 nilaiInput.addEventListener('focus', function() {
                     // Show raw value for editing
-                    this.value = rawNilai;
+                    this.value = rawNilai.replace(/[^0-9]/g, '');
                 });
 
                 nilaiInput.addEventListener('blur', function() {
                     // Store raw value
                     rawNilai = this.value.replace(/[^0-9]/g, '');
-                    // Optional: show formatted (visual only, submit raw)
                     // this.value = rawNilai ? new Intl.NumberFormat('id-ID').format(rawNilai) : '';
                 });
             }
-
-            // trigger correct dynamic label if already have value on edit load
-            updateNominalField();
         });
     </script>
     <script>
+        // Rupiah input formatting
         document.addEventListener('DOMContentLoaded', function() {
-            function formatRupiah(angka) {
-                let number_string = angka.replace(/[^,\d]/g, '').toString(),
-                    split = number_string.split(','),
-                    sisa = split[0].length % 3,
-                    rupiah = split[0].substr(0, sisa),
-                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
-                if (ribuan) {
-                    let separator = sisa ? '.' : '';
-                    rupiah += separator + ribuan.join('.');
-                }
-
-                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
-                return rupiah;
-            }
-
-            const input = document.getElementById('Nilai');
-            input.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\./g, '');
-                if (value) {
-                    e.target.value = formatRupiah(value);
-                } else {
-                    e.target.value = '';
-                }
-            });
-
-            input.addEventListener('blur', function(e) {
-                let value = e.target.value.replace(/\./g, '');
-                if (value) {
-                    e.target.value = formatRupiah(value);
-                }
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function formatRupiah(angka) {
-                let number_string = angka.replace(/[^,\d]/g, '').toString(),
-                    split = number_string.split(','),
-                    sisa = split[0].length % 3,
-                    rupiah = split[0].substr(0, sisa),
-                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
-                if (ribuan) {
-                    let separator = sisa ? '.' : '';
-                    rupiah += separator + ribuan.join('.');
-                }
-
-                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
-                return rupiah;
-            }
-
-            const nominalInput = document.getElementById('Nominal');
-            if (nominalInput) {
-                nominalInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\./g, '');
+            const nilaiInput = document.getElementById('Nilai');
+            if (nilaiInput) {
+                nilaiInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/[^0-9]/g, '');
                     if (value) {
-                        e.target.value = formatRupiah(value);
+                        // Format to rupiah
+                        this.value = parseInt(value).toLocaleString('id-ID');
                     } else {
-                        e.target.value = '';
+                        this.value = '';
                     }
                 });
 
-                nominalInput.addEventListener('blur', function(e) {
-                    let value = e.target.value.replace(/\./g, '');
+                // On focus, remove formatting
+                nilaiInput.addEventListener('focus', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+
+                // On blur, reformat
+                nilaiInput.addEventListener('blur', function() {
+                    let value = this.value.replace(/[^0-9]/g, '');
                     if (value) {
-                        e.target.value = formatRupiah(value);
+                        this.value = parseInt(value).toLocaleString('id-ID');
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        // Format input Nominal as Rupiah while typing
+        document.addEventListener('DOMContentLoaded', function() {
+            const nominalInput = document.getElementById('Nominal');
+            if (nominalInput) {
+                nominalInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        this.value = parseInt(value, 10).toLocaleString('id-ID');
+                    } else {
+                        this.value = '';
+                    }
+                });
+                // Remove formatting on focus for easier editing
+                nominalInput.addEventListener('focus', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+                // Restore formatting on blur
+                nominalInput.addEventListener('blur', function() {
+                    let value = this.value.replace(/[^0-9]/g, '');
+                    if (value) {
+                        this.value = parseInt(value, 10).toLocaleString('id-ID');
                     }
                 });
             }
