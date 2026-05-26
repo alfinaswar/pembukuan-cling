@@ -861,6 +861,33 @@ class LaporanController extends Controller
             ->limit(10)
             ->get();
 
+
+
+        $NamaDokter = User::where('id', $dokterId)->first();
+        setlocale(LC_TIME, 'id_ID.utf8'); // Pastikan locale Bahasa Indonesia tersedia di server
+        $Hari = $startDate->translatedFormat('l, d F Y');
+
+        // Ambil perawat yang bertugas pada shift dan tanggal tersebut (via relasi pada transaksi)
+        $PerawatBertugas = Transaksi::with('getPerawat')
+            ->where($scopeTransaksi)
+            ->whereNotNull('IdPerawat')
+            ->get()
+            ->pluck('getPerawat')
+            ->filter() // hilangkan null jika ada transaksi tanpa perawat
+            ->unique('id')
+            ->values();
+        // Ambil resepsionis yang terkait dengan transaksi pada filter saat ini
+        $ResepsionisBertugas = Transaksi::with('getResepsionis')
+            ->where($scopeTransaksi)
+            ->whereNotNull('IdResepsionis')
+            ->get()
+            ->pluck('getResepsionis')
+            ->filter() // hilangkan null jika ada transaksi tanpa resepsionis
+            ->unique('id')
+            ->values();
+
+
+
         // =============================================
         // 6. DROPDOWN
         // =============================================
@@ -885,6 +912,10 @@ class LaporanController extends Controller
             'perawat',
             'kasir',
             'shift',
+            'NamaDokter',
+            'Hari',
+            'PerawatBertugas',
+            'ResepsionisBertugas'
         ));
     }
 

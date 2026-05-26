@@ -476,9 +476,10 @@
                         </div>
                         <div>
                             <div style="font-size: 14px; font-weight: 500; opacity: 0.9;">Ringkasan 1 Shift</div>
-                            <div style="font-size: 16px; font-weight: 700;">Rabu, 21 Mei 2025</div>
-                            <div style="font-size: 13px; opacity: 0.8;">drg. Cing Claudia</div>
+                            <div style="font-size: 16px; font-weight: 700;">{{ $Hari ?? '-' }}</div>
+                            <div style="font-size: 13px; opacity: 0.8;">{{ $NamaDokter->name ?? '-' }}</div>
                         </div>
+
                     </div>
 
                     <!-- Data Counters (Middle Section) -->
@@ -573,33 +574,24 @@
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
-                        <!-- Perawat 1 -->
-                        <div class="d-flex align-items-center px-3 py-2"
-                            style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
-                            <img src="https://ui-avatars.com/api/?name=Dewi+Sartika&background=random" alt="Dewi Sartika"
-                                class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover;">
-                            <span style="font-size: 13px; color: #333; font-weight: 500;">Dewi Sartika</span>
-                        </div>
-
-                        <!-- Perawat 2 -->
-                        <div class="d-flex align-items-center px-3 py-2"
-                            style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
-                            <img src="https://ui-avatars.com/api/?name=Anita+Putri&background=random" alt="Anita Putri"
-                                class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover;">
-                            <span style="font-size: 13px; color: #333; font-weight: 500;">Anita Putri</span>
-                        </div>
-
-                        <!-- Perawat 3 -->
-                        <div class="d-flex align-items-center px-3 py-2"
-                            style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
-                            <img src="https://ui-avatars.com/api/?name=Siti+Rahma&background=random" alt="Siti Rahma"
-                                class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover;">
-                            <span style="font-size: 13px; color: #333; font-weight: 500;">Siti Rahma</span>
-                        </div>
+                        @forelse ($PerawatBertugas as $perawat)
+                            <div class="d-flex align-items-center px-3 py-2"
+                                style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($perawat->name ?? 'Perawat') }}&background=random"
+                                    alt="{{ $perawat->name ?? 'Perawat' }}" class="rounded-circle me-2"
+                                    style="width: 28px; height: 28px; object-fit: cover;">
+                                <span
+                                    style="font-size: 13px; color: #333; font-weight: 500;">{{ $perawat->name ?? '-' }}</span>
+                            </div>
+                        @empty
+                            <div class="text-muted" style="font-size: 13px;">Tidak ada perawat yang bertugas pada shift
+                                dan tanggal ini.</div>
+                        @endforelse
                     </div>
                 </div>
             </div>
         </div>
+
 
         <!-- Resepsionis yang Bertugas -->
         <div class="col-md-6">
@@ -610,24 +602,31 @@
                             style="width: 40px; height: 40px; background: #e8f7f1; border-radius: 10px;">
                             <i class="ti ti-user-circle" style="color: #26c17e; font-size: 22px;"></i>
                         </div>
-                        <h6 class="mb-0 fw-semibold" style="color: #27ae60; font-size: 16px;">Resepsionis yang
-                            Bertugas
+                        <h6 class="mb-0 fw-semibold" style="color: #27ae60; font-size: 16px;">
+                            Resepsionis yang Bertugas
                         </h6>
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
-                        <!-- Resepsionis 1 -->
-                        <div class="d-flex align-items-center px-3 py-2"
-                            style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
-                            <img src="https://ui-avatars.com/api/?name=Rina+Handayani&background=random"
-                                alt="Rina Handayani" class="rounded-circle me-2"
-                                style="width: 28px; height: 28px; object-fit: cover;">
-                            <span style="font-size: 13px; color: #333; font-weight: 500;">Rina Handayani</span>
-                        </div>
+                        @forelse ($ResepsionisBertugas as $resepsionis)
+                            <div class="d-flex align-items-center px-3 py-2"
+                                style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($resepsionis->name ?? 'Resepsionis') }}&background=random"
+                                    alt="{{ $resepsionis->name ?? 'Resepsionis' }}" class="rounded-circle me-2"
+                                    style="width: 28px; height: 28px; object-fit: cover;">
+                                <span
+                                    style="font-size: 13px; color: #333; font-weight: 500;">{{ $resepsionis->name ?? '-' }}</span>
+                            </div>
+                        @empty
+                            <div class="text-muted" style="font-size: 13px;">
+                                Tidak ada resepsionis yang bertugas pada shift dan tanggal ini.
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 @endsection
 @push('scripts')
