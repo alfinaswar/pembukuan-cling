@@ -41,17 +41,7 @@
             <small class="text-muted">Ringkasan pencapaian dan aktivitas dokter dalam periode terpilih</small>
         </div>
 
-        <div class="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-end align-items-center">
-            <div class="input-group me-2" style="max-width: 220px;">
-                <input type="text" class="form-control" placeholder="2024-06-04" id="mdate" />
-                <span class="input-group-text">
-                    <i class="ti ti-calendar fs-5"></i>
-                </span>
-            </div>
-            <a href="" class="btn btn-success" style="background-color: green;">
-                <i class="ti ti-file-export"></i> Export
-            </a>
-        </div>
+
 
     </div>
     <div class="row">
@@ -78,14 +68,17 @@
                                     <option value="">Pilih Dokter</option>
                                     @foreach ($dokter as $d)
                                         <option value="{{ $d->id }}"
-                                            @if ($isSuperadminOrManagement) {{ $dokter_id == $d->id ? 'selected' : '' }}
+                                            @if ($isSuperadminOrManagement) {{ request('dokter') == $d->id ? 'selected' : '' }}
                                             @else
-                                                {{ $user && $user->id == $d->id ? 'selected' : '' }} @endif>
-                                            {{ $d->name }}</option>
+                                                {{ ($user && $user->id == $d->id) || request('dokter') == $d->id ? 'selected' : '' }} @endif>
+                                            {{ $d->name }}
+                                        </option>
                                     @endforeach
+
                                 </select>
                             </div>
                         </div>
+
 
 
                         <!-- 2. Pilih Periode -->
@@ -125,11 +118,18 @@
                             </div>
                         </div>
 
-                        <div class="col-12 d-flex justify-content-end mt-1">
+                        <div class="col-12 d-flex justify-content-end mt-1 gap-2">
                             <button type="submit" class="btn btn-primary btn-sm" style="font-size: 0.96em;">
                                 <i class="fa fa-filter"></i> Tampilkan
                             </button>
+                            <a href="{{ route('laporan-dokter.download-excel', array_merge(request()->all(), ['export' => 'excel'])) }}"
+                                class="btn btn-sm" style="font-size: 0.96em; background-color: #27ae60; color: #fff;">
+                                <i class="fa fa-file-excel"></i> Export
+                            </a>
+
+
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -574,19 +574,23 @@
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
-                        @forelse ($PerawatBertugas as $perawat)
-                            <div class="d-flex align-items-center px-3 py-2"
-                                style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($perawat->name ?? 'Perawat') }}&background=random"
-                                    alt="{{ $perawat->name ?? 'Perawat' }}" class="rounded-circle me-2"
-                                    style="width: 28px; height: 28px; object-fit: cover;">
-                                <span
-                                    style="font-size: 13px; color: #333; font-weight: 500;">{{ $perawat->name ?? '-' }}</span>
-                            </div>
-                        @empty
+                        @if (isset($PerawatBertugas) && count($PerawatBertugas) > 0)
+                            @foreach ($PerawatBertugas as $perawat)
+                                <div class="d-flex align-items-center px-3 py-2"
+                                    style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(isset($perawat->name) ? $perawat->name : 'Perawat') }}&background=random"
+                                        alt="{{ isset($perawat->name) ? $perawat->name : 'Perawat' }}"
+                                        class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover;">
+                                    <span
+                                        style="font-size: 13px; color: #333; font-weight: 500;">{{ isset($perawat->name) ? $perawat->name : '-' }}</span>
+                                </div>
+                            @endforeach
+                        @else
                             <div class="text-muted" style="font-size: 13px;">Tidak ada perawat yang bertugas pada shift
                                 dan tanggal ini.</div>
-                        @endforelse
+                        @endif
+
+
                     </div>
                 </div>
             </div>
@@ -608,20 +612,24 @@
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
-                        @forelse ($ResepsionisBertugas as $resepsionis)
-                            <div class="d-flex align-items-center px-3 py-2"
-                                style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($resepsionis->name ?? 'Resepsionis') }}&background=random"
-                                    alt="{{ $resepsionis->name ?? 'Resepsionis' }}" class="rounded-circle me-2"
-                                    style="width: 28px; height: 28px; object-fit: cover;">
-                                <span
-                                    style="font-size: 13px; color: #333; font-weight: 500;">{{ $resepsionis->name ?? '-' }}</span>
-                            </div>
-                        @empty
+                        @if (isset($ResepsionisBertugas) && count($ResepsionisBertugas) > 0)
+                            @foreach ($ResepsionisBertugas as $resepsionis)
+                                <div class="d-flex align-items-center px-3 py-2"
+                                    style="background: #f8f9fa; border-radius: 20px; border: 1px solid #e9ecef;">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(isset($resepsionis->name) ? $resepsionis->name : 'Resepsionis') }}&background=random"
+                                        alt="{{ isset($resepsionis->name) ? $resepsionis->name : 'Resepsionis' }}"
+                                        class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover;">
+                                    <span style="font-size: 13px; color: #333; font-weight: 500;">
+                                        {{ isset($resepsionis->name) ? $resepsionis->name : '-' }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        @else
                             <div class="text-muted" style="font-size: 13px;">
                                 Tidak ada resepsionis yang bertugas pada shift dan tanggal ini.
                             </div>
-                        @endforelse
+                        @endif
+
                     </div>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TransactionExport;
 use App\Models\InsentifKaryawan;
 use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanController extends Controller
 {
@@ -249,7 +251,7 @@ class LaporanController extends Controller
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'perawat.required' => 'Perawat wajib dipilih.',
             'perawat.exists' => 'Perawat tidak valid.',
-            'shift.exists' => 'Shift tidak valid.',
+            'shift.exists' => 'Tidak Bertugas di Shit Tersebut.',
         ]);
 
         if ($validator->fails()) {
@@ -348,13 +350,12 @@ class LaporanController extends Controller
                 $first = $group->first();
                 return [
                     'created_at' => $first->created_at,
-                    'jumlah_pasien_lama' => $countpasienlama . ' Pasien', // atau bisa custom sesuai kebutuhan judul kolom
+                    'jumlah_pasien_lama' => $countpasienlama . ' Pasien',  // atau bisa custom sesuai kebutuhan judul kolom
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
                 ];
             })
             ->values();
-
 
         // dd($Shift8PasienLama);
         // 5f. Billing minimal 1jt (rule: transaksi, TotalBayar >= 1jt)
@@ -764,14 +765,14 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'dokter' => 'required|exists:users,id',
+            'dokter' => 'required',
             'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'dokter.required' => 'Dokter wajib dipilih.',
             'dokter.exists' => 'Dokter tidak valid.',
-            'shift.exists' => 'Shift tidak valid.',
+            'shift.exists' => 'Tidak Bertugas di Shit Tersebut.',
         ]);
 
         if ($validator->fails()) {
@@ -861,10 +862,8 @@ class LaporanController extends Controller
             ->limit(10)
             ->get();
 
-
-
         $NamaDokter = User::where('id', $dokterId)->first();
-        setlocale(LC_TIME, 'id_ID.utf8'); // Pastikan locale Bahasa Indonesia tersedia di server
+        setlocale(LC_TIME, 'id_ID.utf8');  // Pastikan locale Bahasa Indonesia tersedia di server
         $Hari = $startDate->translatedFormat('l, d F Y');
 
         // Ambil perawat yang bertugas pada shift dan tanggal tersebut (via relasi pada transaksi)
@@ -873,7 +872,7 @@ class LaporanController extends Controller
             ->whereNotNull('IdPerawat')
             ->get()
             ->pluck('getPerawat')
-            ->filter() // hilangkan null jika ada transaksi tanpa perawat
+            ->filter()  // hilangkan null jika ada transaksi tanpa perawat
             ->unique('id')
             ->values();
         // Ambil resepsionis yang terkait dengan transaksi pada filter saat ini
@@ -882,11 +881,9 @@ class LaporanController extends Controller
             ->whereNotNull('IdResepsionis')
             ->get()
             ->pluck('getResepsionis')
-            ->filter() // hilangkan null jika ada transaksi tanpa resepsionis
+            ->filter()  // hilangkan null jika ada transaksi tanpa resepsionis
             ->unique('id')
             ->values();
-
-
 
         // =============================================
         // 6. DROPDOWN
@@ -895,7 +892,7 @@ class LaporanController extends Controller
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
-
+        // dd(123);
         // =============================================
         // 7. KIRIM KE VIEW
         // =============================================
@@ -922,8 +919,19 @@ class LaporanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function downloadExcel(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'FilterTanggal' => 'required|string',
+            'dokter' => 'nullable|integer',
+            'shift' => 'nullable|integer',
+        ]);
+
+        $filename = 'Transaksi_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(
+            new TransactionExport($validated),
+            $filename
+        );
     }
 }

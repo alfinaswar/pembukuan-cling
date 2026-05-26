@@ -105,6 +105,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/dokter', [LaporanController::class, 'indexDokter'])->name('laporan-dokter.index');
         Route::post('/cari-data-dokter', [LaporanController::class, 'dataDashboardDokter'])->name('laporan-dokter.store');
+        Route::get('/dokter/export-excel', [LaporanController::class, 'downloadExcel'])->name('laporan-dokter.download-excel');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });
