@@ -454,6 +454,12 @@
                                                                 placeholder="Rp 0"
                                                                 value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : '' }}">
                                                         </td>
+                                                        <td>
+                                                            <input type="text" class="form-control"
+                                                                name="JenisPerawatan[0][Keterangan]"
+                                                                placeholder="Keterangan"
+                                                                value="{{ isset($perawatan['Keterangan']) ? $perawatan['Keterangan'] : '' }}">
+                                                        </td>
                                                         <td class="text-center">
                                                             <button type="button"
                                                                 class="btn btn-link btn-remove-perawatan p-1"
