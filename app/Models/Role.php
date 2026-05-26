@@ -20,4 +20,9 @@ class Role extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    public function getRuleInsentif()
+    {
+        return $this->hasMany(RuleInsentif::class, 'Role', 'id');
+    }
 }
