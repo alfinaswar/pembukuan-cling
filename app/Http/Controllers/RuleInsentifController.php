@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role as ModelsRole;
 use App\Models\RuleInsentif;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
@@ -14,7 +15,7 @@ class RuleInsentifController extends Controller
      */
     public function index(Request $request)
     {
-        $role = Role::with('getRuleInsentif')->get();
+        $role = ModelsRole::with('getRuleInsentif')->get();
         // dd($role);
         return view('insentif.index', compact('role'));
     }
@@ -24,13 +25,13 @@ class RuleInsentifController extends Controller
      */
     public function create($id)
     {
-        $role = Role::where('id', $id)->first();
+        $role = ModelsRole::where('id', $id)->first();
         return view('insentif.create', compact('role'));
     }
 
     public function aturan(Request $request)
     {
-        $roles = Role::orderBy('id', 'DESC')->paginate(5);
+        $roles = ModelsRole::orderBy('id', 'DESC')->paginate(5);
         return view('insentif.daftar-role', compact('roles'))
             ->with('i', ($request->input('page', 1) - 1) * 5);
     }
