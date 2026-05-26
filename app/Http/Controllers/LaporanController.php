@@ -238,7 +238,8 @@ class LaporanController extends Controller
         // =============================================
         $validator = Validator::make($request->all(), [
             'FilterTanggal' => [
-                'required', 'string',
+                'required',
+                'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
             'perawat' => 'required|exists:users,id',
@@ -336,10 +337,24 @@ class LaporanController extends Controller
             ->get();
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
-        $Shift8PasienLama = InsentifKaryawan::with('getTransaksi')
+        // Dihitung group per tanggal+shift, struktur data konsisten dengan tabel di view (tanggal, jumlah, perawat, insentif)
+        $countpasienlama = Transaksi::where('JenisPasien', 'Lama')->count();
+        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
-            ->get();
+            ->get()
+            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
+            ->map(function ($group) use ($countpasienlama) {
+                $first = $group->first();
+                return [
+                    'created_at' => $first->created_at,
+                    'jumlah_pasien_lama' => $countpasienlama . ' Pasien', // atau bisa custom sesuai kebutuhan judul kolom
+                    'perawat_nama' => $first->getUser->name ?? '-',
+                    'insentif' => $group->sum('Nominal'),
+                ];
+            })
+            ->values();
+
 
         // dd($Shift8PasienLama);
         // 5f. Billing minimal 1jt (rule: transaksi, TotalBayar >= 1jt)
@@ -373,22 +388,23 @@ class LaporanController extends Controller
             })
             ->values();
         // 5h. Pasien lama (rule: pasien_lama) — grouped per tanggal+shift
+        $countpasienlama = Transaksi::where('JenisPasien', 'Lama')->count();
         $PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
             ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
-            ->map(function ($group) {
+            ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
                     'tanggal' => $first->created_at->format('Y-m-d'),
-                    'jumlah' => $group->count(),
+                    'jumlah' => $countpasienlama,
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
                 ];
             })
             ->values();
-        dd($PasienLama);
+        // dd($PasienLama);
         // 5i. Ringkasan per JenisRule
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Omset Shift ≥ Rp 6.000.000', 'badge' => 'bg-primary', 'order' => 1],
@@ -471,7 +487,8 @@ class LaporanController extends Controller
         // =============================================
         $validator = Validator::make($request->all(), [
             'FilterTanggal' => [
-                'required', 'string',
+                'required',
+                'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
             'perawat' => 'required|exists:users,id',
@@ -743,7 +760,8 @@ class LaporanController extends Controller
         // =============================================
         $validator = Validator::make($request->all(), [
             'FilterTanggal' => [
-                'required', 'string',
+                'required',
+                'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
             'dokter' => 'required|exists:users,id',
