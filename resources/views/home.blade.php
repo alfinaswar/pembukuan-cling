@@ -311,6 +311,8 @@
     </style>
 @endpush
 @push('scripts')
+    <script src="{{ asset('') }}assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="{{ asset('') }}assets/js/apex-chart/apex.pie.init.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

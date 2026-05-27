@@ -297,114 +297,140 @@
                                 <span class="hide-menu">Pasien</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-cash"></i>
-                                </span>
-                                <span class="hide-menu">Pembayaran</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-file-chart"></i>
-                                </span>
-                                <span class="hide-menu">Laporan</span>
-                            </a>
-                            <ul aria-expanded="false" class="collapse first-level">
-                                <li class="sidebar-item">
-                                    <a href="{{ route('laporan-umum.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-report"></i>
-                                        </div>
-                                        <span class="hide-menu">Laporan Umum</span>
-                                    </a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="{{ route('laporan-perawat.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-user-nurse"></i>
-                                        </div>
-                                        <span class="hide-menu">Laporan Perawat</span>
-                                    </a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="{{ route('laporan-dokter.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-stethoscope"></i>
-                                        </div>
-                                        <span class="hide-menu">Laporan Dokter</span>
-                                    </a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="{{ route('laporan-resepsionis.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-notebook"></i>
-                                        </div>
-                                        <span class="hide-menu">Laporan Resepsionis</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-database"></i>
-                                </span>
-                                <span class="hide-menu">Data Master</span>
-                            </a>
-                            <ul aria-expanded="false" class="collapse first-level">
-                                <li class="sidebar-item">
-                                    <a href="{{ route('JenisPerawatan.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-bandage"></i>
-                                        </div>
-                                        <span class="hide-menu">Jenis Perawatan</span>
-                                    </a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="{{ route('Klinik.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-building-hospital"></i>
-                                        </div>
-                                        <span class="hide-menu">Klinik</span>
-                                    </a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-credit-card"></i>
-                                        </div>
-                                        <span class="hide-menu">Metode Pembayaran</span>
-                                    </a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
-                                        <div class="round-16 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-clock"></i>
-                                        </div>
-                                        <span class="hide-menu">Shift</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="#" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-cash"></i>
-                                </span>
-                                <span class="hide-menu">Insentif</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="#" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-settings"></i>
-                                </span>
-                                <span class="hide-menu">Pengaturan</span>
-                            </a>
-                        </li>
+                        @can('pembayaran-index')
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-cash"></i>
+                                    </span>
+                                    <span class="hide-menu">Pembayaran</span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('laporan')
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-file-chart"></i>
+                                    </span>
+                                    <span class="hide-menu">Laporan</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    @can('laporan-umum')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-umum.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-report"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Umum</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('laporan-perawat')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-perawat.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-user-nurse"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Perawat</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('laporan-dokter')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-dokter.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-stethoscope"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Dokter</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('laporan-resepsionis')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-resepsionis.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-notebook"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Resepsionis</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                </ul>
+                            </li>
+                        @endcan
+                        @can('masterdata')
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-database"></i>
+                                    </span>
+                                    <span class="hide-menu">Data Master</span>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    @can('master-perawatan')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('JenisPerawatan.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-bandage"></i>
+                                                </div>
+                                                <span class="hide-menu">Jenis Perawatan</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('master-klinik')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('Klinik.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-building-hospital"></i>
+                                                </div>
+                                                <span class="hide-menu">Klinik</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('master-pembayaran')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-credit-card"></i>
+                                                </div>
+                                                <span class="hide-menu">Metode Pembayaran</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('master-shift')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-clock"></i>
+                                                </div>
+                                                <span class="hide-menu">Shift</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                </ul>
+                            </li>
+                        @endcan
+                        @can('insentif')
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="#" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-cash"></i>
+                                    </span>
+                                    <span class="hide-menu">Insentif</span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('pengaturan')
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="#" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-settings"></i>
+                                    </span>
+                                    <span class="hide-menu">Pengaturan</span>
+                                </a>
+                            </li>
+                        @endcan
                     </ul>
                 </nav>
                 <div class="fixed-profile p-3 mx-4 mb-2 bg-secondary-subtle rounded mt-3">
@@ -521,110 +547,135 @@
                                         </a>
                                     </li>
 
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link" href="{{ route('Transaksi.index') }}"
-                                            aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-cash"></i>
-                                            </span>
-                                            <span class="hide-menu">Pembayaran</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link has-arrow" href="javascript:void(0)"
-                                            aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-file-chart"></i>
-                                            </span>
-                                            <span class="hide-menu">Laporan</span>
-                                        </a>
-                                        <ul aria-expanded="false" class="collapse first-level">
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('laporan-umum.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-report"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Laporan Umum</span>
-                                                </a>
-                                            </li>
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('laporan-perawat.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-user-nurse"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Laporan Perawat</span>
-                                                </a>
-                                            </li>
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('laporan-dokter.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-stethoscope"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Laporan Dokter</span>
-                                                </a>
-                                            </li>
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('laporan-resepsionis.index') }}"
-                                                    class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-notebook"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Laporan Resepsionis</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link has-arrow" href="javascript:void(0)"
-                                            aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-database"></i>
-                                            </span>
-                                            <span class="hide-menu">Data Master</span>
-                                        </a>
-                                        <ul aria-expanded="false" class="collapse first-level">
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('JenisPerawatan.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-bandage"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Jenis Perawatan</span>
-                                                </a>
-                                            </li>
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('Klinik.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-building-hospital"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Klinik</span>
-                                                </a>
-                                            </li>
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-credit-card"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Metode Pembayaran</span>
-                                                </a>
-                                            </li>
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
-                                                    <div
-                                                        class="round-16 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-clock"></i>
-                                                    </div>
-                                                    <span class="hide-menu">Shift</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
+                                    @can('pembayaran-index')
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link" href="{{ route('Transaksi.index') }}"
+                                                aria-expanded="false">
+                                                <span>
+                                                    <i class="ti ti-cash"></i>
+                                                </span>
+                                                <span class="hide-menu">Pembayaran</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('laporan')
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                                aria-expanded="false">
+                                                <span>
+                                                    <i class="ti ti-file-chart"></i>
+                                                </span>
+                                                <span class="hide-menu">Laporan</span>
+                                            </a>
+                                            <ul aria-expanded="false" class="collapse first-level">
+                                                @can('laporan-umum')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-umum.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-report"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Umum</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('laporan-perawat')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-perawat.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-user-nurse"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Perawat</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('laporan-dokter')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-dokter.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-stethoscope"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Dokter</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('laporan-resepsionis')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-resepsionis.index') }}"
+                                                            class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-notebook"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Resepsionis</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                            </ul>
+                                        </li>
+                                    @endcan
+
+                                    @can('masterdata')
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link has-arrow" href="javascript:void(0)"
+                                                aria-expanded="false">
+                                                <span>
+                                                    <i class="ti ti-database"></i>
+                                                </span>
+                                                <span class="hide-menu">Data Master</span>
+                                            </a>
+                                            <ul aria-expanded="false" class="collapse first-level">
+                                                @can('master-perawatan')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('JenisPerawatan.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-bandage"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Jenis Perawatan</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('master-klinik')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('Klinik.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-building-hospital"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Klinik</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('master-metode')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-credit-card"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Metode Pembayaran</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('master-shift')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-clock"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Shift</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                            </ul>
+                                        </li>
+                                    @endcan
+
                                     <li class="sidebar-item">
                                         <a class="sidebar-link" href="#" aria-expanded="false">
                                             <span>
@@ -656,6 +707,7 @@
                             </div>
                         </nav>
                     </div>
+
                 </div>
             </header>
             <!--  Header End -->
@@ -681,6 +733,16 @@
                                 <i class="ti ti-home nav-small-cap-icon fs-4"></i>
                                 <span class="hide-menu">Home</span>
                             </li>
+                            <!-- <li class="sidebar-item">
+                                <a class="sidebar-link" href="{{ route('home') }}" id="get-url"
+                                    aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-layout-dashboard"></i>
+                                    </span>
+                                    <span class="hide-menu">Dashboard</span>
+                                </a>
+                            </li> -->
+
                             <li class="sidebar-item">
                                 <a class="sidebar-link" href="{{ route('home') }}" id="get-url"
                                     aria-expanded="false">
@@ -690,160 +752,172 @@
                                     <span class="hide-menu">Dashboard</span>
                                 </a>
                             </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="../main/index2.html" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-users"></i>
-                                    </span>
-                                    <span class="hide-menu">Pasien</span>
-                                </a>
-                            </li>
-
-
-                            <li class="sidebar-item">
-                                <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"
-                                    href="{{ route('Transaksi.index') }}" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-cash"></i>
-                                    </span>
-                                    <span class="hide-menu">Pembayaran</span>
-                                </a>
-
-                            </li>
-
-                            <li class="sidebar-item">
-                                <a class="sidebar-link has-arrow {{ request()->segment(1) == 'laporan' ? 'active' : '' }}"
-                                    href="javascript:void(0)" aria-expanded="false">
-
-                                    <span class="d-flex">
-                                        <i class="ti ti-file-chart"></i>
-                                    </span>
-                                    <span class="hide-menu">Laporan</span>
-                                </a>
-                                <ul aria-expanded="false" class="collapse first-level">
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-umum.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'umum' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex justify-content-center align-items-center"
-                                                style="height: 32px; width: 32px;">
-                                                <span
-                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                            </div>
-                                            <span class="hide-menu">
-                                                Laporan Umum
-                                            </span>
-                                        </a>
-
-                                    </li>
-
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-perawat.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'perawat' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex justify-content-center align-items-center"
-                                                style="height: 32px; width: 32px;">
-                                                <span
-                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                            </div>
-                                            <span class="hide-menu">Laporan Perawat</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-dokter.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'dokter' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex justify-content-center align-items-center"
-                                                style="height: 32px; width: 32px;">
-                                                <span
-                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                            </div>
-                                            <span class="hide-menu">Laporan Dokter</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-resepsionis.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'resepsionis' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex justify-content-center align-items-center"
-                                                style="height: 32px; width: 32px;">
-                                                <span
-                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                            </div>
-                                            <span class="hide-menu">Laporan Resepsionis</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link has-arrow {{ request()->segment(1) === 'master' ? 'active' : '' }}"
-                                    href="javascript:void(0)" aria-expanded="false">
-                                    <span class="d-flex">
-                                        <i class="ti ti-database"></i>
-                                    </span>
-                                    <span class="hide-menu">Data Master</span>
-                                </a>
-                                <ul aria-expanded="false" class="collapse first-level">
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('JenisPerawatan.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-bandage"></i>
-                                            </div>
-                                            <span class="hide-menu">Jenis Perawatan</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('Klinik.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'klinik' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-building-hospital"></i>
-                                            </div>
-                                            <span class="hide-menu">Klinik</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('MetodePembayaran.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'metode-pembayaran' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-credit-card"></i>
-                                            </div>
-                                            <span class="hide-menu">Metode Pembayaran</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('MasterShift.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'shift' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-clock"></i>
-                                            </div>
-                                            <span class="hide-menu">Shift</span>
-                                        </a>
-                                    </li>
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('users.index') }}"
-                                            class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'pengguna' ? 'active' : '' }}">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-clock"></i>
-                                            </div>
-                                            <span class="hide-menu">Pengguna</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="{{ route('Insentif.index') }}" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-cash"></i>
-                                    </span>
-                                    <span class="hide-menu">Insentif</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="{{ route('roles.index') }}" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-settings"></i>
-                                    </span>
-                                    <span class="hide-menu">Pengaturan</span>
-                                </a>
-                            </li>
+                            @can('pembayaran')
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"
+                                        href="{{ route('Transaksi.index') }}" aria-expanded="false">
+                                        <span>
+                                            <i class="ti ti-cash"></i>
+                                        </span>
+                                        <span class="hide-menu">Pembayaran</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('laporan')
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link has-arrow {{ request()->segment(1) == 'laporan' ? 'active' : '' }}"
+                                        href="javascript:void(0)" aria-expanded="false">
+                                        <span class="d-flex">
+                                            <i class="ti ti-file-chart"></i>
+                                        </span>
+                                        <span class="hide-menu">Laporan</span>
+                                    </a>
+                                    <ul aria-expanded="false" class="collapse first-level">
+                                        @can('laporan-umum')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-umum.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'umum' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">
+                                                        Laporan Umum
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('laporan-perawat')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-perawat.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'perawat' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Perawat</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('laporan-dokter')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-dokter.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'dokter' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Dokter</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('laporan-resepsionis')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-resepsionis.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'resepsionis' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Resepsionis</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcan
+                            @can('masterdata')
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link has-arrow {{ request()->segment(1) === 'master' ? 'active' : '' }}"
+                                        href="javascript:void(0)" aria-expanded="false">
+                                        <span class="d-flex">
+                                            <i class="ti ti-database"></i>
+                                        </span>
+                                        <span class="hide-menu">Data Master</span>
+                                    </a>
+                                    <ul aria-expanded="false" class="collapse first-level">
+                                        @can('master-perawatan')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('JenisPerawatan.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-bandage"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Jenis Perawatan</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('master-klinik')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('Klinik.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'klinik' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-building-hospital"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Klinik</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('master-pembayaran')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('MetodePembayaran.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'metode-pembayaran' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-credit-card"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Metode Pembayaran</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('master-shift')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('MasterShift.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'shift' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-clock"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Shift</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('master-user')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('users.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'pengguna' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-clock"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Pengguna</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                            @endcan
+                            @can('insentif')
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" href="{{ route('Insentif.index') }}" aria-expanded="false">
+                                        <span>
+                                            <i class="ti ti-cash"></i>
+                                        </span>
+                                        <span class="hide-menu">Insentif</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('pengaturan')
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" href="{{ route('roles.index') }}" aria-expanded="false">
+                                        <span>
+                                            <i class="ti ti-settings"></i>
+                                        </span>
+                                        <span class="hide-menu">Pengaturan</span>
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </nav>
                     <div class="fixed-profile p-3 mx-4 mb-1 bg-secondary-subtle rounded" style="margin-top: -30px;">
@@ -875,6 +949,7 @@
                     </div>
                 </div>
             </aside>
+
             <div class="body-wrapper">
                 <div class="container-fluid">
                     @yield('content')
@@ -898,7 +973,6 @@
 
     <script src="{{ asset('') }}assets/js/highlights/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-    <script src="{{ asset('') }}assets/libs/apexcharts/dist/apexcharts.min.js"></script>
     <script src="{{ asset('') }}assets/js/dashboards/dashboard4.js"></script>
     <script src="{{ asset('') }}assets/libs/select2/dist/js/select2.full.min.js"></script>
     <script src="{{ asset('') }}assets/libs/select2/dist/js/select2.min.js"></script>
@@ -910,8 +984,7 @@
         src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-datetimepicker/2.7.1/js/bootstrap-material-datetimepicker.min.js">
     </script>
     <script src="{{ asset('') }}assets/js/forms/material-datepicker-init.js"></script>
-    <script src="{{ asset('') }}assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-    <script src="{{ asset('') }}assets/js/apex-chart/apex.pie.init.js"></script>
+
     <script src="{{ asset('') }}assets/libs/daterangepicker/daterangepicker.js"></script>
     <script src="{{ asset('') }}assets/js/forms/daterangepicker-init.js"></script>
     <script src="{{ asset('') }}assets/libs/sweetalert2/dist/sweetalert2.min.js"></script>

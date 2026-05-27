@@ -21,104 +21,96 @@ class TransaksiController extends Controller
     {
         if ($request->ajax()) {
             $kodeCabang = auth()->user()->kodeperusahaan;
+            $tanggalMulai = $request->input('tanggal_mulai');
+            $tanggalAkhir = $request->input('tanggal_akhir');
+
+            $user = auth()->user();
             $data = Transaksi::with('TransaksiDetail')
-                ->where('KodeCabang', $kodeCabang)
+                ->when($user->hasRole('Superadmin') === false, function ($query) use ($kodeCabang) {
+                    $query->where('KodeCabang', $kodeCabang);
+                })
+                ->when(!$tanggalMulai && !$tanggalAkhir, function ($query) {
+                    $query->whereDate('created_at', today());
+                })
+                ->when($tanggalMulai, function ($query) use ($tanggalMulai) {
+                    $query->whereDate('created_at', '>=', $tanggalMulai);
+                })
+                ->when($tanggalAkhir, function ($query) use ($tanggalAkhir) {
+                    $query->whereDate('created_at', '<=', $tanggalAkhir);
+                })
                 ->latest();
 
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('TotalBayar', function ($row) {
-                    $TotalBayar = $row->TotalBayar;
-                    return 'Rp ' . number_format($TotalBayar, 0, ',', '.');
-                })
-                ->addColumn('BiayaAdmin', function ($row) {
-                    $BiayaAdmin = $row->BiayaAdmin;
-                    return 'Rp ' . number_format($BiayaAdmin, 0, ',', '.');
+                    return 'Rp ' . number_format($row->TotalBayar, 0, ',', '.');
                 })
                 ->addColumn('MetodePembayaran', function ($row) {
-                    if ($row->getMetodePembayaran) {
-                        return $row->getMetodePembayaran->Nama;
-                    }
-                    return '-';
+                    return $row->getMetodePembayaran?->Nama ?? '-';
                 })
                 ->addColumn('Shift', function ($row) {
-                    if ($row->getShift) {
-                        return $row->getShift->Nama;
+                    if (!$row->getShift)
+                        return '-';
+                    $nama = strtolower($row->getShift->Nama);
+                    if ($nama === 'siang' || $row->getShift->id == 1) {
+                        return '<span class="badge bg-warning text-dark"><i class="fa fa-sun me-1"></i>Siang</span>';
+                    } elseif ($nama === 'sore' || $row->getShift->id == 2) {
+                        return '<span class="badge bg-primary"><i class="fa fa-moon me-1"></i>Sore</span>';
                     }
-                    return '-';
+                    return '<span class="badge bg-secondary">' . e($row->getShift->Nama) . '</span>';
                 })
-                ->addColumn('Perawat', function ($row) {
-                    if ($row->getPerawat) {
-                        return $row->getPerawat->name;
-                    }
-                    return '-';
-                })
-                ->addColumn('Dokter', function ($row) {
-                    if ($row->getDokter) {
-                        return $row->getDokter->name;
-                    }
-                    return '-';
-                })
-                ->addColumn('Resepsionis', function ($row) {
-                    if ($row->getResepsionis) {
-                        return $row->getResepsionis->name;
-                    }
+                ->addColumn('Perawat', fn($row) => $row->getPerawat?->name ?? '-')
+                ->addColumn('Dokter', fn($row) => $row->getDokter?->name ?? '-')
+                ->addColumn('Resepsionis', fn($row) => $row->getResepsionis?->name ?? '-')
+                ->addColumn('JenisPasien', function ($row) {
+                    $jenis = $row->JenisPasien ?? '-';
+                    if ($jenis === 'Baru')
+                        return '<span class="badge bg-success"><i class="fa fa-user-plus me-1"></i>Baru</span>';
+                    if ($jenis === 'Lama')
+                        return '<span class="badge bg-info"><i class="fa fa-user-check me-1"></i>Lama</span>';
                     return '-';
                 })
                 ->addColumn('Layanan', function ($row) {
-                    if ($row->TransaksiDetail && count($row->TransaksiDetail) > 0) {
-                        // Rekap layanan: group by nama, jumlahkan biaya dan hitung count
-                        $rekap = [];
-                        foreach ($row->TransaksiDetail as $detail) {
-                            $nama = optional($detail->MasterJenisPerawatan)->Nama;
-                            $biaya = isset($detail->Biaya) ? (int) $detail->Biaya : 0;
-                            if ($nama) {
-                                if (!isset($rekap[$nama])) {
-                                    $rekap[$nama] = [
-                                        'nama' => $nama,
-                                        'harga' => 0,
-                                        'count' => 0,
-                                    ];
-                                }
-                                $rekap[$nama]['harga'] += $biaya;
-                                $rekap[$nama]['count'] += 1;
+                    if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0)
+                        return '-';
+                    $rekap = [];
+                    foreach ($row->TransaksiDetail as $detail) {
+                        $nama = optional($detail->MasterJenisPerawatan)->Nama;
+                        $biaya = (int) ($detail->Biaya ?? 0);
+                        if ($nama) {
+                            if (!isset($rekap[$nama])) {
+                                $rekap[$nama] = ['nama' => $nama, 'harga' => 0, 'count' => 0];
                             }
+                            $rekap[$nama]['harga'] += $biaya;
+                            $rekap[$nama]['count'] += 1;
                         }
-
-                        if (empty($rekap)) {
-                            return '-';
-                        }
-
-                        $html = '<dl>';
-                        foreach ($rekap as $item) {
-                            $namaStr = e($item['nama']);
-                            // Jika count > 1, tampilkan jumlah
-                            if ($item['count'] > 1) {
-                                $namaStr .= ' x' . $item['count'];
-                            }
-                            $hargaStr = 'Rp ' . number_format($item['harga'], 0, ',', '.');
-                            $html .= '<dt style="font-weight:500;">' . $namaStr . ':</dt>';
-                            $html .= '<dd style="margin-bottom:6px;">' . e($hargaStr) . '</dd>';
-                        }
-                        $html .= '</dl>';
-                        return $html;
                     }
-                    return '-';
+                    if (empty($rekap))
+                        return '-';
+                    $html = '<dl class="mb-0">';
+                    foreach ($rekap as $item) {
+                        $namaStr = e($item['nama']) . ($item['count'] > 1 ? ' x' . $item['count'] : '');
+                        $html .= '<dt style="font-weight:500;">' . $namaStr . ':</dt>';
+                        $html .= '<dd style="margin-bottom:4px;">Rp ' . number_format($item['harga'], 0, ',', '.') . '</dd>';
+                    }
+                    $html .= '</dl>';
+                    return $html;
                 })
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
-                        <a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i>
-                        </a>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    ';
+                    <a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                ';
                 })
-                ->rawColumns(['action', 'TotalBayar', 'BiayaAdmin', 'Perawat', 'Dokter', 'Resepsionis', 'Layanan'])
+                ->rawColumns(['action', 'TotalBayar', 'Perawat', 'Dokter', 'Resepsionis', 'Layanan', 'JenisPasien', 'Shift'])
                 ->make(true);
         }
+
         return view('transaksi.kasir.index');
     }
 
@@ -285,7 +277,6 @@ class TransaksiController extends Controller
             ->where('KodeCabang', $kodeCabang)
             ->whereDate('created_at', today())
             ->count();
-
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
