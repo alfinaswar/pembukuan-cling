@@ -791,7 +791,7 @@
                                         @can('laporan-perawat')
                                             <li class="sidebar-item">
                                                 <a href="{{ route('laporan-perawat.index') }}"
-                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'perawat' ? 'active' : '' }}">
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && (request()->segment(2) === 'perawat' || request()->segment(2) === 'cari-data-perawat') ? 'active' : '' }}">
                                                     <div class="round-16 d-flex justify-content-center align-items-center"
                                                         style="height: 32px; width: 32px;">
                                                         <span

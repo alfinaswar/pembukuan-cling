@@ -8,14 +8,6 @@ use App\Models\Transaksi;
 
 class InsentifService
 {
-    /**
-     * Hapus insentif lama dari transaksi ini sebelum menghitung ulang
-     */
-    public function hapusSebelumProses($transaksi)
-    {
-        InsentifKaryawan::where('IdTransaksi', $transaksi->id)->delete();
-    }
-
     public function proses($transaksi)
     {
         $tanggal = $transaksi->Tanggal;
@@ -23,8 +15,9 @@ class InsentifService
         $kodeCabang = $transaksi->KodeCabang;
 
         // =====================================================
-        // 1. HITUNG DATA SHIFT (Akumulasi Real-time)
+        // HITUNG DATA SHIFT
         // =====================================================
+
         $totalShift = Transaksi::whereDate('Tanggal', $tanggal)
             ->where('Shift', $shift)
             ->where('KodeCabang', $kodeCabang)
@@ -45,8 +38,9 @@ class InsentifService
         $totalTransaksi = $transaksi->TotalBayar;
 
         // =====================================================
-        // 2. AMBIL DATA PENDUKUNG
+        // AMBIL NAMA TINDAKAN
         // =====================================================
+
         $tindakans = $transaksi
             ->TransaksiDetail()
             ->with('MasterJenisPerawatan')
@@ -54,40 +48,49 @@ class InsentifService
             ->pluck('MasterJenisPerawatan.Nama')
             ->toArray();
 
+        // =====================================================
+        // CONTEXT RULE
+        // =====================================================
+
         $context = [
-            'omzet_shift' => $totalShift,  // 🔥 Kunci untuk rule kelipatan
+            'omzet_shift' => $totalShift,
             'pasien_lama' => $pasienLama,
             'pasien_baru' => $pasienBaru,
             'transaksi' => $totalTransaksi,
             'tindakan' => $tindakans,
         ];
 
-        $rules = RuleInsentif::where('Status', 1)->orderByDesc('Nilai')->get();
+        // =====================================================
+        // AMBIL RULE AKTIF
+        // =====================================================
+
+        $rules = RuleInsentif::where('Status', 1)
+            ->orderByDesc('Nilai')
+            ->get();
 
         foreach ($rules as $rule) {
             $value = $context[$rule->JenisRule] ?? null;
-            if ($value === null)
-                continue;
 
-            // --- Validasi Konteks ---
-            if ($rule->JenisRule == 'pasien_baru' && $transaksi->JenisPasien !== 'Baru')
+            if ($value === null) {
                 continue;
-            if ($rule->JenisRule == 'pasien_lama' && $transaksi->JenisPasien !== 'Lama')
-                continue;
+            }
 
-            // 🔥 FIX: Hitung userId DI SINI (sebelum digunakan di logika kelipatan)
-            $userId = $this->getUserByRole($transaksi, $rule->Role);
-            if (!$userId)
+            // 🔥 FIX: Validasi JenisPasien untuk rule pasien_baru & pasien_lama
+            if ($rule->JenisRule == 'pasien_baru' && $transaksi->JenisPasien !== 'Baru') {
                 continue;
+            }
+
+            if ($rule->JenisRule == 'pasien_lama' && $transaksi->JenisPasien !== 'Lama') {
+                continue;
+            }
 
             $isValid = false;
-            $finalNominal = $rule->Nominal;
+            $finalNominal = $rule->Nominal;  // Default nominal
 
             // =================================================
-            // 3. EVALUASI RULE
+            // RULE TINDAKAN
             // =================================================
 
-            // A. Rule Tindakan (Cek string)
             if ($rule->JenisRule == 'tindakan') {
                 foreach ($value as $tindakan) {
                     if (str_contains(strtolower($tindakan), strtolower($rule->Nilai))) {
@@ -96,39 +99,20 @@ class InsentifService
                     }
                 }
             }
-            // B. 🔥 Rule Kelipatan (Akumulasi Shift)
+            // 🔥 NEW: RULE KELOMPOK / KELIPATAN
             elseif ($rule->Operator == 'kelipatan') {
-                $threshold = $rule->Nilai;  // Misal: 6.000.000
+                // Hitung berapa kali kelipatan tercapai (floor division)
+                $multiplier = floor($value / $rule->Nilai);
 
-                // 1. Hitung total kelipatan yang TERCAPAI saat ini di shift tersebut
-                $totalKelipatanTercapai = floor($totalShift / $threshold);
-
-                if ($totalKelipatanTercapai >= 1) {
+                if ($multiplier >= 1) {
                     $isValid = true;
-
-                    // 2. Hitung berapa insentif kelipatan yang SUDAH PERNAH dibagikan untuk shift ini
-                    // (Query ini aman karena insentif transaksi ini sudah di-delete di hapusSebelumProses)
-                    $sudahDiberikan = InsentifKaryawan::where('UserId', $userId)
-                        ->where('Role', $rule->Role)
-                        ->where('JenisRule', $rule->JenisRule)
-                        ->where('Shift', $shift)
-                        ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
-                        ->where('KodeCabang', $kodeCabang)
-                        ->count();
-
-                    // 3. Hitung selisih: hanya berikan untuk kelipatan BARU yang belum dibayar
-                    $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
-
-                    if ($kelipatanBaru > 0) {
-                        // Nominal = jumlah kelipatan baru × nominal dasar rule
-                        $finalNominal = $kelipatanBaru * $rule->Nominal;
-                    } else {
-                        // Semua kelipatan sudah dibayar, skip transaksi ini untuk rule ini
-                        continue;
-                    }
+                    // Nominal akhir = kelipatan × nominal dasar
+                    $finalNominal = $multiplier * $rule->Nominal;
                 }
             }
-            // C. Rule Operator Biasa (>=, <=, =)
+            // =================================================
+            // RULE OPERATOR BIASA (>=, <=, =)
+            // =================================================
             else {
                 switch ($rule->Operator) {
                     case '>=':
@@ -144,30 +128,55 @@ class InsentifService
             }
 
             // =================================================
-            // 4. FINALISASI & SIMPAN
+            // JIKA TIDAK VALID
             // =================================================
-            if (!$isValid)
-                continue;
 
-            // Safety check duplicate untuk rule NON-kelipatan (per-shift)
-            if ($rule->BerlakuPer == 'shift' && $rule->Operator != 'kelipatan') {
+            if (!$isValid) {
+                continue;
+            }
+
+            // =================================================
+            // USER BERDASARKAN ROLE
+            // =================================================
+
+            $userId = $this->getUserByRole($transaksi, $rule->Role);
+
+            if (!$userId) {
+                continue;
+            }
+
+            // =================================================
+            // CEK DUPLICATE
+            // =================================================
+
+            if ($rule->BerlakuPer == 'shift') {
                 $exists = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->where('Shift', $shift)
                     ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
-                    ->where('KodeCabang', $kodeCabang)
                     ->exists();
-                if ($exists)
-                    continue;
+            } else {
+                $exists = InsentifKaryawan::where('IdTransaksi', $transaksi->id)
+                    ->where('UserId', $userId)
+                    ->where('Role', $rule->Role)
+                    ->where('JenisRule', $rule->JenisRule)
+                    ->exists();
             }
 
-            // Simpan ke Database
+            if ($exists) {
+                continue;
+            }
+
+            // =================================================
+            // SIMPAN INSENTIF
+            // =================================================
+
             InsentifKaryawan::create([
                 'IdTransaksi' => $transaksi->id,
                 'UserId' => $userId,
                 'Role' => $rule->Role,
-                'Nominal' => $finalNominal,  // Bisa 1x atau Nx nominal jika ada beberapa kelipatan baru
+                'Nominal' => $finalNominal,  // 🔥 Gunakan nominal hasil kalkulasi
                 'JenisRule' => $rule->JenisRule,
                 'Keterangan' => $rule->Keterangan,
                 'Shift' => $shift,
@@ -177,12 +186,16 @@ class InsentifService
         }
     }
 
+    // =====================================================
+    // MAPPING ROLE
+    // =====================================================
+
     private function getUserByRole($transaksi, $role)
     {
         return match ((int) $role) {
-            2 => $transaksi->IdDokter,
-            3 => $transaksi->IdResepsionis,
-            4 => $transaksi->IdPerawat,
+            2 => $transaksi->IdDokter,  // DOKTER
+            3 => $transaksi->IdResepsionis,  // RESEPSIONIS
+            4 => $transaksi->IdPerawat,  // PERAWAT
             default => null
         };
     }

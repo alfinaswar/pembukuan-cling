@@ -2,7 +2,7 @@
 
 @section('content')
     <style>
-        /* (CSS sama persis, tidak diubah) */
+        /* ===== TEAL THEME VARIABLES ===== */
         :root {
             --teal-primary: #0d9488;
             --teal-dark: #0f766e;
@@ -16,6 +16,7 @@
             --card-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
         }
 
+        /* ===== CARD ===== */
         .card {
             border: 1px solid #e5e7eb;
             border-radius: 10px;
@@ -38,6 +39,7 @@
             letter-spacing: .04em;
         }
 
+        /* ===== RINGKASAN PER SHIFT header (teal) ===== */
         .card-header-teal {
             background: var(--teal-primary) !important;
             border-radius: 10px 10px 0 0 !important;
@@ -60,6 +62,7 @@
             color: rgba(255, 255, 255, .8);
         }
 
+        /* ===== FORM LABELS ===== */
         .form-label.fw-semibold,
         .form-label.fw-bold {
             color: #374151;
@@ -72,6 +75,7 @@
             letter-spacing: .06em;
         }
 
+        /* ===== INPUTS ===== */
         .form-control,
         .form-select {
             border-color: #d1d5db;
@@ -92,6 +96,7 @@
             background-color: #f9fafb !important;
         }
 
+        /* ===== RADIO BUTTONS (teal) ===== */
         .form-check-input:checked {
             background-color: var(--teal-primary);
             border-color: var(--teal-primary);
@@ -101,6 +106,7 @@
             box-shadow: 0 0 0 3px rgba(13, 148, 136, .2);
         }
 
+        /* ===== TABLE ===== */
         #table-perawatan {
             border-radius: 8px;
             overflow: hidden;
@@ -134,6 +140,7 @@
             opacity: 1;
         }
 
+        /* ===== JENIS PERAWATAN label ===== */
         label.fw-semibold.mb-2 {
             color: var(--teal-primary);
             font-size: .8rem;
@@ -142,6 +149,7 @@
             letter-spacing: .06em;
         }
 
+        /* ===== TAMBAH PERAWATAN button ===== */
         #btn-tambah-perawatan {
             border-color: var(--teal-primary);
             color: var(--teal-primary);
@@ -156,6 +164,7 @@
             color: #fff;
         }
 
+        /* ===== TOTAL BIAYA CARD ===== */
         .total-biaya-card {
             background: var(--teal-lighter) !important;
             border: 1px solid var(--border-color) !important;
@@ -174,6 +183,7 @@
             font-size: 1.5rem;
         }
 
+        /* ===== BIAYA ADMIN ===== */
         .biaya-admin-row {
             display: flex;
             align-items: center;
@@ -193,6 +203,7 @@
             color: #111827;
         }
 
+        /* ===== CARA BAYAR section ===== */
         .cara-bayar-title {
             font-size: .8rem;
             font-weight: 700;
@@ -206,6 +217,7 @@
             border-color: #e5e7eb;
         }
 
+        /* ===== TOTAL BAYAR row ===== */
         .total-bayar-row {
             display: flex;
             justify-content: space-between;
@@ -228,6 +240,7 @@
             color: var(--teal-primary);
         }
 
+        /* ===== RINGKASAN values ===== */
         .ringkasan-total-label {
             font-size: .85rem;
             color: #6b7280;
@@ -251,6 +264,7 @@
             color: #111827;
         }
 
+        /* ===== STAFF CARD row ===== */
         .staff-icon {
             width: 32px;
             height: 32px;
@@ -263,6 +277,7 @@
             flex-shrink: 0;
         }
 
+        /* ===== ACTION BUTTONS ===== */
         .btn-cancel {
             border: 1px solid #d1d5db;
             background: #fff;
@@ -300,6 +315,7 @@
             color: #fff;
         }
 
+        /* ===== PRIMARY BUTTON generic ===== */
         .btn-primary {
             background-color: var(--teal-primary) !important;
             border-color: var(--teal-primary) !important;
@@ -311,6 +327,7 @@
             border-color: var(--teal-dark) !important;
         }
 
+        /* ===== PATIENT SEARCH icon ===== */
         .input-search-wrap {
             position: relative;
         }
@@ -339,9 +356,12 @@
                         <h5 class="card-title">Edit Transaksi Kasir</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('Transaksi.update', $transaksi->id) }}" method="POST" id="formTransaksiKasir">
+                        {{-- ⚠️ Form Action & Method untuk Update --}}
+                        <form action="{{ route('Transaksi.update', encrypt($transaksi->id)) }}" method="POST"
+                            id="formTransaksiKasir">
                             @csrf
                             @method('PUT')
+
                             <!-- Hari & Tanggal -->
                             <div class="col-12 mb-3">
                                 <label class="form-label mt-3" for="Tanggal">Hari &amp; Tanggal</label>
@@ -363,8 +383,8 @@
                                     </span>
                                     <input type="text" id="nama_pasien" name="NamaPasien"
                                         class="form-control @error('NamaPasien') is-invalid @enderror"
-                                        value="{{ old('NamaPasien', $transaksi->NamaPasien) }}"
-                                        placeholder="Masukkan nama pasien" autocomplete="off">
+                                        placeholder="Masukkan nama pasien" autocomplete="off"
+                                        value="{{ old('NamaPasien', $transaksi->NamaPasien ?? '') }}">
                                 </div>
                                 @error('NamaPasien')
                                     <span class="invalid-feedback">{{ $message }}</span>
@@ -377,13 +397,13 @@
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input @error('JenisPasien') is-invalid @enderror"
                                         type="radio" name="JenisPasien" id="pasien_baru" value="Baru"
-                                        {{ old('JenisPasien', $transaksi->JenisPasien) == 'Baru' ? 'checked' : '' }}>
+                                        {{ old('JenisPasien', $transaksi->JenisPasien ?? '') == 'Baru' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="pasien_baru">Pasien Baru</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input @error('JenisPasien') is-invalid @enderror"
                                         type="radio" name="JenisPasien" id="pasien_lama" value="Lama"
-                                        {{ old('JenisPasien', $transaksi->JenisPasien) == 'Lama' ? 'checked' : '' }}>
+                                        {{ old('JenisPasien', $transaksi->JenisPasien ?? '') == 'Lama' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="pasien_lama">Pasien Lama</label>
                                 </div>
                                 @error('JenisPasien')
@@ -407,60 +427,110 @@
                                         </thead>
                                         <tbody id="body-perawatan">
                                             @php
-                                                $perawatanLama = old(
-                                                    'JenisPerawatan',
-                                                    isset($transaksi->TransaksiDetail)
-                                                        ? $transaksi->TransaksiDetail->toArray()
-                                                        : [],
-                                                );
+                                                // Prioritas: old() jika ada error validasi, else ambil dari DB
+                                                $oldPerawatan = old('JenisPerawatan');
+                                                $existingDetails = $transaksi->TransaksiDetail ?? collect();
                                             @endphp
-                                            @if (is_array($perawatanLama) && count($perawatanLama) > 0)
-                                                @foreach ($perawatanLama as $idx => $perawatan)
-                                                    <td class="text-center align-middle">{{ $loop->iteration }}</td>
-                                                    <td>
-                                                        <select class="form-control perawatan-select"
-                                                            name="JenisPerawatan[{{ $idx }}][id]">
-                                                            <option value="">Pilih Jenis Perawatan</option>
-                                                            @foreach ($Perawatan as $row)
-                                                                <option value="{{ $row->id }}"
-                                                                    data-harga="{{ $row->Tarif }}"
-                                                                    {{ (isset($perawatan['JenisPerawatan']) && $perawatan['JenisPerawatan'] == $row->id) || (isset($perawatan['id']) && $perawatan['id'] == $row->id) ? 'selected' : '' }}>
-                                                                    {{ $row->Nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" class="form-control biaya-perawatan bg-light"
-                                                            name="JenisPerawatan[{{ $idx }}][Biaya]"
-                                                            placeholder="Rp 0"
-                                                            value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : (isset($perawatan['biaya']) ? $perawatan['biaya'] : '') }}">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" class="form-control"
-                                                            name="JenisPerawatan[{{ $idx }}][Keterangan]"
-                                                            placeholder="Keterangan"
-                                                            value="{{ isset($perawatan['Keterangan']) ? $perawatan['Keterangan'] : (isset($perawatan['keterangan']) ? $perawatan['keterangan'] : '') }}">
-                                                    </td>
 
-                                                    <td class="text-center">
-                                                        <button type="button" class="btn btn-link btn-remove-perawatan p-1"
-                                                            title="Hapus">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18"
-                                                                height="18" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path d="M3 6h18" />
-                                                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                                                <path d="M10 11v6" />
-                                                                <path d="M14 11v6" />
-                                                            </svg>
-                                                        </button>
-                                                    </td>
+                                            @if (is_array($oldPerawatan) && count($oldPerawatan) > 0)
+                                                {{-- Tampilkan old() jika validasi gagal --}}
+                                                @foreach ($oldPerawatan as $idx => $perawatan)
+                                                    <tr>
+                                                        <td class="text-center align-middle">{{ $loop->iteration }}</td>
+                                                        <td>
+                                                            <select class="form-control perawatan-select"
+                                                                name="JenisPerawatan[{{ $idx }}][id]">
+                                                                <option value="">Pilih Jenis Perawatan</option>
+                                                                @foreach ($Perawatan as $row)
+                                                                    <option value="{{ $row->id }}"
+                                                                        data-harga="{{ $row->Tarif }}"
+                                                                        {{ isset($perawatan['id']) && $perawatan['id'] == $row->id ? 'selected' : '' }}>
+                                                                        {{ $row->Nama }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                class="form-control biaya-perawatan bg-light"
+                                                                name="JenisPerawatan[{{ $idx }}][Biaya]"
+                                                                placeholder="Rp 0"
+                                                                value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : '' }}">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control"
+                                                                name="JenisPerawatan[{{ $idx }}][Keterangan]"
+                                                                placeholder="Keterangan"
+                                                                value="{{ isset($perawatan['Keterangan']) ? $perawatan['Keterangan'] : '' }}">
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button"
+                                                                class="btn btn-link btn-remove-perawatan p-1"
+                                                                title="Hapus">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                    height="18" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M3 6h18" />
+                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                    <path d="M10 11v6" />
+                                                                    <path d="M14 11v6" />
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @elseif ($existingDetails->isNotEmpty())
+                                                {{-- Tampilkan data dari database --}}
+                                                @foreach ($existingDetails as $idx => $detail)
+                                                    <tr>
+                                                        <td class="text-center align-middle">{{ $loop->iteration }}</td>
+                                                        <td>
+                                                            <select class="form-control perawatan-select"
+                                                                name="JenisPerawatan[{{ $idx }}][id]">
+                                                                <option value="">Pilih Jenis Perawatan</option>
+                                                                @foreach ($Perawatan as $row)
+                                                                    <option value="{{ $row->id }}"
+                                                                        data-harga="{{ $row->Tarif }}"
+                                                                        {{ $detail->JenisPerawatan == $row->id ? 'selected' : '' }}>
+                                                                        {{ $row->Nama }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                class="form-control biaya-perawatan bg-light"
+                                                                name="JenisPerawatan[{{ $idx }}][Biaya]"
+                                                                placeholder="Rp 0" value="{{ $detail->Biaya }}">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control"
+                                                                name="JenisPerawatan[{{ $idx }}][Keterangan]"
+                                                                placeholder="Keterangan"
+                                                                value="{{ $detail->Keterangan ?? '' }}">
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button"
+                                                                class="btn btn-link btn-remove-perawatan p-1"
+                                                                title="Hapus">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                    height="18" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M3 6h18" />
+                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                    <path d="M10 11v6" />
+                                                                    <path d="M14 11v6" />
+                                                                </svg>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             @else
+                                                {{-- Default: 1 baris kosong --}}
                                                 <tr>
                                                     <td class="text-center align-middle">1</td>
                                                     <td>
@@ -475,8 +545,13 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="text" class="form-control biaya-perawatan bg-light"
+                                                        <input type="text"
+                                                            class="form-control biaya-perawatan bg-light"
                                                             name="JenisPerawatan[0][Biaya]" placeholder="Rp 0">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control"
+                                                            name="JenisPerawatan[0][Keterangan]" placeholder="Keterangan">
                                                     </td>
                                                     <td class="text-center">
                                                         <button type="button"
@@ -504,7 +579,6 @@
                             </div>
 
                             <!-- Biaya Admin -->
-                            <!-- Biaya Admin -->
                             <div class="biaya-admin-row mb-3">
                                 <span class="biaya-admin-label">
                                     Biaya Admin
@@ -515,7 +589,8 @@
                                         class="form-control text-end @error('BiayaAdmin') is-invalid @enderror"
                                         id="biaya_admin" name="BiayaAdmin"
                                         style="width:130px;display:inline-block;background:#fff;border:1px solid #ced4da;font-weight:600;color:#111827;"
-                                        placeholder="Rp 0" value="{{ old('BiayaAdmin') }}" autocomplete="off">
+                                        placeholder="Rp 0" value="{{ old('BiayaAdmin', $transaksi->BiayaAdmin ?? 0) }}"
+                                        autocomplete="off">
                                 </div>
                                 @error('BiayaAdmin')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
@@ -524,13 +599,15 @@
 
                             <!-- Total Biaya -->
                             <input type="hidden" id="total-biaya-input" name="TotalBiaya"
-                                value="{{ old('TotalBiaya', $transaksi->TotalBayar) }}">
+                                value="{{ old('TotalBiaya', $transaksi->TotalBayar ?? 0) }}">
                             <div class="total-biaya-card card border-0 mb-3">
                                 <div class="card-body py-3 px-4">
                                     <div class="label-total mb-1">
                                         Total Biaya (Perawatan + Biaya Admin<span id="info-pasien-baru"></span>)
                                     </div>
-                                    <h3 class="mb-0">Rp <span id="total-biaya">0</span></h3>
+                                    <h3 class="mb-0">Rp <span
+                                            id="total-biaya">{{ number_format($transaksi->TotalBayar ?? 0, 0, ',', '.') }}</span>
+                                    </h3>
                                 </div>
                             </div>
 
@@ -540,9 +617,11 @@
                                     <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
                                 </a>
                                 <button type="submit" class="btn-save">
-                                    <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan Perubahan
+                                    <i data-lucide="save" style="width:15px;height:15px;"></i> Update Transaksi
                                 </button>
                             </div>
+
+
                     </div>
                 </div>
             </div>
@@ -562,15 +641,16 @@
                             </div>
                             <div class="card-body py-3 px-4">
                                 <div class="ringkasan-total-label">Total Biaya Per Shift</div>
-                                <div class="ringkasan-total-value mb-3">Rp 0</div>
+                                <div class="ringkasan-total-value mb-3">Rp
+                                    {{ number_format($totalShift ?? 0, 0, ',', '.') }}</div>
                                 <div class="d-flex justify-content-between">
                                     <span class="ringkasan-stat-label">Total Pasien Baru Per Shift</span>
-                                    <span class="ringkasan-stat-value">0 Pasien</span>
+                                    <span class="ringkasan-stat-value">{{ $totalPasienBaru ?? 0 }} Pasien</span>
                                 </div>
                                 <hr class="my-2" style="border-color:#f3f4f6;">
                                 <div class="d-flex justify-content-between">
                                     <span class="ringkasan-stat-label">Total Pasien Lama Per Shift</span>
-                                    <span class="ringkasan-stat-value">0 Pasien</span>
+                                    <span class="ringkasan-stat-value">{{ $totalPasienLama ?? 0 }} Pasien</span>
                                 </div>
                             </div>
                         </div>
@@ -586,7 +666,7 @@
                                         <input class="form-check-input @error('MetodePembayaran') is-invalid @enderror"
                                             type="radio" name="MetodePembayaran"
                                             id="metode_pembayaran_{{ $mp->id }}" value="{{ $mp->id }}"
-                                            {{ old('MetodePembayaran', $transaksi->MetodePembayaran) == $mp->id ? 'checked' : '' }}>
+                                            {{ old('MetodePembayaran', $transaksi->MetodePembayaran ?? '') == $mp->id ? 'checked' : '' }}>
                                         <label class="form-check-label" for="metode_pembayaran_{{ $mp->id }}">
                                             {{ $mp->Nama }}
                                         </label>
@@ -600,7 +680,8 @@
 
                                 <div class="total-bayar-row">
                                     <span class="total-bayar-label">Total Bayar</span>
-                                    <span class="total-bayar-value">Rp <span id="total-bayar">0</span></span>
+                                    <span class="total-bayar-value">Rp <span
+                                            id="total-bayar">{{ number_format($transaksi->TotalBayar ?? 0, 0, ',', '.') }}</span></span>
                                 </div>
                             </div>
                         </div>
@@ -610,6 +691,7 @@
                     <div class="col-12">
                         <div class="card mb-0">
                             <div class="card-body py-3 px-4">
+
                                 <!-- Dokter -->
                                 <div class="mb-2">
                                     <label for="Dokter" class="form-label fw-bold text-uppercase">
@@ -621,7 +703,7 @@
                                         <option value="">-- Pilih Dokter --</option>
                                         @foreach ($dokter as $d)
                                             <option value="{{ $d->id }}"
-                                                {{ old('Dokter', $transaksi->IdDokter) == $d->id ? 'selected' : '' }}>
+                                                {{ old('Dokter', $transaksi->IdDokter ?? '') == $d->id ? 'selected' : '' }}>
                                                 {{ $d->name }}
                                             </option>
                                         @endforeach
@@ -630,6 +712,7 @@
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
                                 </div>
+
                                 <!-- Perawat -->
                                 <div class="mb-2">
                                     <label for="Perawat" class="form-label fw-bold text-uppercase">
@@ -641,14 +724,16 @@
                                         <option value="">-- Pilih Perawat --</option>
                                         @foreach ($perawat as $p)
                                             <option value="{{ $p->id }}"
-                                                {{ old('Perawat', $transaksi->IdPerawat) == $p->id ? 'selected' : '' }}>
-                                                {{ $p->name }}</option>
+                                                {{ old('Perawat', $transaksi->IdPerawat ?? '') == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('Perawat')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
                                 </div>
+
                                 <!-- Kasir / Resepsionis -->
                                 <div class="mb-2">
                                     <label for="Kasir" class="form-label fw-bold text-uppercase">
@@ -660,27 +745,30 @@
                                         <option value="">-- Pilih Resepsionis --</option>
                                         @foreach ($kasir as $r)
                                             <option value="{{ $r->id }}"
-                                                {{ old('Kasir', $transaksi->IdResepsionis) == $r->id ? 'selected' : '' }}>
-                                                {{ $r->name }}</option>
+                                                {{ old('Kasir', $transaksi->IdResepsionis ?? '') == $r->id ? 'selected' : '' }}>
+                                                {{ $r->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('Kasir')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
                                 </div>
+
                             </div>
                         </div>
                     </div>
+                    </form>
                 </div>
             </div>
-            </form>
         </div>
     </div>
 @endsection
 
 @push('scripts')
     <script>
-        let perawatanCount = 1;
+        let perawatanCount =
+            {{ is_array(old('JenisPerawatan')) ? count(old('JenisPerawatan')) : $transaksi->TransaksiDetail->count() ?? 1 }};
         let adminAutoFilled = false;
 
         function rupiahFormat(num) {
@@ -718,12 +806,12 @@
         // Format Rupiah REAL-TIME saat mengetik di Biaya Admin
         $('#biaya_admin').on('input', function() {
             let val = parseRupiah($(this).val());
-            adminAutoFilled = false; // Tandai sebagai input manual
+            adminAutoFilled = false;
             $(this).val(rupiahFormat(val));
-            recalculateTotal(); // Langsung hitung total
+            recalculateTotal();
         });
 
-        // Handle submit form
+        // Handle submit form - konversi ke angka sebelum submit
         $('#formTransaksiKasir').on('submit', function() {
             $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
             $('.biaya-perawatan').each(function() {
@@ -759,7 +847,7 @@
                 recalculateTotal();
             });
 
-            // Initial check
+            // Initial check untuk Biaya Admin
             let initialAdmin = parseRupiah($('#biaya_admin').val());
             let initialJenis = $('input[name="JenisPasien"]:checked').val();
             if (initialJenis === "Baru" && initialAdmin === 0) {
@@ -827,7 +915,7 @@
             recalculateTotal();
         });
 
-        // Auto-fill biaya perawatan
+        // Auto-fill biaya perawatan saat pilih jenis
         $(document).on('change', '.perawatan-select', function() {
             let harga = $(this).find('option:selected').data('harga') ?? 0;
             $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
@@ -841,20 +929,27 @@
             recalculateTotal();
         });
 
-        // Initial setup
+        // Initial setup saat halaman load
         $(function() {
-            $('.perawatan-select').each(function() {
-                let harga = $(this).find('option:selected').data('harga') ?? 0;
-                $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
-            });
-            $('#body-perawatan tr').each(function(i) {
-                $(this).find('td:first').text(i + 1);
+            // Format nilai yang sudah ada
+            $('.biaya-perawatan').each(function() {
+                let val = $(this).val();
+                if (val && !val.includes('Rp')) {
+                    $(this).val(rupiahFormat(val));
+                }
             });
 
             let adminVal = $('#biaya_admin').val();
             if (adminVal && !adminVal.includes('Rp')) {
                 $('#biaya_admin').val(rupiahFormat(adminVal));
             }
+
+            // Update nomor urut
+            $('#body-perawatan tr').each(function(i) {
+                $(this).find('td:first').text(i + 1);
+            });
+
+            // Hitung total awal
             recalculateTotal();
         });
     </script>

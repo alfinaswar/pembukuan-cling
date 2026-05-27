@@ -77,12 +77,13 @@
                                     <option value="">Pilih Perawat</option>
                                     @foreach ($perawat as $p)
                                         <option value="{{ $p->id }}"
-                                            @if ($isSuperadminOrManagement) {{ $perawat_id == $p->id ? 'selected' : '' }}
+                                            @if ($isSuperadminOrManagement) {{ request('perawat') == $p->id ? 'selected' : '' }}
                                             @else
-                                                {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
+                                                {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
+
                                 </select>
                             </div>
                         </div>
