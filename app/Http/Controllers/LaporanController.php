@@ -340,7 +340,8 @@ class LaporanController extends Controller
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
         // Dihitung group per tanggal+shift, struktur data konsisten dengan tabel di view (tanggal, jumlah, perawat, insentif)
-        $countpasienlama = Transaksi::where('JenisPasien', 'Lama')->count();
+        $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
+
         $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
@@ -580,16 +581,17 @@ class LaporanController extends Controller
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
         //     View akses: $row['created_at'], $row['jumlah_pasien_lama'], $row['perawat_nama']
         //     → perlu di-group & di-map agar strukturnya cocok
+        $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
         $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
             ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
-            ->map(function ($group) {
+            ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
                     'created_at' => $first->created_at,
-                    'jumlah_pasien_lama' => $group->count(),
+                    'jumlah_pasien_lama' => $countpasienlama,
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
                 ];
