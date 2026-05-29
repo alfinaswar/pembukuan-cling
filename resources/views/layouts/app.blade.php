@@ -776,7 +776,8 @@
                                         @can('laporan-umum')
                                             <li class="sidebar-item">
                                                 <a href="{{ route('laporan-umum.index') }}"
-                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'umum' ? 'active' : '' }}">
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && (request()->segment(2) === 'umum' || request()->segment(2) === 'data-umum') ? 'active' : '' }}">
+
                                                     <div class="round-16 d-flex justify-content-center align-items-center"
                                                         style="height: 32px; width: 32px;">
                                                         <span
