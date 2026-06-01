@@ -16,16 +16,30 @@
                 <div class="card-body">
 
                     {{-- 🔹 FILTER TANGGAL --}}
-                    <div class="row mb-3 g-2">
-                        <div class="col-md-4">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">Tanggal Mulai</label>
                             <input type="date" id="filter_tanggal_mulai" class="form-control form-control-sm">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">Tanggal Akhir</label>
                             <input type="date" id="filter_tanggal_akhir" class="form-control form-control-sm">
                         </div>
-                        <div class="col-md-4 d-flex align-items-end gap-2">
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Shift</label>
+                            <select id="filter_shift" class="form-control form-control-sm">
+                                <option value="">Semua Shift</option>
+                                @foreach ($shift as $item)
+                                    <option value="{{ $item->id }}">
+                                        {{ $item->Nama }}
+                                        ({{ \Carbon\Carbon::createFromFormat('H:i:s', $item->JamMulai)->format('H:i') }} -
+                                        {{ \Carbon\Carbon::createFromFormat('H:i:s', $item->JamSelesai)->format('H:i') }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end gap-2">
                             <button id="btnFilter" class="btn btn-primary btn-sm">
                                 <i class="ti ti-filter me-1"></i> Filter
                             </button>
@@ -34,7 +48,79 @@
                             </button>
                         </div>
                     </div>
+
                     {{-- END FILTER --}}
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="avatar bg-success text-white rounded-circle">
+                                                <i class="ti ti-wallet"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="text-muted small mb-1">Total Omset</div>
+                                            <div id="sum_omset" class="fw-bold fs-5">Rp 0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="avatar bg-primary text-white rounded-circle">
+                                                <i class="ti ti-user-plus"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="text-muted small mb-1">Total Pasien Baru</div>
+                                            <div id="sum_pasien_baru" class="fw-bold fs-5">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="avatar bg-info text-white rounded-circle">
+                                                <i class="ti ti-user-check"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="text-muted small mb-1">Total Pasien Lama</div>
+                                            <div id="sum_pasien_lama" class="fw-bold fs-5">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="avatar bg-secondary text-white rounded-circle">
+                                                <i class="ti ti-users"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="text-muted small mb-1">Total Pasien</div>
+                                            <div id="sum_pasien_total" class="fw-bold fs-5">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
 
                     <div class="table-responsive">
                         <table id="transaksiKasirTable" class="table table-striped table-bordered align-middle"
@@ -89,7 +175,7 @@
             function reloadTable() {
                 const mulai = $('#filter_tanggal_mulai').val();
                 const akhir = $('#filter_tanggal_akhir').val();
-
+                const shift = $('#filter_shift').val();
                 $('#transaksiKasirTable').DataTable().ajax.reload();
             }
 
@@ -102,8 +188,10 @@
             $('#btnReset').on('click', function() {
                 const today = new Date().toISOString().split('T')[0];
                 $('#filter_tanggal_mulai, #filter_tanggal_akhir').val(today);
+                $('#filter_shift').val(''); // Reset filter shift ke default (kosong)
                 reloadTable();
             });
+
 
             // TOMBOL DELETE
             $('body').on('click', '.btn-delete', function() {
@@ -153,6 +241,7 @@
                         // Kirim parameter filter ke server
                         d.tanggal_mulai = $('#filter_tanggal_mulai').val();
                         d.tanggal_akhir = $('#filter_tanggal_akhir').val();
+                        d.shift = $('#filter_shift').val();
                     }
                 },
                 language: {
@@ -222,6 +311,19 @@
                 // ✅ Pastikan default load = hari ini
                 initComplete: function() {
                     reloadTable();
+                },
+                drawCallback: function(settings) {
+                    const json = settings.json;
+                    if (json && json.summary) {
+                        const s = json.summary;
+                        // Format rupiah
+                        const formatRp = (val) =>
+                            'Rp ' + parseInt(val).toLocaleString('id-ID');
+                        $('#sum_omset').text(formatRp(s.total_omset));
+                        $('#sum_pasien_baru').text(s.pasien_baru);
+                        $('#sum_pasien_lama').text(s.pasien_lama);
+                        $('#sum_pasien_total').text(s.pasien_total);
+                    }
                 }
             });
         });

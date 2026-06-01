@@ -242,6 +242,7 @@
             }
         }
     </style>
+    @stack('css')
 </head>
 
 <body style="background-color: #FAFBFE;">
@@ -494,6 +495,11 @@
                                 </a>
                                 <div class="me-4 d-flex align-items-center">
                                     <span id="currentDateTime" class="fw-semibold" style="font-size: 15px;"></span>
+                                    <span class="mx-3 fw-semibold" style="font-size: 15px;">
+                                        Shift: {{ auth()->user()?->getShift?->Nama ?? '-' }}
+
+
+                                    </span>
                                 </div>
                                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
                                     <!-- ... Remaining Icons ... -->
@@ -511,6 +517,7 @@
                                     </li>
                                 </ul>
                             </div>
+
                         </div>
                     </nav>
                     <!-- Mobilenavbar complete menu -->
@@ -538,14 +545,7 @@
                                             <span class="hide-menu">Dashboard</span>
                                         </a>
                                     </li>
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link" href="#" aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-user"></i>
-                                            </span>
-                                            <span class="hide-menu">Pasien</span>
-                                        </a>
-                                    </li>
+
 
                                     @can('pembayaran-index')
                                         <li class="sidebar-item">
@@ -733,15 +733,7 @@
                                 <i class="ti ti-home nav-small-cap-icon fs-4"></i>
                                 <span class="hide-menu">Home</span>
                             </li>
-                            <!-- <li class="sidebar-item">
-                                <a class="sidebar-link" href="{{ route('home') }}" id="get-url"
-                                    aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-layout-dashboard"></i>
-                                    </span>
-                                    <span class="hide-menu">Dashboard</span>
-                                </a>
-                            </li> -->
+
 
                             <li class="sidebar-item">
                                 <a class="sidebar-link" href="{{ route('home') }}" id="get-url"
@@ -896,6 +888,18 @@
                                                 </a>
                                             </li>
                                         @endcan
+                                        {{-- @can('master-hari-libur') --}}
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('MasterHariLibur.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'hari-libur' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-calendar-event"></i>
+                                                </div>
+                                                <span class="hide-menu">Hari Libur</span>
+                                            </a>
+                                        </li>
+
+                                        {{-- @endcan --}}
                                     </ul>
                                 </li>
                             @endcan
@@ -1138,4 +1142,70 @@
     }
     updateDateTimeID();
     setInterval(updateDateTimeID, 1000);
+</script>
+
+<script>
+    const SESSION_LIFETIME_MIN = {{ config('session.lifetime', 120) }};
+    const SHOW_POPUP_BEFORE_EXPIRY_SEC = 120;
+    const session_lifetime_ms = SESSION_LIFETIME_MIN * 60 * 1000;
+    const popup_trigger_ms = session_lifetime_ms - (SHOW_POPUP_BEFORE_EXPIRY_SEC * 1000);
+    const sessionStartTime = Date.now();
+    let sessionPopupShown = false;
+    let popupTimeout;
+
+    function showSessionPopup() {
+        if (sessionPopupShown) return;
+        sessionPopupShown = true;
+        Swal.fire({
+            title: 'Session Akan Habis',
+            html: `Sesi Anda hampir habis.<br>Pilih <b>Perpanjang</b> untuk memperbarui sesi Anda.<br>Atau pilih <b>Logout</b> untuk keluar sekarang.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Perpanjang',
+            cancelButtonText: 'Logout',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            timer: SHOW_POPUP_BEFORE_EXPIRY_SEC * 1000,
+            timerProgressBar: true,
+            didOpen: () => {
+                const content = Swal.getHtmlContainer();
+                if (content) {
+                    content.style.fontSize = "16px";
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('{{ url('/keepalive') }}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).then(() => {
+                    sessionPopupShown = false;
+                    window.location.reload();
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel || result.isDismissed) {
+                window.location.href = "{{ route('logout') }}";
+            } else {}
+        });
+        setTimeout(function() {
+            if (sessionPopupShown) {
+                window.location.href = "{{ route('logout') }}";
+            }
+        }, SHOW_POPUP_BEFORE_EXPIRY_SEC * 1000 + 1500); // buffer sedikit setelah timer
+    }
+
+    function startSessionPopupTimer() {
+        if (popupTimeout) clearTimeout(popupTimeout);
+        const timeUntilPopup = popup_trigger_ms - (Date.now() - sessionStartTime);
+        if (timeUntilPopup <= 0) {
+            showSessionPopup();
+        } else {
+            popupTimeout = setTimeout(showSessionPopup, timeUntilPopup);
+        }
+    }
+
+    startSessionPopupTimer();
+    setTimeout(function() {
+        window.location.href = "{{ route('logout') }}";
+    }, session_lifetime_ms + 2000);
 </script>

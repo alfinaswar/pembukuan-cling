@@ -279,7 +279,24 @@
                                                 @endif
                                             </td>
                                             <td>{{ 'Rp ' . number_format($tr->TotalBayar ?? 0, 0, ',', '.') }}</td>
-                                            <td>{{ $tr->getMetodePembayaran->Nama ?? ($tr->MetodePembayaran ?? '-') }}</td>
+                                            <td>
+                                                @if (!empty($tr->getMetodePembayaran) && count($tr->getMetodePembayaran) > 0)
+                                                    <ul class="mb-0" style="padding-left: 18px;">
+                                                        @foreach ($tr->getMetodePembayaran as $mp)
+                                                            <li>
+                                                                <strong>{{ $mp->getMetodeBayar->Nama ?? ($mp->MetodePembayaran ?? '-') }}</strong>
+                                                                :
+                                                                {{ 'Rp ' . number_format($mp->Nominal ?? 0, 0, ',', '.') }}
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    -
+                                                @endif
+
+
+                                            </td>
+
                                             <td>{{ \Carbon\Carbon::parse($tr->created_at)->format('d/m/Y H:i') }}</td>
                                             <td>{{ $tr->getCabang->Nama ?? '-' }}</td>
                                         </tr>

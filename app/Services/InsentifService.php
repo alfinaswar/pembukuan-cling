@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\InsentifKaryawan;
+use App\Models\MasterHariLibur;  // <-- Tambahkan import Model MasterHariLibur
 use App\Models\RuleInsentif;
 use App\Models\Transaksi;
+use Carbon\Carbon;
 
 class InsentifService
 {
@@ -21,6 +23,7 @@ class InsentifService
         $tanggal = $transaksi->Tanggal;
         $shift = $transaksi->Shift;
         $kodeCabang = $transaksi->KodeCabang;
+        $tanggalCarbon = Carbon::parse($tanggal);
 
         // =====================================================
         // 1. HITUNG DATA SHIFT (Akumulasi Real-time)
@@ -55,7 +58,7 @@ class InsentifService
             ->toArray();
 
         $context = [
-            'omzet_shift' => $totalShift,  // 🔥 Kunci untuk rule kelipatan
+            'omzet_shift' => $totalShift,
             'pasien_lama' => $pasienLama,
             'pasien_baru' => $pasienBaru,
             'transaksi' => $totalTransaksi,
@@ -66,91 +69,169 @@ class InsentifService
 
         foreach ($rules as $rule) {
             $value = $context[$rule->JenisRule] ?? null;
-            if ($value === null)
-                continue;
-
-            // --- Validasi Konteks ---
-            if ($rule->JenisRule == 'pasien_baru' && $transaksi->JenisPasien !== 'Baru')
-                continue;
-            if ($rule->JenisRule == 'pasien_lama' && $transaksi->JenisPasien !== 'Lama')
-                continue;
-
-            // 🔥 FIX: Hitung userId DI SINI (sebelum digunakan di logika kelipatan)
-            $userId = $this->getUserByRole($transaksi, $rule->Role);
-            if (!$userId)
-                continue;
-
-            $isValid = false;
-            $finalNominal = $rule->Nominal;
 
             // =================================================
-            // 3. EVALUASI RULE
+            // 🔥 HANDLE RULE KHUSUS
             // =================================================
 
-            // A. Rule Tindakan (Cek string)
-            if ($rule->JenisRule == 'tindakan') {
-                foreach ($value as $tindakan) {
-                    if (str_contains(strtolower($tindakan), strtolower($rule->Nilai))) {
-                        $isValid = true;
-                        break;
-                    }
+            // A. Rule: Insentif Hari Libur (1x per HARI)
+            if ($rule->JenisRule == 'insentif_hari_libur') {
+                $userId = $this->getUserByRole($transaksi, $rule->Role);
+                if (!$userId)
+                    continue;
+
+                // Cek apakah tanggal transaksi adalah hari libur (hanya pakai tabel MasterHariLibur)
+                $isHoliday = $this->isHariLibur($transaksi->Tanggal);
+                if (!$isHoliday)
+                    continue;
+
+                // 🔥 CEK FREKUENSI: Sudah dapat insentif hari ini?
+                $sudahDapatHariIni = InsentifKaryawan::where('UserId', $userId)
+                    ->where('Role', $rule->Role)
+                    ->where('JenisRule', $rule->JenisRule)
+                    ->whereDate('created_at', $tanggal)  // Cek per tanggal
+                    ->where('KodeCabang', $kodeCabang)
+                    ->exists();
+
+                if ($sudahDapatHariIni) {
+                    continue;  // Skip, sudah dapat hari ini
                 }
+
+                $isValid = true;
+                $finalNominal = $rule->Nominal;
             }
-            // B. 🔥 Rule Kelipatan (Akumulasi Shift)
-            elseif ($rule->Operator == 'kelipatan') {
-                $threshold = $rule->Nilai;  // Misal: 6.000.000
+            // B. Rule: Target Tercapai (1x per BULAN)
+            elseif ($rule->JenisRule == 'target_tercapai') {
+                $userId = $this->getUserByRole($transaksi, $rule->Role);
+                if (!$userId)
+                    continue;
 
-                // 1. Hitung total kelipatan yang TERCAPAI saat ini di shift tersebut
-                $totalKelipatanTercapai = floor($totalShift / $threshold);
+                // 🔥 CEK FREKUENSI: Sudah dapat insentif bulan ini?
+                $sudahDapatBulanIni = InsentifKaryawan::where('UserId', $userId)
+                    ->where('Role', $rule->Role)
+                    ->where('JenisRule', $rule->JenisRule)
+                    ->whereYear('created_at', $tanggalCarbon->year)
+                    ->whereMonth('created_at', $tanggalCarbon->month)
+                    ->where('KodeCabang', $kodeCabang)
+                    ->exists();
 
-                if ($totalKelipatanTercapai >= 1) {
-                    $isValid = true;
-
-                    // 2. Hitung berapa insentif kelipatan yang SUDAH PERNAH dibagikan untuk shift ini
-                    // (Query ini aman karena insentif transaksi ini sudah di-delete di hapusSebelumProses)
-                    $sudahDiberikan = InsentifKaryawan::where('UserId', $userId)
-                        ->where('Role', $rule->Role)
-                        ->where('JenisRule', $rule->JenisRule)
-                        ->where('Shift', $shift)
-                        ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
-                        ->where('KodeCabang', $kodeCabang)
-                        ->count();
-
-                    // 3. Hitung selisih: hanya berikan untuk kelipatan BARU yang belum dibayar
-                    $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
-
-                    if ($kelipatanBaru > 0) {
-                        // Nominal = jumlah kelipatan baru × nominal dasar rule
-                        $finalNominal = $kelipatanBaru * $rule->Nominal;
-                    } else {
-                        // Semua kelipatan sudah dibayar, skip transaksi ini untuk rule ini
-                        continue;
-                    }
+                if ($sudahDapatBulanIni) {
+                    continue;  // Skip, sudah dapat bulan ini
                 }
-            }
-            // C. Rule Operator Biasa (>=, <=, =)
-            else {
+
+                // Ambil metric target dari context
+                $metricKey = $rule->KondisiTambahan ?? 'omzet_shift';
+                $metricValue = $context[$metricKey] ?? 0;
+
+                // Evaluasi berdasarkan operator
                 switch ($rule->Operator) {
                     case '>=':
-                        $isValid = $value >= $rule->Nilai;
+                        $isValid = $metricValue >= $rule->Nilai;
                         break;
                     case '<=':
-                        $isValid = $value <= $rule->Nilai;
+                        $isValid = $metricValue <= $rule->Nilai;
                         break;
                     case '=':
-                        $isValid = $value == $rule->Nilai;
+                        $isValid = $metricValue == $rule->Nilai;
                         break;
+                    case '>':
+                        $isValid = $metricValue > $rule->Nilai;
+                        break;
+                    case '<':
+                        $isValid = $metricValue < $rule->Nilai;
+                        break;
+                    default:
+                        $isValid = false;
                 }
+
+                if (!$isValid)
+                    continue;
+                $finalNominal = $rule->Nominal;
+            }
+            // =================================================
+            // 🔥 HANDLE RULE REGULER
+            // =================================================
+            else {
+                if ($value === null)
+                    continue;
+
+                // Validasi Konteks
+                if ($rule->JenisRule == 'pasien_baru' && $transaksi->JenisPasien !== 'Baru')
+                    continue;
+                if ($rule->JenisRule == 'pasien_lama' && $transaksi->JenisPasien !== 'Lama')
+                    continue;
+
+                $userId = $this->getUserByRole($transaksi, $rule->Role);
+                if (!$userId)
+                    continue;
+
+                $isValid = false;
+                $finalNominal = $rule->Nominal;
+
+                // C. Rule Tindakan
+                if ($rule->JenisRule == 'tindakan') {
+                    foreach ($value as $tindakan) {
+                        if (str_contains(strtolower($tindakan), strtolower($rule->Nilai))) {
+                            $isValid = true;
+                            break;
+                        }
+                    }
+                }
+                // D. Rule Kelipatan
+                elseif ($rule->Operator == 'kelipatan') {
+                    $threshold = $rule->Nilai;
+                    $totalKelipatanTercapai = floor($totalShift / $threshold);
+
+                    if ($totalKelipatanTercapai >= 1) {
+                        $isValid = true;
+
+                        $sudahDiberikan = InsentifKaryawan::where('UserId', $userId)
+                            ->where('Role', $rule->Role)
+                            ->where('JenisRule', $rule->JenisRule)
+                            ->where('Shift', $shift)
+                            ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
+                            ->where('KodeCabang', $kodeCabang)
+                            ->count();
+
+                        $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
+
+                        if ($kelipatanBaru > 0) {
+                            $finalNominal = $kelipatanBaru * $rule->Nominal;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+                // E. Rule Operator Biasa
+                else {
+                    switch ($rule->Operator) {
+                        case '>=':
+                            $isValid = $value >= $rule->Nilai;
+                            break;
+                        case '<=':
+                            $isValid = $value <= $rule->Nilai;
+                            break;
+                        case '=':
+                            $isValid = $value == $rule->Nilai;
+                            break;
+                        default:
+                            $isValid = false;
+                    }
+                }
+
+                if (!$isValid)
+                    continue;
             }
 
             // =================================================
-            // 4. FINALISASI & SIMPAN
+            // 3. CEK DUPLICATE & SIMPAN
             // =================================================
-            if (!$isValid)
-                continue;
 
-            // Safety check duplicate untuk rule NON-kelipatan (per-shift)
-            if ($rule->BerlakuPer == 'shift' && $rule->Operator != 'kelipatan') {
+            // Cek duplicate untuk rule per-shift (non-kelipatan, non-target)
+            if ($rule->BerlakuPer == 'shift' &&
+                    $rule->Operator != 'kelipatan' &&
+                    $rule->JenisRule != 'target_tercapai' &&
+                    $rule->JenisRule != 'insentif_hari_libur') {
                 $exists = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
@@ -167,7 +248,7 @@ class InsentifService
                 'IdTransaksi' => $transaksi->id,
                 'UserId' => $userId,
                 'Role' => $rule->Role,
-                'Nominal' => $finalNominal,  // Bisa 1x atau Nx nominal jika ada beberapa kelipatan baru
+                'Nominal' => $finalNominal,
                 'JenisRule' => $rule->JenisRule,
                 'Keterangan' => $rule->Keterangan,
                 'Shift' => $shift,
@@ -177,6 +258,20 @@ class InsentifService
         }
     }
 
+    // =====================================================
+    // 🔥 HELPER: Cek Hari Libur dengan MasterHariLibur
+    // =====================================================
+    private function isHariLibur($tanggal)
+    {
+        // Cek pada tabel MasterHariLibur berdasarkan field 'TanggalLibur'
+        $isNationalHoliday = MasterHariLibur::whereDate('TanggalLibur', $tanggal)->exists();
+
+        return $isNationalHoliday;
+    }
+
+    // =====================================================
+    // MAPPING ROLE
+    // =====================================================
     private function getUserByRole($transaksi, $role)
     {
         return match ((int) $role) {

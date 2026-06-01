@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MasterKlinik;
+use App\Models\TargetCapaian;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
@@ -22,6 +23,9 @@ class MasterKlinikController extends Controller
                     return '
                         <a href="' . route('Klinik.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
                             <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="' . route('Klinik.target-capaian', $encryptedId) . '" class="btn btn-sm btn-info">
+                            <i class="fa fa-bullseye"></i>
                         </a>
                         <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
                             <i class="fa fa-trash"></i>
@@ -69,6 +73,32 @@ class MasterKlinikController extends Controller
                 ->log('Menambahkan data master klinik: ' . $request->Nama);
         }
         return redirect()->route('Klinik.index')->with('success', 'Klinik berhasil ditambahkan');
+    }
+
+    public function storeTarget(Request $request, $id)
+    {
+        $id = decrypt($id);
+        // dd($request->all());
+        $validatedData = $request->validate([
+            'Tahun' => 'required|numeric|min:2000|max:2100',
+            'BesarTarget' => 'required',
+        ]);
+
+        $target = new TargetCapaian();
+        $target->IdKlinik = $id;
+        $target->Tahun = $request->Tahun;
+        $target->BesarTarget = $request->BesarTarget;
+        $target->UserCreate = auth()->user()->name;
+        $target->save();
+
+        if (function_exists('activity')) {
+            activity('target-capaian-klinik')
+                ->causedBy(auth()->user()->id)
+                ->withProperties(['ip' => request()->ip()])
+                ->log('Menambahkan target capaian klinik tahun ' . $request->Tahun . ' pada klinik ID: ' . $id);
+        }
+
+        return redirect()->route('Klinik.target-capaian', encrypt($id))->with('success', 'Target capaian berhasil ditambahkan');
     }
 
     /**
@@ -120,6 +150,20 @@ class MasterKlinikController extends Controller
         }
 
         return redirect()->route('Klinik.index')->with('success', 'Klinik berhasil diupdate');
+    }
+
+    public function targetCapaian(Request $request, $id)
+    {
+        $id = decrypt($id);
+        $data = MasterKlinik::with('getTarget')->find($id);
+        return view('master.klinik.target-capaian', compact('data'));
+    }
+
+    public function buatTarget(Request $request, $id)
+    {
+        $id = decrypt($id);
+        $data = MasterKlinik::with('getTarget')->find($id);
+        return view('master.klinik.buat-target', compact('data'));
     }
 
     /**

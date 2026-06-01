@@ -238,6 +238,73 @@
             </div>
         </div>
     </div> <!-- End of row g-4 -->
+
+    @if (auth()->user() && empty(auth()->user()->shift))
+        <!-- Modal for Set Shift -->
+        <div class="modal fade" id="setShiftModal" tabindex="-1" aria-labelledby="setShiftModalLabel"
+            aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <form method="POST" action="{{ route('home.update-shift') }}" id="setShiftForm">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="setShiftModalLabel">Pilih Shift Kerja Anda</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                Shift Anda belum diatur. Silakan pilih shift aktif anda sebelum melanjutkan.
+                            </div>
+                            <div class="mb-3">
+                                <label for="shift" class="form-label">Shift</label>
+                                <select name="shift" id="shift" class="form-select" required>
+                                    <option value="">-- Pilih Shift --</option>
+
+                                    @foreach ($listShift as $shift)
+                                        <option value="{{ $shift->id }}">
+                                            {{ $shift->Nama }}
+                                            ({{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->JamMulai)->format('H:i') }}
+                                            -
+                                            {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->JamSelesai)->format('H:i') }})
+                                        </option>
+                                    @endforeach
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Simpan Shift</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @push('scripts')
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var setShiftModal = new bootstrap.Modal(document.getElementById('setShiftModal'));
+                    setShiftModal.show();
+                });
+            </script>
+            @if (session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(function() {
+                            var alert = document.createElement('div');
+                            alert.className = 'alert alert-success alert-dismissible fade show';
+                            alert.role = 'alert';
+                            alert.innerHTML = '{{ session('success') }}' +
+                                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                            document.body.appendChild(alert);
+                            setTimeout(function() {
+                                var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                                bsAlert.close();
+                            }, 3500);
+                        }, 500);
+                    });
+                </script>
+            @endif
+        @endpush
+    @endif
 @endsection
 
 @push('styles')

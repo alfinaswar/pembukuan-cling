@@ -41,6 +41,7 @@ class RuleInsentifController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $validatedData = $request->validate([
             'Nama' => 'required|string|max:255',
             // Tambahkan aturan validasi lain jika diperlukan

@@ -75,7 +75,7 @@ class HomeController extends Controller
         $persenPerubahan = $pendapatanMingguLalu > 0
             ? round((($pendapatanMingguIni - $pendapatanMingguLalu) / $pendapatanMingguLalu) * 100, 1)
             : 0;
-
+        $listShift = MasterShift::get();
         return view('home', compact(
             'totalPendapatan',
             'totalPesanan',
@@ -84,7 +84,21 @@ class HomeController extends Controller
             'chartLabels',
             'chartData',
             'recentTransaksi',
-            'persenPerubahan'
+            'persenPerubahan',
+            'listShift'
         ));
+    }
+
+    public function updateShift(Request $request)
+    {
+        $request->validate([
+            'shift' => 'required|exists:master_shifts,id',
+        ]);
+
+        $user = auth()->user();
+        $user->shift = $request->shift;
+        $user->save();
+
+        return redirect()->back()->with('success', 'Shift Anda berhasil disimpan.');
     }
 }

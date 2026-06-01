@@ -83,10 +83,10 @@
                                                         Rule untuk Role: <span
                                                             class="text-primary">{{ $r->name }}</span>
                                                     </h5>
-                                                    <a href="{{ route('Insentif.create', $r->id) }}"
+                                                    {{-- <a href="{{ route('Insentif.create', $r->id) }}"
                                                         class="btn btn-primary btn-sm d-flex align-items-center gap-1">
                                                         <i class="ti ti-plus"></i> Tambah Rule
-                                                    </a>
+                                                    </a> --}}
                                                 </div>
 
                                                 @if ($r->getRuleInsentif->isEmpty())

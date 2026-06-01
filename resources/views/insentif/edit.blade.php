@@ -106,6 +106,15 @@
                                                 {{ old('JenisRule', $insentif->JenisRule ?? '') == 'tindakan' ? 'selected' : '' }}>
                                                 tindakan
                                             </option>
+                                            <option value="insentif_hari_libur"
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'insentif_hari_libur' ? 'selected' : '' }}>
+                                                insentif_hari_libur
+                                            </option>
+                                            <option value="target_tercapai"
+                                                {{ old('JenisRule', $insentif->JenisRule ?? '') == 'target_tercapai' ? 'selected' : '' }}>
+                                                target_tercapai
+                                            </option>
+
                                         </select>
 
                                     </div>
@@ -270,6 +279,13 @@
                                             <option value="transaksi"
                                                 {{ old('BerlakuPer', $insentif->BerlakuPer ?? '') == 'transaksi' ? 'selected' : '' }}>
                                                 Transaksi</option>
+                                            <option value="hari"
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer ?? '') == 'hari' ? 'selected' : '' }}>
+                                                Hari</option>
+                                            <option value="bulan"
+                                                {{ old('BerlakuPer', $insentif->BerlakuPer ?? '') == 'bulan' ? 'selected' : '' }}>
+                                                Bulan</option>
+
                                         </select>
 
                                     </div>

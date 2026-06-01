@@ -23,10 +23,11 @@ class TransaksiController extends Controller
             $kodeCabang = auth()->user()->kodeperusahaan;
             $tanggalMulai = $request->input('tanggal_mulai');
             $tanggalAkhir = $request->input('tanggal_akhir');
-
+            $shiftId = $request->input('shift');
+            // dd($shiftId);
             $user = auth()->user();
             $data = Transaksi::with('TransaksiDetail')
-                ->when($user->hasRole('Superadmin') === false, function ($query) use ($kodeCabang) {
+                ->when(!$user->hasRole('Superadmin'), function ($query) use ($kodeCabang) {
                     $query->where('KodeCabang', $kodeCabang);
                 })
                 ->when(!$tanggalMulai && !$tanggalAkhir, function ($query) {
@@ -38,24 +39,43 @@ class TransaksiController extends Controller
                 ->when($tanggalAkhir, function ($query) use ($tanggalAkhir) {
                     $query->whereDate('created_at', '<=', $tanggalAkhir);
                 })
+                ->when($shiftId, function ($query) use ($shiftId) {
+                    $query->where('Shift', $shiftId);
+                })
                 ->latest();
-
+            $summary = [
+                'total_omset' => (clone $data)->sum('TotalBayar'),
+                'pasien_baru' => (clone $data)->where('JenisPasien', 'Baru')->count(),
+                'pasien_lama' => (clone $data)->where('JenisPasien', 'Lama')->count(),
+                'pasien_total' => (clone $data)->count(),
+            ];
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('TotalBayar', function ($row) {
                     return 'Rp ' . number_format($row->TotalBayar, 0, ',', '.');
                 })
                 ->addColumn('MetodePembayaran', function ($row) {
-                    return $row->getMetodePembayaran?->Nama ?? '-';
+                    if (!$row->getMetodePembayaran || $row->getMetodePembayaran->isEmpty()) {
+                        return '-';
+                    }
+                    $html = '<dl class="mb-0">';
+                    foreach ($row->getMetodePembayaran as $pembayaran) {
+                        $nama = e($pembayaran->getMetodeBayar->Nama ?? '-');
+                        $nominal = number_format($pembayaran->Nominal ?? 0, 0, ',', '.');
+                        $html .= '<dt style="font-weight:500;">' . $nama . '</dt>';
+                        $html .= '<dd style="margin-bottom:4px;">Rp ' . $nominal . '</dd>';
+                    }
+                    $html .= '</dl>';
+                    return $html;
                 })
                 ->addColumn('Shift', function ($row) {
                     if (!$row->getShift)
                         return '-';
                     $nama = strtolower($row->getShift->Nama);
-                    if ($nama === 'siang' || $row->getShift->id == 1) {
-                        return '<span class="badge bg-warning text-dark"><i class="fa fa-sun me-1"></i>Siang</span>';
-                    } elseif ($nama === 'sore' || $row->getShift->id == 2) {
-                        return '<span class="badge bg-primary"><i class="fa fa-moon me-1"></i>Sore</span>';
+                    if ($nama === 'pagi' || $row->getShift->id == 1) {
+                        return '<span class="badge bg-warning text-dark"><i class="fa fa-sun me-1"></i>Pagi</span>';
+                    } elseif ($nama === 'siang' || $row->getShift->id == 2) {
+                        return '<span class="badge bg-primary"><i class="fa fa-moon me-1"></i>Siang</span>';
                     }
                     return '<span class="badge bg-secondary">' . e($row->getShift->Nama) . '</span>';
                 })
@@ -107,11 +127,13 @@ class TransaksiController extends Controller
                     </button>
                 ';
                 })
-                ->rawColumns(['action', 'TotalBayar', 'Perawat', 'Dokter', 'Resepsionis', 'Layanan', 'JenisPasien', 'Shift'])
+                ->rawColumns(['action', 'TotalBayar', 'Perawat', 'Dokter', 'Resepsionis', 'Layanan', 'JenisPasien', 'Shift', 'MetodePembayaran'])
+                ->with(['summary' => $summary])
                 ->make(true);
         }
 
-        return view('transaksi.kasir.index');
+        $shift = MasterShift::get();
+        return view('transaksi.kasir.index', compact('shift'));
     }
 
     /**
@@ -175,7 +197,9 @@ class TransaksiController extends Controller
             'Perawat' => 'required|exists:users,id',
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
-            'MetodePembayaran' => 'required|exists:master_metode_pembayarans,id',
+            'MetodePembayaran' => 'required|array|min:1',
+            'NominalBayar' => 'required|array',
+            'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
@@ -195,17 +219,15 @@ class TransaksiController extends Controller
             'Kasir.exists' => 'Kasir tidak valid',
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
-            'MetodePembayaran.required' => 'Pilih metode pembayaran',
-            'MetodePembayaran.exists' => 'Metode pembayaran tidak valid',
+            'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
-        $shiftId = $this->getShift(now());
+        $shiftId = auth()->user()->shift;
         $transaksi = Transaksi::create([
             'Tanggal' => $request->Tanggal,
             'NamaPasien' => $request->NamaPasien,
             'JenisPasien' => $request->JenisPasien,
-            'MetodePembayaran' => $request->MetodePembayaran,
             'BiayaAdmin' => $request->BiayaAdmin,
             'TotalBayar' => $request->TotalBiaya,
             'IdResepsionis' => $request->Kasir,
@@ -233,6 +255,18 @@ class TransaksiController extends Controller
                         'UserCreate' => auth()->user()->name,
                         'UserUpdate' => null,
                         'UserDelete' => null,
+                    ]);
+                }
+            }
+        }
+
+        if ($request->has('MetodePembayaran') && is_array($request->MetodePembayaran)) {
+            foreach ($request->MetodePembayaran as $key => $metode) {
+                if ($metode !== null) {
+                    $transaksi->getMetodePembayaran()->create([
+                        'IdTransaksi' => $transaksi->id,
+                        'MetodePembayaran' => $metode,
+                        'Nominal' => isset($request->NominalBayar[$key]) ? $request->NominalBayar[$key] : 0,
                     ]);
                 }
             }

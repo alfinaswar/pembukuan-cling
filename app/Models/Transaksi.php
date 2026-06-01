@@ -20,7 +20,7 @@ class Transaksi extends Model
 
     public function getMetodePembayaran()
     {
-        return $this->belongsTo(MasterMetodePembayaran::class, 'MetodePembayaran', 'id');
+        return $this->hasMany(PembayaranTransaksi::class, 'IdTransaksi', 'id');
     }
 
     public function getPerawat()
@@ -47,6 +47,7 @@ class Transaksi extends Model
     {
         return $this->belongsTo(MasterKlinik::class, 'KodeCabang', 'Kode');
     }
+
     public function getInsentif()
     {
         return $this->hasMany(InsentifKaryawan::class, 'id', 'IdTransksi');

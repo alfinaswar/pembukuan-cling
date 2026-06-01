@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\MasterHariLiburController;
 use App\Http\Controllers\MasterJenisPerawatanController;
 use App\Http\Controllers\MasterKlinikController;
 use App\Http\Controllers\MasterMetodePembayaranController;
@@ -32,6 +33,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::post('/home/update-shift', [HomeController::class, 'updateShift'])->name('home.update-shift');
 
 Route::group(['middleware' => ['auth']], function () {
     Route::resource('roles', RoleController::class);
@@ -55,6 +57,12 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [MasterKlinikController::class, 'update'])->name('Klinik.update');
         Route::get('/show/{id}', [MasterKlinikController::class, 'show'])->name('Klinik.show');
         Route::delete('/delete/{id}', [MasterKlinikController::class, 'destroy'])->name('Klinik.destroy');
+
+        //
+        Route::get('/target-capaian/{id}', [MasterKlinikController::class, 'targetCapaian'])->name('Klinik.target-capaian');
+        Route::get('/tambah-target/{id}', [MasterKlinikController::class, 'buatTarget'])->name('Klinik.tambah-target');
+        Route::post('/store/{id}', [MasterKlinikController::class, 'storeTarget'])->name('Klinik.simpan-target');
+        Route::get('/show/{id}', [MasterKlinikController::class, 'showTarget'])->name('Klinik.show');
     });
     Route::prefix('master/metode-pembayaran')->group(function () {
         Route::get('/', [MasterMetodePembayaranController::class, 'index'])->name('MetodePembayaran.index');
@@ -74,6 +82,15 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/show/{id}', [MasterShiftController::class, 'show'])->name('MasterShift.show');
         Route::delete('/delete/{id}', [MasterShiftController::class, 'destroy'])->name('MasterShift.destroy');
     });
+    Route::prefix('master/hari-libur')->group(function () {
+        Route::get('/', [MasterHariLiburController::class, 'index'])->name('MasterHariLibur.index');
+        Route::get('/create', [MasterHariLiburController::class, 'create'])->name('MasterHariLibur.create');
+        Route::post('/store', [MasterHariLiburController::class, 'store'])->name('MasterHariLibur.store');
+        Route::get('/edit/{id}', [MasterHariLiburController::class, 'edit'])->name('MasterHariLibur.edit');
+        Route::put('/update/{id}', [MasterHariLiburController::class, 'update'])->name('MasterHariLibur.update');
+        Route::get('/show/{id}', [MasterHariLiburController::class, 'show'])->name('MasterHariLibur.show');
+        Route::delete('/delete/{id}', [MasterHariLiburController::class, 'destroy'])->name('MasterHariLibur.destroy');
+    });
     Route::prefix('transaksi/kasir')->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('Transaksi.index');
         Route::get('/create', [TransaksiController::class, 'create'])->name('Transaksi.create');
@@ -82,6 +99,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [TransaksiController::class, 'update'])->name('Transaksi.update');
         Route::get('/show/{id}', [TransaksiController::class, 'show'])->name('Transaksi.show');
         Route::delete('/delete/{id}', [TransaksiController::class, 'destroy'])->name('Transaksi.destroy');
+        Route::get('/summary', [TransaksiController::class, 'summary'])->name('Transaksi.summary');
     });
     Route::prefix('insentif/')->group(function () {
         Route::get('/', [RuleInsentifController::class, 'index'])->name('Insentif.index');

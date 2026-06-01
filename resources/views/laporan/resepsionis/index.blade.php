@@ -67,7 +67,7 @@
                             $isSuperadminOrManagement =
                                 $user && ($user->hasRole('Superadmin') || $user->hasRole('Management'));
                         @endphp
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Kasir / Resepsionis</label>
                             <div class="input-group mb-2">
@@ -77,19 +77,35 @@
                                     <option value="">Pilih Kasir / Resepsionis</option>
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            @if ($isSuperadminOrManagement) {{ $kasir_id == $p->id ? 'selected' : '' }}
-                                            @else
-                                                {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
+                                            {{ request('perawat') == $p->id ? 'selected' : '' }}>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
                                 </select>
+
                             </div>
                         </div>
 
+                        <div class="col-md-4">
+                            <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
+                            <div class="input-group mb-2">
+                                <select id="shiftSelect" name="shift" class="select2 form-control"
+                                    style="width:100%; font-size: 0.96em; min-height:36px;">
+                                    <option value="">Pilih Shift</option>
+                                    @foreach ($shift as $s)
+                                        <option value="{{ $s->id }}"
+                                            {{ old('shift', request('shift')) == $s->id ? 'selected' : '' }}>
+                                            {{ $s->Nama ?? ($s->name ?? '-') }}
+                                            ({{ \Carbon\Carbon::parse($s->JamMulai)->format('H:i') }} -
+                                            {{ \Carbon\Carbon::parse($s->JamSelesai)->format('H:i') }})
+                                        </option>
+                                    @endforeach
 
+                                </select>
+                            </div>
+                        </div>
                         <!-- Pilih Periode -->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="periodeInput" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Periode</label>
                             <div class="input-group mb-2">
@@ -227,89 +243,32 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="fw-semibold" style="color: #3a037b;">No</th>
-                                    <th class="fw-semibold" style="color: #3a037b;">Tanggal</th>
-                                    <th class="fw-semibold" style="color: #3a037b;">Total Biaya</th>
-                                    <th class="fw-semibold" style="color: #3a037b;">Perawat</th>
-                                    <th class="fw-semibold" style="color: #3a037b;">Insentif</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- Data dummy untuk tabel --}}
-                                @forelse($data['ShiftTotalBiayaKlinik'] ?? [] as $index => $shift)
-                                    {{-- @dd($shift) --}}
-                                    <tr>
-                                        <td style="color: #3a037b;">{{ $index + 1 }}</td>
-                                        <td style="color: #3a037b;">
-                                            {{ \Carbon\Carbon::parse($shift->created_at)->format('d/m/Y') }}</td>
-                                        <td style="color: #3a037b;">Rp
-                                            {{ number_format($shift->getTransaksi->TotalBayar ?? 0, 0, ',', '.') }}</td>
-                                        <td style="color: #3a037b;">{{ $shift->getUser->name ?? '-' }}</td>
-                                        <td style="color: #3a037b;">Rp
-                                            {{ number_format($shift->Nominal ?? 0, 0, ',', '.') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center" style="color: #3a037b;">Tidak ada data
-                                            shift</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
                     @php
-                        // Menyesuaikan representasi dari data ShiftTotalBiayaKlinik di atas
-                        $totalShift_6jt = 0;
-                        $totalShift_12jt = 0;
-                        $totalInsentif = 0;
-
-                        foreach ($data['ShiftTotalBiayaKlinik'] ?? [] as $shift) {
-                            $totalBiaya = $shift->getTransaksi->TotalBayar ?? 0;
-
-                            if ($totalBiaya >= 12000000) {
-                                $totalShift_12jt++;
-                                $totalInsentif += 100000;
-                            } elseif ($totalBiaya >= 6000000) {
-                                $totalShift_6jt++;
-                                $totalInsentif += 50000;
-                            }
-                        }
-                        $totalShift = $totalShift_6jt + $totalShift_12jt;
+                        $totalShift = isset($data['ShiftTotalBiayaKlinik']) ? count($data['ShiftTotalBiayaKlinik']) : 0;
+                        $totalInsentif = collect($data['ShiftTotalBiayaKlinik'] ?? [])->sum('Nominal');
                     @endphp
-                    <div class="alert alert-primary d-flex justify-content-between align-items-start mt-2" role="alert"
+                    <div class="text-center mb-3">
+                        <div class="fw-semibold mb-2" style="font-size: 16px; color: #3a037b;">
+                            Total Insentif Shift
+                        </div>
+                        <div class="fw-bold" style="font-size:26px; color: #3a037b;">
+                            Rp {{ number_format($totalInsentif, 0, ',', '.') }}
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-primary d-flex align-items-start mt-2" role="alert"
                         style="background-color: #f5f6ff; border-color: #d9e0fc; border-radius: 12px;">
                         <div>
                             <div class="fw-semibold mb-2" style="font-size: 14px; color: #3a037b;">
                                 Perhitungan Insentif
                             </div>
                             <ul class="mb-0 ps-3" style="font-size: 13px; color: #3a037b; line-height: 1.5;">
-                                <li>Rp 50.000 untuk setiap shift &ge; Rp 6.000.000</li>
-                                <li>Rp 100.000 untuk setiap shift &ge; Rp 12.000.000</li>
+                                <li>Rp 50.000 untuk setiap kelipatan Rp 6.000.000</li>
+
                             </ul>
                         </div>
-                        <div class="text-end ms-4" style="min-width:140px;">
-                            <div class="fw-semibold" style="font-size: 13px; color: #3a037b;">
-                                Total Shift Tercapai
-                                <span class="fw-bold"
-                                    style="font-size:18px; margin-left: 8px; color:#3a037b;">{{ $totalShift }}</span>
-                            </div>
-                            <div style="font-size:13px; color: #3a037b;">
-                                ({{ $totalShift_6jt }} shift ≥ 6jt, {{ $totalShift_12jt }} shift ≥ 12jt)
-                            </div>
-                            <div class="mt-2" style="font-size:13px; color: #3a037b;">
-                                Total Insentif
-                            </div>
-                            <div class="fw-bold" style="font-size:18px; color: #3a037b;">
-                                Rp {{ number_format($totalInsentif, 0, ',', '.') }}
-                            </div>
-                        </div>
                     </div>
-
-
 
                 </div>
             </div>

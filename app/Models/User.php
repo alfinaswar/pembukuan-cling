@@ -62,10 +62,10 @@ class User extends Authenticatable
         return $this->hasOne(MasterKlinik::class, 'Kode', 'kodeperusahaan');
     }
 
-    // public function getJabatan()
-    // {
-    //     return $this->hasOne(MasterJabatan::class, 'id', 'jabatan');
-    // }
+    public function getShift()
+    {
+        return $this->hasOne(MasterShift::class, 'id', 'shift');
+    }
 
     /**
      * Get the Departemen associated with the User

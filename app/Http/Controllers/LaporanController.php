@@ -53,20 +53,26 @@ class LaporanController extends Controller
             ->count();
 
         // Chart Payment
-        $paymentChartData = Transaksi::select('MetodePembayaran', 'KodeCabang', DB::raw('SUM(TotalBayar) as jumlah'))
+        $paymentChartData = Transaksi::with('getMetodePembayaran')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
-            ->groupBy('MetodePembayaran', 'KodeCabang')
-            ->with('getMetodePembayaran')  // assuming the relation name is getMetodePembayaran
             ->get();
 
-        // ambil label nama metode pembayaran jika relasi ada, kalau tidak fallback ke field MetodePembayaran
-        $paymentChartLabels = $paymentChartData->map(function ($item) {
-            return $item->getMetodePembayaran->Nama ?? $item->MetodePembayaran ?? '-';
-        });
+        // Ambil data label dan total pembayaran dari relasi getMetodePembayaran
+        $metodePembayaranTotals = [];
 
-        $paymentChartTotals = $paymentChartData->pluck('jumlah');
-        // dd($paymentChartLabels);
+        foreach ($paymentChartData as $transaksi) {
+            foreach ($transaksi->getMetodePembayaran as $pembayaran) {
+                $nama = $pembayaran->getMetodeBayar->Nama ?? ($pembayaran->MetodePembayaran ?? '-');
+                if (!isset($metodePembayaranTotals[$nama])) {
+                    $metodePembayaranTotals[$nama] = 0;
+                }
+                $metodePembayaranTotals[$nama] += (float) $pembayaran->Nominal;
+            }
+        }
+
+        $paymentChartLabels = array_keys($metodePembayaranTotals);
+        $paymentChartTotals = array_values($metodePembayaranTotals);
 
         // Transaksi Terbaru
         $transaksiTerbaru = Transaksi::with(['getPerawat'])
@@ -493,16 +499,19 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'required|exists:users,id',
+            'perawat' => 'required|exists:users,id',  // Field form tetap 'perawat' untuk resepsionis
+            'shift' => 'nullable|exists:transaksis,Shift',  // Diperbaiki: validasi exists
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'perawat.required' => 'Kasir / Resepsionis wajib dipilih.',
             'perawat.exists' => 'Kasir / Resepsionis tidak valid.',
+            'shift.exists' => 'Shift tidak valid / tidak ditemukan.',  // Pesan error baru
         ]);
 
         if ($validator->fails()) {
-            $errorHtml = collect(['FilterTanggal', 'perawat'])
+            // Tambahkan 'shift' ke dalam list field yang dicek errornya
+            $errorHtml = collect(['FilterTanggal', 'perawat', 'shift'])
                 ->filter(fn($field) => $validator->errors()->has($field))
                 ->map(fn($field) => $validator->errors()->first($field))
                 ->implode('<br>');
@@ -520,24 +529,29 @@ class LaporanController extends Controller
         [$startRaw, $endRaw] = explode(' - ', $request->FilterTanggal);
         $startDate = Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
         $endDate = Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
-        $kasirId = $request->perawat;  // nama field di form tetap 'perawat'
+
+        $kasirId = $request->perawat;  // Mapping input 'perawat' ke variable internal 'kasirId'
+        $shiftFilter = $request->filled('shift') ? $request->shift : null;
         $kodeCabang = auth()->user()->kodeperusahaan;
 
         // =============================================
-        // 3. BASE SCOPE
-        //    Resepsionis tidak punya filter shift,
-        //    kolom yang dipakai: IdKasir (transaksi) & UserId (insentif)
-        //    — sesuaikan nama kolom dengan skema DB kamu
+        // 3. BASE SCOPE (Reusable Closures)
         // =============================================
-        $scopeTransaksi = fn($q) => $q
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', $kodeCabang)
-            ->where('IdResepsionis', $kasirId);  // ← ganti sesuai kolom FK kasir di tabel transaksis
+        $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
+            $q
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where('KodeCabang', $kodeCabang)
+                ->where('IdResepsionis', $kasirId)
+                ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
+        };
 
-        $scopeInsentif = fn($q) => $q
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', $kodeCabang)
-            ->where('UserId', $kasirId);
+        $scopeInsentif = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
+            $q
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where('KodeCabang', $kodeCabang)
+                ->where('UserId', $kasirId)
+                ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
+        };
 
         // =============================================
         // 4. VALIDASI DATA KOSONG
@@ -553,7 +567,7 @@ class LaporanController extends Controller
         // 5. QUERY
         // =============================================
 
-        // 5a. Omset & Total Shift (array agar konsisten dengan view)
+        // 5a. Omset & Total Shift
         $omsetRow = Transaksi::where($scopeTransaksi)
             ->selectRaw('
             COUNT(DISTINCT CONCAT(DATE(created_at), "-", Shift)) as total_shift,
@@ -579,9 +593,8 @@ class LaporanController extends Controller
             ->get();
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
-        //     View akses: $row['created_at'], $row['jumlah_pasien_lama'], $row['perawat_nama']
-        //     → perlu di-group & di-map agar strukturnya cocok
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
+
         $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
@@ -593,12 +606,13 @@ class LaporanController extends Controller
                     'created_at' => $first->created_at,
                     'jumlah_pasien_lama' => $countpasienlama,
                     'perawat_nama' => $first->getUser->name ?? '-',
+                    'shift' => $first->Shift ?? null,
                     'insentif' => $group->sum('Nominal'),
                 ];
             })
             ->values();
 
-        // 5f. Ringkasan per JenisRule (hanya rule yang aktif di view resepsionis)
+        // 5f. Ringkasan per JenisRule
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000', 'badge' => 'bg-primary', 'order' => 1],
             'pasien_lama' => ['label' => 'Shift dengan 8 Pasien Lama', 'badge' => 'bg-info', 'order' => 2],
@@ -623,7 +637,7 @@ class LaporanController extends Controller
         })->values();
 
         // =============================================
-        // 6. DROPDOWN
+        // 6. DROPDOWN (Data untuk Filter)
         // =============================================
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
@@ -644,6 +658,7 @@ class LaporanController extends Controller
             'endDate' => $endDate,
             'kasirId' => $kasirId,
             'kodeCabang' => $kodeCabang,
+            'shiftFilter' => $shiftFilter,  // Penting: agar select shift tetap terpilih
         ];
 
         return view('laporan.resepsionis.index', compact('dokter', 'perawat', 'kasir', 'shift', 'data'));

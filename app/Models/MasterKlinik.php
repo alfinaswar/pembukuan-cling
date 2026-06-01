@@ -24,6 +24,11 @@ class MasterKlinik extends Model
      */
     protected $guarded = ['id'];
 
+    public function getTarget()
+    {
+        return $this->hasMany(TargetCapaian::class, 'IdKlinik', 'id');
+    }
+
     protected static function boot()
     {
         parent::boot();

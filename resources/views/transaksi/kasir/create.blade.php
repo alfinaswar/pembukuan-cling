@@ -348,15 +348,16 @@
 
     <div class="container-fluid">
         <!-- ROW 1 -->
-        <div class="row mt-3">
-            <!-- LEFT: Form Transaksi Kasir -->
-            <div class="col-xl-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Transaksi Kasir</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('Transaksi.store') }}" method="POST" id="formTransaksiKasir">
+        <form action="{{ route('Transaksi.store') }}" method="POST" id="formTransaksiKasir" enctype="multipart/form-data">
+            <div class="row mt-3">
+                <!-- LEFT: Form Transaksi Kasir -->
+                <div class="col-xl-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Transaksi Kasir</h5>
+                        </div>
+                        <div class="card-body">
+
                             @csrf
                             {{-- <div class="col-12">
                                 <label class="form-label mt-3">Default Material Date Picker</label>
@@ -384,12 +385,14 @@
                                     </span>
                                     <input type="text" id="nama_pasien" name="NamaPasien"
                                         class="form-control @error('NamaPasien') is-invalid @enderror"
-                                        placeholder="Masukkan nama pasien" autocomplete="off">
+                                        placeholder="Masukkan nama pasien" autocomplete="off"
+                                        value="{{ old('NamaPasien') }}">
                                 </div>
                                 @error('NamaPasien')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
+
 
                             <!-- Jenis Pasien radio -->
                             <div class="mb-3">
@@ -568,146 +571,192 @@
                                 </button>
                             </div>
 
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT: Ringkasan + Metode Bayar + Staff -->
-            <div class="col-xl-4">
-                <div class="row g-3">
-
-                    <!-- Ringkasan Per Shift -->
-                    <div class="col-12">
-                        <div class="card mb-0">
-                            <div class="card-header-teal">
-                                <h5>Ringkasan Per Shift</h5>
-                                <span class="icon-group">
-                                    <i data-lucide="users" style="width:20px;height:20px;"></i>
-                                </span>
-                            </div>
-                            <div class="card-body py-3 px-4">
-                                <div class="ringkasan-total-label">Total Biaya Per Shift</div>
-                                <div class="ringkasan-total-value mb-3">Rp 0</div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="ringkasan-stat-label">Total Pasien Baru Per Shift</span>
-                                    <span class="ringkasan-stat-value">{{ $totalPasienBaru }} Pasien</span>
-                                </div>
-                                <hr class="my-2" style="border-color:#f3f4f6;">
-                                <div class="d-flex justify-content-between">
-                                    <span class="ringkasan-stat-label">Total Pasien Lama Per Shift</span>
-                                    <span class="ringkasan-stat-value">{{ $totalPasienLama }} Pasien</span>
-                                </div>
-
-                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Metode Pembayaran -->
-                    <div class="col-12">
-                        <div class="card mb-0">
-                            <div class="card-body py-3 px-4">
-                                <div class="cara-bayar-title">Cara Bayar</div>
-                                @foreach ($MetodePembayaran as $mp)
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input @error('MetodePembayaran') is-invalid @enderror"
-                                            type="radio" name="MetodePembayaran"
-                                            id="metode_pembayaran_{{ $mp->id }}" value="{{ $mp->id }}"
-                                            {{ old('MetodePembayaran') == $mp->id ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="metode_pembayaran_{{ $mp->id }}">
-                                            {{ $mp->Nama }}
-                                        </label>
+                <!-- RIGHT: Ringkasan + Metode Bayar + Staff -->
+                <div class="col-xl-4">
+                    <div class="row g-3">
+
+                        <!-- Ringkasan Per Shift -->
+                        <div class="col-12">
+                            <div class="card mb-0">
+                                <div class="card-header-teal">
+                                    <h5>Ringkasan Per Shift</h5>
+                                    <span class="icon-group">
+                                        <i data-lucide="users" style="width:20px;height:20px;"></i>
+                                    </span>
+                                </div>
+                                <div class="card-body py-3 px-4">
+                                    <div class="ringkasan-total-label">Total Biaya Per Shift</div>
+                                    <div class="ringkasan-total-value mb-3">Rp 0</div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="ringkasan-stat-label">Total Pasien Baru Per Shift</span>
+                                        <span class="ringkasan-stat-value">{{ $totalPasienBaru }} Pasien</span>
                                     </div>
-                                @endforeach
-                                @error('MetodePembayaran')
-                                    <span class="invalid-feedback d-block">{{ $message }}</span>
-                                @enderror
+                                    <hr class="my-2" style="border-color:#f3f4f6;">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="ringkasan-stat-label">Total Pasien Lama Per Shift</span>
+                                        <span class="ringkasan-stat-value">{{ $totalPasienLama }} Pasien</span>
+                                    </div>
 
-                                <hr class="cara-bayar-divider mt-2 mb-3">
-
-                                <div class="total-bayar-row">
-                                    <span class="total-bayar-label">Total Bayar</span>
-                                    <span class="total-bayar-value">Rp <span id="total-bayar">0</span></span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Staff: Dokter / Perawat / Kasir -->
-                    <div class="col-12">
-                        <div class="card mb-0">
-                            <div class="card-body py-3 px-4">
+                        <!-- Metode Pembayaran -->
+                        <div class="col-12">
+                            <div class="card mb-0">
+                                <div class="card-body py-3 px-4">
+                                    <div class="cara-bayar-title mb-2">Cara Bayar</div>
 
-                                <!-- Dokter -->
-                                <div class="mb-2">
-                                    <label for="Dokter" class="form-label fw-bold text-uppercase">
-                                        <i data-lucide="stethoscope" style="width:14px;height:14px;" class="me-1"></i>
-                                        Nama Dokter
-                                    </label>
-                                    <select name="Dokter" id="Dokter"
-                                        class="form-select staff-select @error('Dokter') is-invalid @enderror">
-                                        <option value="">-- Pilih Dokter --</option>
-                                        @foreach ($dokter as $d)
-                                            <option value="{{ $d->id }}"
-                                                {{ old('Dokter') == $d->id ? 'selected' : '' }}>{{ $d->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('Dokter')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered align-middle mb-0" id="pembayaran-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:50%">Metode Pembayaran</th>
+                                                    <th style="width:45%">Nominal</th>
+                                                    <th style="width:5%"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php
+                                                    $oldPembayaran = old('MetodePembayaran', []);
+                                                    $oldNominal = old('Nominal', []);
+                                                    $barisPembayaran = max(1, count($oldPembayaran));
+                                                @endphp
+                                                @for ($i = 0; $i < $barisPembayaran; $i++)
+                                                    <tr>
+                                                        <td>
+                                                            <select name="MetodePembayaran[]"
+                                                                class="form-select @error('MetodePembayaran.' . $i) is-invalid @enderror">
+                                                                <option value="">-- Pilih Metode --</option>
+                                                                @foreach ($MetodePembayaran as $mp)
+                                                                    <option value="{{ $mp->id }}"
+                                                                        {{ isset($oldPembayaran[$i]) && $oldPembayaran[$i] == $mp->id ? 'selected' : '' }}>
+                                                                        {{ $mp->Nama }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('MetodePembayaran.' . $i)
+                                                                <span
+                                                                    class="invalid-feedback d-block">{{ $message }}</span>
+                                                            @enderror
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" min="0" name="NominalBayar[]"
+                                                                class="form-control nominal-input-bayar currency-format @error('NominalBayar.' . $i) is-invalid @enderror"
+                                                                value="{{ isset($oldNominal[$i]) ? number_format($oldNominal[$i], 0, ',', '.') : '' }}"
+                                                                placeholder="Nominal Bayar">
+                                                            @error('NominalBayar.' . $i)
+                                                                <span
+                                                                    class="invalid-feedback d-block">{{ $message }}</span>
+                                                            @enderror
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-danger remove-row"
+                                                                title="Hapus Baris">
+                                                                <i data-lucide="trash"
+                                                                    style="width:16px;height:16px;"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endfor
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                        id="addPembayaranRow">
+                                        <i data-lucide="plus" style="width:15px;height:15px;"></i> Tambah Baris
+                                    </button>
+
+                                    <hr class="cara-bayar-divider mt-3 mb-3">
+
+                                    <div class="total-bayar-row">
+                                        <span class="total-bayar-label">Total Bayar</span>
+                                        <span class="total-bayar-value">Rp <span id="total-bayar">0</span></span>
+                                    </div>
                                 </div>
-
-                                <!-- Perawat -->
-                                <div class="mb-2">
-                                    <label for="Perawat" class="form-label fw-bold text-uppercase">
-                                        <i data-lucide="syringe" style="width:14px;height:14px;" class="me-1"></i>
-                                        Nama Perawat
-                                    </label>
-                                    <select name="Perawat" id="Perawat"
-                                        class="form-select staff-select @error('Perawat') is-invalid @enderror">
-                                        <option value="">-- Pilih Perawat --</option>
-                                        @foreach ($perawat as $p)
-                                            <option value="{{ $p->id }}"
-                                                {{ old('Perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('Perawat')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <!-- Kasir / Resepsionis -->
-                                <div class="mb-2">
-                                    <label for="Kasir" class="form-label fw-bold text-uppercase">
-                                        <i data-lucide="user-check" style="width:14px;height:14px;" class="me-1"></i>
-                                        Nama Resepsionis
-                                    </label>
-                                    <select name="Kasir" id="Kasir"
-                                        class="form-select staff-select @error('Kasir') is-invalid @enderror">
-                                        <option value="">-- Pilih Resepsionis --</option>
-                                        @foreach ($kasir as $r)
-                                            <option value="{{ $r->id }}"
-                                                {{ old('Kasir') == $r->id ? 'selected' : '' }}>{{ $r->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('Kasir')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
                             </div>
                         </div>
-                    </div>
 
+                        <!-- Staff: Dokter / Perawat / Kasir -->
+                        <div class="col-12">
+                            <div class="card mb-0">
+                                <div class="card-body py-3 px-4">
+
+                                    <!-- Dokter -->
+                                    <div class="mb-2">
+                                        <label for="Dokter" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="stethoscope" style="width:14px;height:14px;"
+                                                class="me-1"></i>
+                                            Nama Dokter
+                                        </label>
+                                        <select name="Dokter" id="Dokter"
+                                            class="form-select staff-select @error('Dokter') is-invalid @enderror">
+                                            <option value="">-- Pilih Dokter --</option>
+                                            @foreach ($dokter as $d)
+                                                <option value="{{ $d->id }}"
+                                                    {{ old('Dokter') == $d->id ? 'selected' : '' }}>{{ $d->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('Dokter')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Perawat -->
+                                    <div class="mb-2">
+                                        <label for="Perawat" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="syringe" style="width:14px;height:14px;" class="me-1"></i>
+                                            Nama Perawat
+                                        </label>
+                                        <select name="Perawat" id="Perawat"
+                                            class="form-select staff-select @error('Perawat') is-invalid @enderror">
+                                            <option value="">-- Pilih Perawat --</option>
+                                            @foreach ($perawat as $p)
+                                                <option value="{{ $p->id }}"
+                                                    {{ old('Perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('Perawat')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Kasir / Resepsionis -->
+                                    <div class="mb-2">
+                                        <label for="Kasir" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="user-check" style="width:14px;height:14px;"
+                                                class="me-1"></i>
+                                            Nama Resepsionis
+                                        </label>
+                                        <select name="Kasir" id="Kasir"
+                                            class="form-select staff-select @error('Kasir') is-invalid @enderror">
+                                            <option value="">-- Pilih Resepsionis --</option>
+                                            @foreach ($kasir as $r)
+                                                <option value="{{ $r->id }}"
+                                                    {{ old('Kasir') == $r->id ? 'selected' : '' }}>{{ $r->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('Kasir')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
-            </form>
-        </div>
+        </form>
     </div>
-
-
 @endsection
 @push('scripts')
     <script>
@@ -757,7 +806,12 @@
         // Handle submit form
         $('#formTransaksiKasir').on('submit', function() {
             $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
+
             $('.biaya-perawatan').each(function() {
+                $(this).val(parseRupiah($(this).val()));
+            });
+
+            $('.nominal-input-bayar').each(function() {
                 $(this).val(parseRupiah($(this).val()));
             });
         });
@@ -887,6 +941,140 @@
                 $('#biaya_admin').val(rupiahFormat(adminVal));
             }
             recalculateTotal();
+        });
+    </script>
+    <script>
+        function formatRupiahInput(val) {
+            let number_string = val.replace(/[^,\d]/g, '').toString(),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return rupiah;
+        }
+
+        function parseRupiah(str) {
+            return parseInt((str || '0').replace(/[^0-9]/g, ''), 10) || 0;
+        }
+
+        function formatRupiah(angka) {
+            return angka.toLocaleString('id-ID');
+        }
+
+        function getTotalBayar() {
+            // Cek total dari field total-biaya
+            let totalStr = document.getElementById('total-biaya');
+            let total = 0;
+            if (totalStr) {
+                total = parseRupiah(totalStr.innerText || "0");
+            }
+            return total;
+        }
+
+        function hitungTotalBayar() {
+            let total = 0;
+            document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
+                let val = parseRupiah(input.value);
+                total += val;
+            });
+            document.getElementById('total-bayar').innerText = formatRupiah(total);
+        }
+
+        function limitNominalBayar(input) {
+            // Batas maksimum: total sisa yang boleh diisi
+            let totalBayar = getTotalBayar();
+            let totalLain = 0;
+            let currentInput = input;
+            document.querySelectorAll('.nominal-input-bayar').forEach(function(inp) {
+                if (inp !== currentInput) {
+                    totalLain += parseRupiah(inp.value);
+                }
+            });
+            let sisa = totalBayar - totalLain;
+            let nilaiInput = parseRupiah(input.value);
+            if (nilaiInput > sisa) {
+                input.value = formatRupiahInput(sisa.toString());
+            }
+        }
+
+        function initPembayaranTableEvents() {
+            // Remove row
+            document.querySelectorAll('#pembayaran-table .remove-row').forEach(function(btn) {
+                btn.onclick = function() {
+                    let rows = document.querySelectorAll('#pembayaran-table tbody tr').length;
+                    if (rows > 1) {
+                        this.closest('tr').remove();
+                        hitungTotalBayar();
+                    }
+                };
+            });
+
+            // Input event for real-time formatting & check limit
+            document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
+                // Prevent multiple listeners
+                input.removeEventListener('input', input._rupiahHandler || (() => {}));
+                input._rupiahHandler = function(e) {
+                    let caretPos = input.selectionStart,
+                        oldVal = input.value,
+                        numericVal = formatRupiahInput(input.value);
+
+                    input.value = numericVal;
+                    limitNominalBayar(input);
+                    // Try to preserve caret position when typing
+                    let newPos = caretPos + (input.value.length - oldVal.length);
+                    input.setSelectionRange(newPos, newPos);
+
+                    hitungTotalBayar();
+                }
+                input.addEventListener('input', input._rupiahHandler);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initPembayaranTableEvents();
+
+            document.getElementById('addPembayaranRow').addEventListener('click', function() {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                                    <td>
+                                        <select name="MetodePembayaran[]" class="form-select">
+                                            <option value="">-- Pilih Metode --</option>
+                                            @foreach ($MetodePembayaran as $mp)
+                                                <option value="{{ $mp->id }}">{{ $mp->Nama }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" min="0" name="NominalBayar[]" class="form-control nominal-input-bayar currency-format" placeholder="Nominal">
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-danger remove-row" title="Hapus Baris">
+                                            <i data-lucide="trash" style="width:16px;height:16px;"></i>
+                                        </button>
+                                    </td>
+                                `;
+                document.querySelector('#pembayaran-table tbody').appendChild(tr);
+
+                // Re-init events for new elements
+                initPembayaranTableEvents();
+            });
+
+            // Format all nominal fields on page load & apply limit check
+            document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
+                if (input.value) {
+                    input.value = formatRupiahInput(input.value);
+                }
+                limitNominalBayar(input);
+            });
+
+            hitungTotalBayar();
         });
     </script>
 @endpush
