@@ -35,6 +35,25 @@
             }
         }
     </style>
+    <style>
+        /* Memblokir semua event klik pada container Select2 */
+        .select2-readonly-wrapper .select2-container {
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        /* Mengubah warna background agar terlihat seperti disabled */
+        .select2-readonly-wrapper .select2-selection {
+            background-color: #f3f3f3 !important;
+            border-color: #ced4da !important;
+            cursor: not-allowed !important;
+        }
+
+        /* Memberikan efek visual pudar sedikit agar jelas tidak bisa diklik */
+        .select2-readonly-wrapper .select2-container {
+            opacity: 0.75;
+        }
+    </style>
     <div class="row mb-3 align-items-center">
         <div class="col-lg-6 col-md-6 col-sm-12">
             <h3 class="mb-0 fw-semibold">Dashboard Report Insentif Perawat</h3>
@@ -66,30 +85,32 @@
                             $perawat_id = old('perawat', request('perawat', $user->id ?? ''));
                             $isSuperadminOrManagement =
                                 $user && ($user->hasRole('Superadmin') || $user->hasRole('Management'));
+                            $isDisabled = !$isSuperadminOrManagement;
                         @endphp
+
                         <div class="col-md-4">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Perawat</label>
-                            <div class="input-group mb-2">
+
+                            {{-- Tambahkan class 'select2-readonly-wrapper' jika user bukan Superadmin/Management --}}
+                            <div class="input-group mb-2 {{ $isDisabled ? 'select2-readonly-wrapper' : '' }}">
                                 <select id="perawatSelect" name="perawat" class="select2 form-control"
-                                    style="width:100%; font-size: 0.96em; min-height:36px; {{ !$isSuperadminOrManagement ? 'pointer-events: none; background: #f3f3f3;' : '' }}"
-                                    {{ !$isSuperadminOrManagement ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                                    style="width:100%; font-size: 0.96em; min-height:36px;"
+                                    {{ $isDisabled ? 'tabindex="-1" aria-disabled="true"' : '' }}>
                                     <option value="">Pilih Perawat</option>
                                     @foreach ($perawat as $p)
                                         <option value="{{ $p->id }}"
-                                            @if ($isSuperadminOrManagement) {{ request('perawat') == $p->id ? 'selected' : '' }}
-                                            @else
-                                                {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }} @endif>
+                                            @if (!$isDisabled) {{-- Jika Superadmin/Management, pilih berdasarkan request atau user id --}}
+                        {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
+                    @else
+                        {{-- Jika bukan, paksa pilih berdasarkan user id (agar tidak bisa diubah) --}}
+                        {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
-
                                 </select>
                             </div>
-                        </div>
-
-
-                        <!-- Pilih Shift -->
+                        </div <!-- Pilih Shift -->
                         <div class="col-md-4">
                             <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
                             <div class="input-group mb-2">
