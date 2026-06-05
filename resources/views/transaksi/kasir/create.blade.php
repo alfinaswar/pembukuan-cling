@@ -344,6 +344,18 @@
         .input-search-wrap .form-control {
             padding-left: 32px;
         }
+
+        .perawatan-select+.select2-container {
+            width: 220px !important;
+            max-width: 220px !important;
+        }
+
+        .perawatan-select+.select2-container .select2-selection__rendered {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            padding-right: 20px;
+        }
     </style>
 
     <div class="container-fluid">
@@ -423,7 +435,7 @@
                                         <thead>
                                             <tr>
                                                 <th style="width:4%;">No.</th>
-                                                <th>Jenis Perawatan</th>
+                                                <th style="width:26%;">Jenis Perawatan</th>
                                                 <th style="width:26%;">Biaya Perawatan</th>
                                                 <th>Keterangan</th>
                                                 <th style="width:8%;">Aksi</th>
@@ -439,7 +451,8 @@
                                                         <td class="text-center align-middle">{{ $loop->iteration }}</td>
                                                         <td>
                                                             <select class="form-control perawatan-select"
-                                                                name="JenisPerawatan[{{ $idx }}][id]">
+                                                                name="JenisPerawatan[{{ $idx }}][id]"
+                                                                style="width:220px !important;background-color:#f8f9fa;">
                                                                 <option value="">Pilih Jenis Perawatan</option>
                                                                 @foreach ($Perawatan as $row)
                                                                     <option value="{{ $row->id }}"
@@ -450,6 +463,7 @@
                                                                 @endforeach
                                                             </select>
                                                         </td>
+
                                                         <td>
                                                             <input type="text"
                                                                 class="form-control biaya-perawatan bg-light"
@@ -458,7 +472,7 @@
                                                                 value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : '' }}">
                                                         </td>
                                                         <td>
-                                                            <input type="text" class="form-control"
+                                                            <input type="text"Jenis Perawatan class="form-control"
                                                                 name="JenisPerawatan[0][Keterangan]"
                                                                 placeholder="Keterangan"
                                                                 value="{{ isset($perawatan['Keterangan']) ? $perawatan['Keterangan'] : '' }}">
@@ -496,7 +510,8 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="text" class="form-control biaya-perawatan bg-light"
+                                                        <input type="text"
+                                                            class="form-control biaya-perawatan bg-light"
                                                             name="JenisPerawatan[0][Biaya]" placeholder="Rp 0">
                                                     </td>
                                                     <td>
@@ -612,12 +627,15 @@
                                     <div class="cara-bayar-title mb-2">Cara Bayar</div>
 
                                     <div class="table-responsive">
-                                        <table class="table table-bordered align-middle mb-0" id="pembayaran-table">
+                                        <table class="table table-bordered align-middle mb-0" id="pembayaran-table"
+                                            style="table-layout:fixed;">
                                             <thead>
                                                 <tr>
-                                                    <th style="width:50%">Metode Pembayaran</th>
-                                                    <th style="width:45%">Nominal</th>
-                                                    <th style="width:5%"></th>
+                                                    <th style="width: 240px; min-width: 240px; max-width: 240px;">Metode
+                                                        Pembayaran</th>
+                                                    <th style="width: 180px; min-width: 180px; max-width: 180px;">Nominal
+                                                    </th>
+                                                    <th style="width: 50px; min-width: 50px; max-width: 50px;"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -628,9 +646,10 @@
                                                 @endphp
                                                 @for ($i = 0; $i < $barisPembayaran; $i++)
                                                     <tr>
-                                                        <td>
+                                                        <td style="width: 240px; min-width: 240px; max-width: 240px;">
                                                             <select name="MetodePembayaran[]"
-                                                                class="form-select @error('MetodePembayaran.' . $i) is-invalid @enderror">
+                                                                class="form-select @error('MetodePembayaran.' . $i) is-invalid @enderror"
+                                                                style="width: 100%; min-width: 100%; max-width: 100%;">
                                                                 <option value="">-- Pilih Metode --</option>
                                                                 @foreach ($MetodePembayaran as $mp)
                                                                     <option value="{{ $mp->id }}"
@@ -644,9 +663,10 @@
                                                                     class="invalid-feedback d-block">{{ $message }}</span>
                                                             @enderror
                                                         </td>
-                                                        <td>
+                                                        <td style="width: 180px; min-width: 180px; max-width: 180px;">
                                                             <input type="text" min="0" name="NominalBayar[]"
                                                                 class="form-control nominal-input-bayar currency-format @error('NominalBayar.' . $i) is-invalid @enderror"
+                                                                style="width: 100%; min-width: 100%; max-width: 100%;"
                                                                 value="{{ isset($oldNominal[$i]) ? number_format($oldNominal[$i], 0, ',', '.') : '' }}"
                                                                 placeholder="Nominal Bayar">
                                                             @error('NominalBayar.' . $i)
@@ -654,18 +674,28 @@
                                                                     class="invalid-feedback d-block">{{ $message }}</span>
                                                             @enderror
                                                         </td>
-                                                        <td class="text-center">
+                                                        <td class="text-center"
+                                                            style="width: 30px; min-width: 30px; max-width: 50px;">
                                                             <button type="button"
                                                                 class="btn btn-sm btn-danger remove-row"
                                                                 title="Hapus Baris">
-                                                                <i data-lucide="trash"
-                                                                    style="width:16px;height:16px;"></i>
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                    height="18" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M3 6h18" />
+                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                    <path d="M10 11v6" />
+                                                                    <path d="M14 11v6" />
+                                                                </svg>
                                                             </button>
                                                         </td>
                                                     </tr>
                                                 @endfor
                                             </tbody>
                                         </table>
+
                                     </div>
                                     <button type="button" class="btn btn-outline-primary btn-sm mt-2"
                                         id="addPembayaranRow">
@@ -819,8 +849,10 @@
         $(document).ready(function() {
             // Init Select2
             $('.perawatan-select').select2({
-                dropdownParent: $('#table-perawatan').parent()
+                dropdownParent: $('#table-perawatan').parent(),
+                width: '220px'
             });
+
             $('.staff-select').select2({
                 dropdownParent: $('.card-body:has(#Kasir)').length ? $('.card-body:has(#Kasir)') : $(
                     document.body)

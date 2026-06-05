@@ -41,7 +41,7 @@
             <small class="text-muted">Ringkasan pencapaian dan perhitungan insentif berdasarkan performa</small>
         </div>
 
-        <div class="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-end align-items-center">
+        {{-- <div class="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-end align-items-center">
             <div class="input-group me-2" style="max-width: 220px;">
                 <input type="text" class="form-control" placeholder="2024-06-04" id="mdate" />
                 <span class="input-group-text">
@@ -51,7 +51,7 @@
             <a href="" class="btn btn-success" style="background-color: green;">
                 <i class="ti ti-file-export"></i> Export
             </a>
-        </div>
+        </div> --}}
 
     </div>
     <div class="row">

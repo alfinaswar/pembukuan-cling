@@ -735,6 +735,14 @@
                             </li>
 
 
+                            <li class="sidebar-item" style="display: none">
+                                <a class="sidebar-link" href="#" id="get-url" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-layout-dashboard"></i>
+                                    </span>
+                                    <span class="hide-menu">Dashboard</span>
+                                </a>
+                            </li>
                             <li class="sidebar-item">
                                 <a class="sidebar-link" href="{{ route('home') }}" id="get-url"
                                     aria-expanded="false">
