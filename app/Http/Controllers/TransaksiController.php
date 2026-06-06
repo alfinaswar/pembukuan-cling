@@ -289,11 +289,13 @@ class TransaksiController extends Controller
     public function edit($id)
     {
         $id = decrypt($id);
-        $transaksi = Transaksi::with(['TransaksiDetail', 'getPerawat', 'getDokter', 'getResepsionis'])
+
+        // TAMBAHKAN 'TransaksiPembayaran' di dalam with()
+        // (Sesuaikan nama relasi jika berbeda, misal: 'Pembayaran' atau 'TransaksiMetodePembayaran')
+        $transaksi = Transaksi::with(['TransaksiDetail', 'getMetodePembayaran', 'getPerawat', 'getDokter', 'getResepsionis'])
             ->findOrFail($id);
 
-        $Perawatan = MasterJenisPerawatan::where('Status', 'Y')
-            ->get();
+        $Perawatan = MasterJenisPerawatan::where('Status', 'Y')->get();
         $shift = MasterShift::whereTime('JamMulai', '<=', now()->format('H:i:s'))
             ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
             ->first();
@@ -305,7 +307,6 @@ class TransaksiController extends Controller
             ->whereDate('created_at', today())
             ->count();
 
-        // Hitung total pasien lama pada shift ini
         $totalPasienLama = Transaksi::where('JenisPasien', 'Lama')
             ->where('Shift', optional($shift)->id)
             ->where('KodeCabang', $kodeCabang)
@@ -316,7 +317,7 @@ class TransaksiController extends Controller
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
-
+        // dd($transaksi);
         return view('transaksi.kasir.edit', compact(
             'transaksi',
             'Perawatan',
@@ -429,9 +430,26 @@ class TransaksiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transaksi $transaksi)
+    public function destroy($id)
     {
-        //
+        $id = decrypt($id);
+        try {
+            $transaksi = Transaksi::findOrFail($id);
+            // dd($transaksi);
+            $transaksi->TransaksiDetail()->delete();
+            $transaksi->getMetodePembayaran()->delete();
+            $transaksi->delete();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Transaksi berhasil dihapus.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Gagal menghapus transaksi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     private function getShift($tanggal)
