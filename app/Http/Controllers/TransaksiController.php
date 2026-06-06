@@ -165,7 +165,7 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $kodeCabang = auth()->user()->kodeperusahaan;
-        $dokter = User::role('Dokter')->where('KodePerusahaan', $kodeCabang)->get();
+        $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
 
