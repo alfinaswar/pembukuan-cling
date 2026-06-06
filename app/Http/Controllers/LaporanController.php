@@ -490,6 +490,7 @@ class LaporanController extends Controller
      */
     public function dataDashboardResepsionis(Request $request)
     {
+        // dd($request->all());
         // =============================================
         // 1. VALIDASI
         // =============================================
@@ -499,18 +500,16 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'required|exists:users,id',  // Field form tetap 'perawat' untuk resepsionis
+            'perawat' => 'required',
             'shift' => 'nullable|exists:transaksis,Shift',  // Diperbaiki: validasi exists
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'perawat.required' => 'Kasir / Resepsionis wajib dipilih.',
-            'perawat.exists' => 'Kasir / Resepsionis tidak valid.',
             'shift.exists' => 'Shift tidak valid / tidak ditemukan.',  // Pesan error baru
         ]);
-
+        // dd($request->all());
         if ($validator->fails()) {
-            // Tambahkan 'shift' ke dalam list field yang dicek errornya
             $errorHtml = collect(['FilterTanggal', 'perawat', 'shift'])
                 ->filter(fn($field) => $validator->errors()->has($field))
                 ->map(fn($field) => $validator->errors()->first($field))
@@ -522,7 +521,7 @@ class LaporanController extends Controller
                 ->withInput()
                 ->with('fail_message', $errorHtml ?: 'Terjadi kesalahan validasi.');
         }
-
+        // dd($request->all());
         // =============================================
         // 2. PARSE PARAMETER
         // =============================================

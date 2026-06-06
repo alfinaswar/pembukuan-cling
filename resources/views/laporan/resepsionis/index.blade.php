@@ -75,13 +75,13 @@
 
                             {{-- Tambahkan class 'select2-readonly-wrapper' jika user bukan Superadmin/Management --}}
                             <div class="input-group mb-2 {{ $isDisabled ? 'select2-readonly-wrapper' : '' }}">
-                                <select id="kasirSelect" name="kasir" class="select2 form-control"
+                                <select id="kasirSelect" name="perawat" class="select2 form-control"
                                     style="width:100%; font-size: 0.96em; min-height:36px;"
                                     {{ $isDisabled ? 'tabindex="-1" aria-disabled="true"' : '' }}>
                                     <option value="">Pilih Kasir / Resepsionis</option>
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            {{ request('kasir') == $p->id ? 'selected' : '' }}>
+                                            {{ request('perawat') == $p->id ? 'selected' : '' }}>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
