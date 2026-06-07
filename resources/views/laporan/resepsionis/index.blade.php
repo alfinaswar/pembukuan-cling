@@ -81,13 +81,16 @@
                                     <option value="">Pilih Kasir / Resepsionis</option>
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            {{ request('perawat') == $p->id ? 'selected' : '' }}>
+                                            @if (!$isDisabled) {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
+                                            @else
+                                                {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+
 
                         <div class="col-md-4">
                             <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
