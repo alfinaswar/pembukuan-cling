@@ -819,7 +819,7 @@ class LaporanController extends Controller
         //    untuk semua query ke tabel Transaksi
         // =============================================
         $scopeTransaksi = fn($q) => $q
-            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->where('IdDokter', $dokterId)
             ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -865,7 +865,7 @@ class LaporanController extends Controller
             'getResepsionis',
         ])
             ->where($scopeTransaksi)
-            ->orderByDesc('Tanggal')
+            ->orderByDesc('created_at')
             ->get();
 
         // 5e. Rincian per jenis perawatan (sidebar)
