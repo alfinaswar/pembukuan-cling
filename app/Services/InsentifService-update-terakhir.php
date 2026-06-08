@@ -3,11 +3,8 @@
 namespace App\Services;
 
 use App\Models\InsentifKaryawan;
-use App\Models\MasterHariLibur;
-use App\Models\MasterKlinik;
+use App\Models\MasterHariLibur;  // <-- Tambahkan import Model MasterHariLibur
 use App\Models\RuleInsentif;
-use App\Models\TargetBulanan;  // <-- 🔥 Tambahkan import Model TargetBulanan
-use App\Models\TargetCapaian;
 use App\Models\Transaksi;
 use Carbon\Carbon;
 
@@ -83,19 +80,22 @@ class InsentifService
                 if (!$userId)
                     continue;
 
+                // Cek apakah tanggal transaksi adalah hari libur (hanya pakai tabel MasterHariLibur)
                 $isHoliday = $this->isHariLibur($transaksi->Tanggal);
                 if (!$isHoliday)
                     continue;
 
+                // 🔥 CEK FREKUENSI: Sudah dapat insentif hari ini?
                 $sudahDapatHariIni = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
-                    ->whereDate('created_at', $tanggal)
+                    ->whereDate('created_at', $tanggal)  // Cek per tanggal
                     ->where('KodeCabang', $kodeCabang)
                     ->exists();
 
-                if ($sudahDapatHariIni)
-                    continue;
+                if ($sudahDapatHariIni) {
+                    continue;  // Skip, sudah dapat hari ini
+                }
 
                 $isValid = true;
                 $finalNominal = $rule->Nominal;
@@ -115,41 +115,30 @@ class InsentifService
                     ->where('KodeCabang', $kodeCabang)
                     ->exists();
 
-                if ($sudahDapatBulanIni)
-                    continue;
-                $kodeKlinik = MasterKlinik::where('Kode', $transaksi->KodeCabang)->value('id');
-                $targetBulanan = TargetCapaian::where('Tahun', $tanggalCarbon->year)
-                    ->where('Bulan', $tanggalCarbon->month)
-                    ->where('IdKlinik', $kodeKlinik)
-                    ->first();
+                if ($sudahDapatBulanIni) {
+                    continue;  // Skip, sudah dapat bulan ini
+                }
 
-                // Jika target bulan ini belum di-set di database, skip rule ini
-                if (!$targetBulanan)
-                    continue;
-
-                // Threshold diambil dari tabel target, BUKAN dari $rule->Nilai
-                $threshold = $targetBulanan->BesarTarget;
-
-                // Ambil metric aktual dari context (misal: omzet_shift)
+                // Ambil metric target dari context
                 $metricKey = $rule->KondisiTambahan ?? 'omzet_shift';
                 $metricValue = $context[$metricKey] ?? 0;
 
-                // Evaluasi berdasarkan operator menggunakan $threshold
+                // Evaluasi berdasarkan operator
                 switch ($rule->Operator) {
                     case '>=':
-                        $isValid = $metricValue >= $threshold;
+                        $isValid = $metricValue >= $rule->Nilai;
                         break;
                     case '<=':
-                        $isValid = $metricValue <= $threshold;
+                        $isValid = $metricValue <= $rule->Nilai;
                         break;
                     case '=':
-                        $isValid = $metricValue == $threshold;
+                        $isValid = $metricValue == $rule->Nilai;
                         break;
                     case '>':
-                        $isValid = $metricValue > $threshold;
+                        $isValid = $metricValue > $rule->Nilai;
                         break;
                     case '<':
-                        $isValid = $metricValue < $threshold;
+                        $isValid = $metricValue < $rule->Nilai;
                         break;
                     default:
                         $isValid = false;
@@ -157,8 +146,6 @@ class InsentifService
 
                 if (!$isValid)
                     continue;
-
-                // 🔥 Besar insentif tetap diambil dari rule
                 $finalNominal = $rule->Nominal;
             }
             // =================================================
@@ -168,6 +155,7 @@ class InsentifService
                 if ($value === null)
                     continue;
 
+                // Validasi Konteks
                 if ($rule->JenisRule == 'pasien_baru' && $transaksi->JenisPasien !== 'Baru')
                     continue;
                 if ($rule->JenisRule == 'pasien_lama' && $transaksi->JenisPasien !== 'Lama')
@@ -238,6 +226,8 @@ class InsentifService
             // =================================================
             // 3. CEK DUPLICATE & SIMPAN
             // =================================================
+
+            // Cek duplicate untuk rule per-shift (non-kelipatan, non-target)
             if ($rule->BerlakuPer == 'shift' &&
                     $rule->Operator != 'kelipatan' &&
                     $rule->JenisRule != 'target_tercapai' &&
@@ -273,7 +263,10 @@ class InsentifService
     // =====================================================
     private function isHariLibur($tanggal)
     {
-        return MasterHariLibur::whereDate('TanggalLibur', $tanggal)->exists();
+        // Cek pada tabel MasterHariLibur berdasarkan field 'TanggalLibur'
+        $isNationalHoliday = MasterHariLibur::whereDate('TanggalLibur', $tanggal)->exists();
+
+        return $isNationalHoliday;
     }
 
     // =====================================================

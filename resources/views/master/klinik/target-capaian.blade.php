@@ -56,6 +56,7 @@
                                         <tr>
                                             <th style="width:40px;" class="text-center">#</th>
                                             <th>Tahun</th>
+                                            <th>Bulan</th>
                                             <th>Besar Target</th>
                                             <th style="width:190px;" class="text-center">Aksi</th>
                                         </tr>
@@ -66,13 +67,34 @@
                                                 <tr>
                                                     <td class="text-center">{{ $index + 1 }}</td>
                                                     <td>{{ $target->Tahun }}</td>
+                                                    <td>
+                                                        @php
+                                                            $bulanList = [
+                                                                1 => 'Januari',
+                                                                2 => 'Februari',
+                                                                3 => 'Maret',
+                                                                4 => 'April',
+                                                                5 => 'Mei',
+                                                                6 => 'Juni',
+                                                                7 => 'Juli',
+                                                                8 => 'Agustus',
+                                                                9 => 'September',
+                                                                10 => 'Oktober',
+                                                                11 => 'November',
+                                                                12 => 'Desember',
+                                                            ];
+                                                        @endphp
+                                                        {{ $bulanList[(int) $target->Bulan] ?? $target->Bulan }}
+                                                    </td>
+
                                                     <td>Rp.{{ number_format($target->BesarTarget, 0, ',', '.') }}</td>
                                                     <td class="text-center">
                                                         <!-- Placeholder for actions (edit/delete) -->
-                                                        <button type="button" class="btn btn-sm btn-warning btn-edit"
-                                                            data-id="{{ $target->id }}">
+                                                        <a href="{{ route('Klinik.edit-target', encrypt($target->id)) }}"
+                                                            class="btn btn-sm btn-warning">
                                                             <i class="ti ti-edit"></i>
-                                                        </button>
+                                                        </a>
+
                                                         <button type="button" class="btn btn-sm btn-danger btn-delete"
                                                             data-id="{{ $target->id }}">
                                                             <i class="ti ti-trash"></i>

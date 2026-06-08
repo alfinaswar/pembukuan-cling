@@ -66,30 +66,35 @@
                             $kasir_id = old('kasir', request('kasir', $user->id ?? ''));
                             $isSuperadminOrManagement =
                                 $user && ($user->hasRole('Superadmin') || $user->hasRole('Management'));
-                            $isDisabled = !$isSuperadminOrManagement;
+                            $isKasirResepsionis = $user && $user->hasRole('Kasir / Resepsionis');
                         @endphp
 
                         <div class="col-md-4">
                             <label for="kasirSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Kasir /
                                 Resepsionis</label>
 
-                            {{-- Tambahkan class 'select2-readonly-wrapper' jika user bukan Superadmin/Management --}}
-                            <div class="input-group mb-2 {{ $isDisabled ? 'select2-readonly-wrapper' : '' }}">
+                            <div class="input-group mb-2">
+                                @if ($isKasirResepsionis)
+                                    <input type="hidden" name="perawat" value="{{ $user->id }}">
+                                @endif
+
                                 <select id="kasirSelect" name="perawat" class="select2 form-control"
-                                    style="width:100%; font-size: 0.96em; min-height:36px;"
-                                    {{ $isDisabled ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                                    style="width:100%; font-size: 0.96em; min-height:36px;" {{-- 🔥 Gunakan disabled native HTML --}}
+                                    @if ($isKasirResepsionis) disabled @endif>
                                     <option value="">Pilih Kasir / Resepsionis</option>
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            @if (!$isDisabled) {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
-                                            @else
-                                                {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
+                                            @if ($isKasirResepsionis) {{ $user->id == $p->id ? 'selected' : '' }}
+                    @else
+                        {{-- Logic selection normal --}}
+                        {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+
 
 
                         <div class="col-md-4">

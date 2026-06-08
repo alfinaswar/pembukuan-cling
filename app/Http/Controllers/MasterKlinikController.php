@@ -38,6 +38,63 @@ class MasterKlinikController extends Controller
         return view('master.klinik.index');
     }
 
+    public function editTarget($id)
+    {
+        $decryptedId = decrypt($id);
+
+        $target = TargetCapaian::findOrFail($decryptedId);
+        $klinik = MasterKlinik::findOrFail($target->IdKlinik);
+
+        return view('master.klinik.edit-target', [
+            'target' => $target,
+            'data' => $klinik,
+        ]);
+    }
+
+    public function updateTarget(Request $request, $id)
+    {
+        $decryptedId = decrypt($id);
+
+        $validatedData = $request->validate([
+            'Tahun' => 'required|numeric|min:2000|max:2100',
+            'Bulan' => 'required|numeric|min:1|max:12',
+            'BesarTarget' => 'required|numeric|min:1',
+        ]);
+
+        $target = TargetCapaian::findOrFail($decryptedId);
+
+        $exists = TargetCapaian::where('IdKlinik', $target->IdKlinik)
+            ->where('Tahun', $request->Tahun)
+            ->where('Bulan', $request->Bulan)
+            ->where('id', '!=', $decryptedId)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'Bulan' => 'Target untuk bulan dan tahun tersebut sudah ada untuk klinik ini.'
+                ]);
+        }
+
+        $target->Tahun = $request->Tahun;
+        $target->Bulan = $request->Bulan;
+        $target->BesarTarget = $request->BesarTarget;
+        $target->save();
+
+        if (function_exists('activity')) {
+            activity('target-capaian')
+                ->causedBy(auth()->user()->id)
+                ->withProperties(['ip' => request()->ip()])
+                ->log('Memperbarui data target capaian: ' . $target->IdKlinik . ', Tahun: ' . $target->Tahun . ', Bulan: ' . $target->Bulan);
+        }
+
+        return redirect()
+            ->route('Klinik.target-capaian', encrypt($target->IdKlinik))
+            ->with('success', 'Data target capaian berhasil diperbarui.');
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -78,15 +135,31 @@ class MasterKlinikController extends Controller
     public function storeTarget(Request $request, $id)
     {
         $id = decrypt($id);
-        // dd($request->all());
+
+        // Validasi input, tambahkan Bulan
         $validatedData = $request->validate([
             'Tahun' => 'required|numeric|min:2000|max:2100',
+            'Bulan' => 'required|numeric|min:1|max:12',
             'BesarTarget' => 'required',
         ]);
+
+        // Cek apakah sudah ada Bulan yg sama di Tahun dan IdKlinik yang sama
+        $exists = TargetCapaian::where('IdKlinik', $id)
+            ->where('Tahun', $request->Tahun)
+            ->where('Bulan', $request->Bulan)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['Bulan' => 'Target untuk Bulan dan Tahun tersebut sudah ada di klinik ini.']);
+        }
 
         $target = new TargetCapaian();
         $target->IdKlinik = $id;
         $target->Tahun = $request->Tahun;
+        $target->Bulan = $request->Bulan;
         $target->BesarTarget = $request->BesarTarget;
         $target->UserCreate = auth()->user()->name;
         $target->save();
@@ -95,7 +168,7 @@ class MasterKlinikController extends Controller
             activity('target-capaian-klinik')
                 ->causedBy(auth()->user()->id)
                 ->withProperties(['ip' => request()->ip()])
-                ->log('Menambahkan target capaian klinik tahun ' . $request->Tahun . ' pada klinik ID: ' . $id);
+                ->log('Menambahkan target capaian klinik tahun ' . $request->Tahun . ' bulan ' . $request->Bulan . ' pada klinik ID: ' . $id);
         }
 
         return redirect()->route('Klinik.target-capaian', encrypt($id))->with('success', 'Target capaian berhasil ditambahkan');
