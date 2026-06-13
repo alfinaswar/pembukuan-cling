@@ -649,7 +649,8 @@
                                                         <td style="width: 240px; min-width: 240px; max-width: 240px;">
                                                             <select name="MetodePembayaran[]"
                                                                 class="form-select @error('MetodePembayaran.' . $i) is-invalid @enderror"
-                                                                style="width: 100%; min-width: 100%; max-width: 100%;">
+                                                                style="width: 100%; min-width: 100%; max-width: 100%;"
+                                                                required>
                                                                 <option value="">-- Pilih Metode --</option>
                                                                 @foreach ($MetodePembayaran as $mp)
                                                                     <option value="{{ $mp->id }}"
@@ -668,7 +669,7 @@
                                                                 class="form-control nominal-input-bayar currency-format @error('NominalBayar.' . $i) is-invalid @enderror"
                                                                 style="width: 100%; min-width: 100%; max-width: 100%;"
                                                                 value="{{ isset($oldNominal[$i]) ? number_format($oldNominal[$i], 0, ',', '.') : '' }}"
-                                                                placeholder="Nominal Bayar">
+                                                                placeholder="Nominal Bayar" required>
                                                             @error('NominalBayar.' . $i)
                                                                 <span
                                                                     class="invalid-feedback d-block">{{ $message }}</span>
