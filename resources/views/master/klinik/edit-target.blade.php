@@ -6,7 +6,7 @@
         <div class="page-title-head d-flex align-items-center flex-wrap gap-2 mb-4">
             <div class="flex-grow-1">
                 <h4 class="page-main-title m-0 fw-semibold">
-                    <i class="ti ti-plus me-2 text-primary"></i>Tambah Target Capaian Klinik
+                    <i class="ti ti-edit me-2 text-primary"></i>Edit Target Capaian Klinik
                 </h4>
             </div>
             <nav aria-label="breadcrumb">
@@ -17,7 +17,7 @@
                     <li class="breadcrumb-item">
                         <a href="{{ route('Klinik.index') }}" class="text-decoration-none text-reset">Klinik</a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Tambah Target</li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Target</li>
                 </ol>
             </nav>
         </div>
@@ -29,7 +29,7 @@
                     <!-- Card Header -->
                     <div class="card-header bg-white py-3 border-bottom">
                         <h5 class="card-title mb-0 fw-semibold">
-                            <i class="ti ti-file-text me-2"></i>Form Data Target Capaian - <span
+                            <i class="ti ti-file-text me-2"></i>Edit Data Target Capaian - <span
                                 class="text-primary">{{ $data->Nama }}</span>
 
                         </h5>
@@ -37,9 +37,10 @@
 
                     <!-- Card Body -->
                     <div class="card-body p-4">
-                        <form action="{{ route('Klinik.simpan-target', encrypt($data->id)) }}" method="POST"
+                        <form action="{{ route('Klinik.update-target', encrypt($target->id)) }}" method="POST"
                             id="formTargetKlinik">
                             @csrf
+                            @method('PUT')
 
                             <!-- Info Box -->
                             <div class="alert alert-light border mb-4 d-flex align-items-center gap-2" style="color: #000;">
@@ -60,8 +61,8 @@
                                     </span>
                                     <input type="number" id="Tahun" name="Tahun"
                                         class="form-control @error('Tahun') is-invalid @enderror"
-                                        value="{{ old('Tahun', date('Y')) }}" required min="2000" max="2100"
-                                        placeholder="Contoh: 2024" autocomplete="off">
+                                        value="{{ old('Tahun', $target->Tahun ?? date('Y')) }}" required min="2000"
+                                        max="2100" placeholder="Contoh: 2024" autocomplete="off">
                                 </div>
                                 @error('Tahun')
                                     <div class="invalid-feedback d-block mt-1">
@@ -97,10 +98,12 @@
                                                 11 => 'November',
                                                 12 => 'Desember',
                                             ];
+                                            $selectedBulan = old('Bulan', $target->Bulan ?? null);
                                         @endphp
                                         @foreach ($bulanList as $num => $bln)
                                             <option value="{{ $num }}"
-                                                {{ old('Bulan') == $num ? 'selected' : '' }}>{{ $bln }}</option>
+                                                {{ (string) $selectedBulan === (string) $num ? 'selected' : '' }}>
+                                                {{ $bln }}</option>
                                         @endforeach
 
                                     </select>
@@ -123,8 +126,8 @@
                                     </span>
                                     <input type="text" id="BesarTarget" name="BesarTarget"
                                         class="form-control rupiah-input @error('BesarTarget') is-invalid @enderror"
-                                        value="{{ old('BesarTarget') }}" required placeholder="Contoh: Rp 5.000"
-                                        autocomplete="off" inputmode="numeric">
+                                        value="{{ old('BesarTarget', isset($target->BesarTarget) ? number_format($target->BesarTarget, 0, ',', '.') : '') }}"
+                                        required placeholder="Contoh: Rp 5.000" autocomplete="off" inputmode="numeric">
                                 </div>
                                 @error('BesarTarget')
                                     <div class="invalid-feedback d-block mt-1">
@@ -144,7 +147,7 @@
                                     <i class="ti ti-arrow-left me-1"></i>Batal
                                 </a>
                                 <button type="submit" class="btn btn-primary px-4">
-                                    <i class="ti ti-device-floppy me-1"></i>Simpan Data
+                                    <i class="ti ti-device-floppy me-1"></i>Update Data
                                 </button>
                             </div>
                         </form>

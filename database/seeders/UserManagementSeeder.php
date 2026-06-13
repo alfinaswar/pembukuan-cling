@@ -16,7 +16,7 @@ class UserManagementSeeder extends Seeder
         $now = Carbon::now();
 
         // 1️⃣ Pastikan role "Super Admin" tersedia (Spatie)
-        $roleSuperAdmin = Role::firstOrCreate(['name' => 'Management']);
+        $roleSuperAdmin = Role::firstOrCreate(['name' => 'Superadmin']);
 
         // Format: [Nama, Kategori, Role, Tipe, Email]
         $management = [
@@ -65,7 +65,7 @@ class UserManagementSeeder extends Seeder
             );
 
             // 3️⃣ Assign role "Super Admin" (Spatie)
-            if (!$user->hasRole('Management')) {
+            if (!$user->hasRole('Superadmin')) {
                 $user->syncRoles($roleSuperAdmin);
             }
         }

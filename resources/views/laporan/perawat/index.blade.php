@@ -103,14 +103,15 @@
                                             @if (!$isDisabled) {{-- Jika Superadmin/Management, pilih berdasarkan request atau user id --}}
                         {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
                     @else
-                        {{-- Jika bukan, paksa pilih berdasarkan user id (agar tidak bisa diubah) --}}
+
                         {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
-                        </div <!-- Pilih Shift -->
+                        </div>
+                        <!-- Pilih Shift -->
                         <div class="col-md-4">
                             <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
                             <div class="input-group mb-2">

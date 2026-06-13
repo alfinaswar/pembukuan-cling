@@ -63,6 +63,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/tambah-target/{id}', [MasterKlinikController::class, 'buatTarget'])->name('Klinik.tambah-target');
         Route::post('/store/{id}', [MasterKlinikController::class, 'storeTarget'])->name('Klinik.simpan-target');
         Route::get('/show/{id}', [MasterKlinikController::class, 'showTarget'])->name('Klinik.show');
+        Route::get('/edit-target/{id}', [MasterKlinikController::class, 'editTarget'])->name('Klinik.edit-target');
+        Route::put('/update-target/{id}', [MasterKlinikController::class, 'updateTarget'])->name('Klinik.update-target');
     });
     Route::prefix('master/metode-pembayaran')->group(function () {
         Route::get('/', [MasterMetodePembayaranController::class, 'index'])->name('MetodePembayaran.index');

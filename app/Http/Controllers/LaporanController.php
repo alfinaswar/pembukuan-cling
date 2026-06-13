@@ -290,7 +290,7 @@ class LaporanController extends Controller
         // =============================================
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdPerawat', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -298,7 +298,7 @@ class LaporanController extends Controller
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -538,7 +538,7 @@ class LaporanController extends Controller
         // =============================================
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdResepsionis', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
@@ -546,7 +546,7 @@ class LaporanController extends Controller
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
@@ -897,7 +897,7 @@ class LaporanController extends Controller
             ->whereNotNull('IdResepsionis')
             ->get()
             ->pluck('getResepsionis')
-            ->filter()  // hilangkan null jika ada transaksi tanpa resepsionis
+            ->filter()
             ->unique('id')
             ->values();
 
