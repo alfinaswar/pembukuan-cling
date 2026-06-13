@@ -34,20 +34,20 @@ class LaporanController extends Controller
         }
 
         // Total Biaya
-        $totalBiaya = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $totalBiaya = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->sum('TotalBayar');
         // jumlah total pasien
-        $totalPasien = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $totalPasien = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->count();
         // Pasien Baru & Lama
-        $pasienBaru = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $pasienBaru = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->where('JenisPasien', 'Baru')
             ->count();
 
-        $pasienLama = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $pasienLama = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->where('JenisPasien', 'Lama')
             ->count();
@@ -77,7 +77,7 @@ class LaporanController extends Controller
         // Transaksi Terbaru
         $transaksiTerbaru = Transaksi::with(['getPerawat'])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
-            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->latest()
             ->get();
 
@@ -142,20 +142,20 @@ class LaporanController extends Controller
         }
 
         // Total Biaya
-        $totalBiaya = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $totalBiaya = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->sum('TotalBayar');
         // jumlah total pasien
-        $totalPasien = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $totalPasien = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->count();
         // Pasien Baru & Lama
-        $pasienBaru = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $pasienBaru = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->where('JenisPasien', 'Baru')
             ->count();
 
-        $pasienLama = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
+        $pasienLama = Transaksi::whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->where('JenisPasien', 'Lama')
             ->count();
@@ -178,7 +178,7 @@ class LaporanController extends Controller
         // Transaksi Terbaru
         $transaksiTerbaru = Transaksi::with(['getPerawat'])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
-            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->latest()
             ->get();
 
@@ -290,7 +290,7 @@ class LaporanController extends Controller
         // =============================================
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
-                ->whereBetween('Tanggal', [$startDate, $endDate])
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdPerawat', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -298,7 +298,7 @@ class LaporanController extends Controller
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
-                ->whereBetween('Tanggal', [$startDate, $endDate])
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -538,7 +538,7 @@ class LaporanController extends Controller
         // =============================================
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
-                ->whereBetween('Tanggal', [$startDate, $endDate])
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdResepsionis', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
@@ -546,7 +546,7 @@ class LaporanController extends Controller
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
-                ->whereBetween('Tanggal', [$startDate, $endDate])
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
