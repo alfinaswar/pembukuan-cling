@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MasterJenisPerawatan;
+use App\Models\MasterKlinik;
 use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
 use App\Models\Transaksi;
@@ -42,6 +43,12 @@ class TransaksiController extends Controller
                 ->when($shiftId, function ($query) use ($shiftId) {
                     $query->where('Shift', $shiftId);
                 })
+                ->when($request->filled('klinik'), function ($query) use ($request) {
+                    $klinikId = $request->input('klinik');
+                    $query->where('KodeCabang', $klinikId);
+                })
+
+
                 ->latest();
             $summary = [
                 'total_omset' => (clone $data)->sum('TotalBayar'),
@@ -79,9 +86,7 @@ class TransaksiController extends Controller
                     }
                     return '<span class="badge bg-secondary">' . e($row->getShift->Nama) . '</span>';
                 })
-                ->addColumn('Perawat', fn($row) => $row->getPerawat?->name ?? '-')
-                ->addColumn('Dokter', fn($row) => $row->getDokter?->name ?? '-')
-                ->addColumn('Resepsionis', fn($row) => $row->getResepsionis?->name ?? '-')
+
                 ->addColumn('JenisPasien', function ($row) {
                     $jenis = $row->JenisPasien ?? '-';
                     if ($jenis === 'Baru')
@@ -97,12 +102,21 @@ class TransaksiController extends Controller
                     foreach ($row->TransaksiDetail as $detail) {
                         $nama = optional($detail->MasterJenisPerawatan)->Nama;
                         $biaya = (int) ($detail->Biaya ?? 0);
+                        $keterangan = $detail->Keterangan ?? null;
                         if ($nama) {
                             if (!isset($rekap[$nama])) {
-                                $rekap[$nama] = ['nama' => $nama, 'harga' => 0, 'count' => 0];
+                                $rekap[$nama] = [
+                                    'nama' => $nama,
+                                    'harga' => 0,
+                                    'count' => 0,
+                                    'keterangan' => []
+                                ];
                             }
                             $rekap[$nama]['harga'] += $biaya;
                             $rekap[$nama]['count'] += 1;
+                            if ($keterangan && !in_array($keterangan, $rekap[$nama]['keterangan'])) {
+                                $rekap[$nama]['keterangan'][] = $keterangan;
+                            }
                         }
                     }
                     if (empty($rekap))
@@ -112,10 +126,29 @@ class TransaksiController extends Controller
                         $namaStr = e($item['nama']) . ($item['count'] > 1 ? ' x' . $item['count'] : '');
                         $html .= '<dt style="font-weight:500;">' . $namaStr . ':</dt>';
                         $html .= '<dd style="margin-bottom:4px;">Rp ' . number_format($item['harga'], 0, ',', '.') . '</dd>';
+                        if (!empty($item['keterangan'])) {
+                            foreach ($item['keterangan'] as $ket) {
+                                $html .= '<dd style="margin-bottom:2px;"><small><i class="fa fa-info-circle me-1"></i>' . e($ket) . '</small></dd>';
+                            }
+                        }
                     }
                     $html .= '</dl>';
                     return $html;
                 })
+                ->addColumn('Petugas', function ($row) {
+                    $dokter = $row->getDokter?->name ?? '-';
+                    $perawat = $row->getPerawat?->name ?? '-';
+                    $resepsionis = $row->getResepsionis?->name ?? '-';
+                    $html = '<dl class="mb-0">';
+                    $html .= '<dt style="font-weight:500;">Dokter</dt><dd>' . e($dokter) . '</dd>';
+                    $html .= '<dt style="font-weight:500;">Perawat</dt><dd>' . e($perawat) . '</dd>';
+                    $html .= '<dt style="font-weight:500;">Resepsionis</dt><dd>' . e($resepsionis) . '</dd>';
+                    $html .= '</dl>';
+                    return $html;
+                })
+
+
+
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
@@ -127,13 +160,14 @@ class TransaksiController extends Controller
                     </button>
                 ';
                 })
-                ->rawColumns(['action', 'TotalBayar', 'Perawat', 'Dokter', 'Resepsionis', 'Layanan', 'JenisPasien', 'Shift', 'MetodePembayaran'])
+                ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran'])
                 ->with(['summary' => $summary])
                 ->make(true);
         }
 
         $shift = MasterShift::get();
-        return view('transaksi.kasir.index', compact('shift'));
+        $klinik = MasterKlinik::get();
+        return view('transaksi.kasir.index', compact('shift', 'klinik'));
     }
 
     /**
@@ -251,6 +285,7 @@ class TransaksiController extends Controller
                     $transaksi->TransaksiDetail()->create([
                         'IdTransaksi' => $transaksi->id,
                         'JenisPerawatan' => $perawatan['id'],
+                        'Keterangan' => $perawatan['Keterangan'],
                         'Biaya' => $perawatan['Biaya'],
                         'UserCreate' => auth()->user()->name,
                         'UserUpdate' => null,
@@ -412,6 +447,7 @@ class TransaksiController extends Controller
                         'IdTransaksi' => $transaksi->id,
                         'JenisPerawatan' => $perawatan['id'],
                         'Biaya' => $perawatan['Biaya'],
+                        'Keterangan' => $perawatan['Keterangan'],
                         'UserCreate' => auth()->user()->name,
                         'UserUpdate' => null,
                         'UserDelete' => null,

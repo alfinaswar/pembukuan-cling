@@ -15,7 +15,7 @@
                 </div>
                 <div class="card-body">
 
-                    {{-- 🔹 FILTER TANGGAL --}}
+                    {{-- 🔹 FILTER TANGGAL + KLINIK --}}
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Tanggal Mulai</label>
@@ -38,8 +38,16 @@
                                 @endforeach
                             </select>
                         </div>
-
-                        <div class="col-md-3 d-flex align-items-end gap-2">
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Klinik</label>
+                            <select id="filter_klinik" class="form-control form-control-sm">
+                                <option value="">Semua Klinik</option>
+                                @foreach ($klinik as $item)
+                                    <option value="{{ $item->Kode }}">{{ $item->Nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end gap-2 mt-3">
                             <button id="btnFilter" class="btn btn-primary btn-sm">
                                 <i class="ti ti-filter me-1"></i> Filter
                             </button>
@@ -48,6 +56,7 @@
                             </button>
                         </div>
                     </div>
+
 
                     {{-- END FILTER --}}
                     <div class="row mb-4">
@@ -135,9 +144,7 @@
                                     <th>Metode Pembayaran</th>
                                     <th>Layanan</th>
                                     <th>Total Bayar</th>
-                                    <th>Dokter</th>
-                                    <th>Perawat</th>
-                                    <th>Resepsionis</th>
+                                    <th>Petugas</th>
                                     <th>Shift</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -176,6 +183,7 @@
                 const mulai = $('#filter_tanggal_mulai').val();
                 const akhir = $('#filter_tanggal_akhir').val();
                 const shift = $('#filter_shift').val();
+                const klinik = $('#filter_klinik').val();
                 $('#transaksiKasirTable').DataTable().ajax.reload();
             }
 
@@ -189,9 +197,9 @@
                 const today = new Date().toISOString().split('T')[0];
                 $('#filter_tanggal_mulai, #filter_tanggal_akhir').val(today);
                 $('#filter_shift').val(''); // Reset filter shift ke default (kosong)
+                $('#filter_klinik').val(''); // Reset filter klinik ke default (kosong)
                 reloadTable();
             });
-
 
             // TOMBOL DELETE
             $('body').on('click', '.btn-delete', function() {
@@ -242,6 +250,7 @@
                         d.tanggal_mulai = $('#filter_tanggal_mulai').val();
                         d.tanggal_akhir = $('#filter_tanggal_akhir').val();
                         d.shift = $('#filter_shift').val();
+                        d.klinik = $('#filter_klinik').val();
                     }
                 },
                 language: {
@@ -286,16 +295,8 @@
                         name: 'TotalBayar'
                     },
                     {
-                        data: 'Dokter',
-                        name: 'Dokter'
-                    },
-                    {
-                        data: 'Perawat',
-                        name: 'Perawat'
-                    },
-                    {
-                        data: 'Resepsionis',
-                        name: 'Resepsionis'
+                        data: 'Petugas',
+                        name: 'Petugas'
                     },
                     {
                         data: 'Shift',
