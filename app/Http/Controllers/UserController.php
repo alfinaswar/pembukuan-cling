@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\MasterKlinik;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
-use DB;
-use Hash;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
+use Spatie\Permission\Models\Role;
 use Yajra\DataTables\DataTables;
+use DB;
+use Hash;
 
 class UserController extends Controller
 {
@@ -37,7 +37,6 @@ class UserController extends Controller
                     }
                     return '-';
                 })
-
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
@@ -71,19 +70,22 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required|array',
+            'kodeperusahaan' => 'required',  // tambahkan validasi kodeperusahaan
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => \Hash::make($request->password),
+            'kodeperusahaan' => $request->kodeperusahaan,  // set kodeperusahaan dari request
         ]);
-        $user->syncRoles($request->roles);
+        $user->syncRoles($request->roles[0]);
 
         if (function_exists('activity')) {
             activity('user')
@@ -124,25 +126,27 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $id = decrypt($id);
+        // $id = decrypt($id);
         $user = User::findOrFail($id);
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'roles' => 'required|array',
+            'kodeperusahaan' => 'required',  // tambahkan validasi kodeperusahaan untuk update
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->kodeperusahaan = $request->kodeperusahaan;
 
         if ($request->filled('password')) {
             $user->password = \Hash::make($request->password);
         }
 
         $user->save();
-        $user->syncRoles($request->roles);
+        $user->syncRoles($request->roles[0]);
 
         if (function_exists('activity')) {
             activity('user')

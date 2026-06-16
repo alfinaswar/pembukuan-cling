@@ -96,13 +96,13 @@
                                         <label for="cabang_id" class="form-label fw-semibold mb-2">
                                             Cabang <span class="text-danger">*</span>
                                         </label>
-                                        <select id="cabang_id" name="cabang_id"
-                                            class="form-select @error('cabang_id') is-invalid @enderror"
+                                        <select id="kodeperusahaan" name="kodeperusahaan"
+                                            class="form-select @error('kodeperusahaan') is-invalid @enderror"
                                             data-toggle="select2" required>
                                             <option value="">Pilih Cabang</option>
                                             @foreach ($perusahaan as $cabang)
-                                                <option value="{{ $cabang->id }}"
-                                                    {{ old('cabang_id', $user->cabang_id) == $cabang->id ? 'selected' : '' }}>
+                                                <option value="{{ $cabang->Kode }}"
+                                                    {{ old('kodeperusahaan', $user->kodeperusahaan) == $cabang->Kode ? 'selected' : '' }}>
                                                     {{ $cabang->Nama }}
                                                 </option>
                                             @endforeach
