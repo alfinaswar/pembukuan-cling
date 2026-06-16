@@ -502,10 +502,7 @@ class LaporanController extends Controller
      */
     public function dataDashboardResepsionis(Request $request)
     {
-        // dd($request->all());
-        // =============================================
         // 1. VALIDASI
-        // =============================================
         $validator = Validator::make($request->all(), [
             'FilterTanggal' => [
                 'required',
@@ -513,14 +510,13 @@ class LaporanController extends Controller
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
             'perawat' => 'required',
-            'shift' => 'nullable|exists:transaksis,Shift',  // Diperbaiki: validasi exists
+            'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'perawat.required' => 'Kasir / Resepsionis wajib dipilih.',
-            'shift.exists' => 'Shift tidak valid / tidak ditemukan.',  // Pesan error baru
+            'shift.exists' => 'Shift tidak valid / tidak ditemukan.',
         ]);
-        // dd($request->all());
         if ($validator->fails()) {
             $errorHtml = collect(['FilterTanggal', 'perawat', 'shift'])
                 ->filter(fn($field) => $validator->errors()->has($field))
@@ -533,27 +529,23 @@ class LaporanController extends Controller
                 ->withInput()
                 ->with('fail_message', $errorHtml ?: 'Terjadi kesalahan validasi.');
         }
-        // dd($request->all());
-        // =============================================
+
         // 2. PARSE PARAMETER
-        // =============================================
         [$startRaw, $endRaw] = explode(' - ', $request->FilterTanggal);
         $startDate = Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
         $endDate = Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
 
-        $kasirId = $request->perawat;  // Mapping input 'perawat' ke variable internal 'kasirId'
+        $kasirId = $request->perawat;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
         $kodeCabang = auth()->user()->kodeperusahaan;
 
-        // =============================================
         // 3. BASE SCOPE (Reusable Closures)
-        // =============================================
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdResepsionis', $kasirId)
-                ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
+                ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
@@ -561,12 +553,10 @@ class LaporanController extends Controller
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $kasirId)
-                ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));  // Konsisten pakai when()
+                ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
 
-        // =============================================
         // 4. VALIDASI DATA KOSONG
-        // =============================================
         if (!Transaksi::where($scopeTransaksi)->exists()) {
             return redirect()->back()->withInput()->with(
                 'error',
@@ -574,9 +564,7 @@ class LaporanController extends Controller
             );
         }
 
-        // =============================================
         // 5. QUERY
-        // =============================================
 
         // 5a. Omset & Total Shift
         $omsetRow = Transaksi::where($scopeTransaksi)
@@ -623,10 +611,16 @@ class LaporanController extends Controller
             })
             ->values();
 
-        // 5f. Ringkasan per JenisRule
+        // 5f. Insentif Hari Libur (rule: hari_libur)
+        $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
+            ->where('JenisRule', 'hari_libur')
+            ->sum('Nominal');
+
+        // 5g. Ringkasan per JenisRule
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000', 'badge' => 'bg-primary', 'order' => 1],
             'pasien_lama' => ['label' => 'Shift dengan 8 Pasien Lama', 'badge' => 'bg-info', 'order' => 2],
+            'hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning', 'order' => 3],
         ];
 
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
@@ -645,31 +639,28 @@ class LaporanController extends Controller
                 'total_insentif' => $db->total_insentif ?? 0,
                 'total_data' => $db->total_data ?? 0,
             ];
-        })->values();
+        })->sortBy('order')->values();
 
-        // =============================================
         // 6. DROPDOWN (Data untuk Filter)
-        // =============================================
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
 
-        // =============================================
         // 7. KIRIM KE VIEW
-        // =============================================
         $data = [
             'OmsetSatuShift' => $OmsetSatuShift,
             'TotalInsentif' => $TotalInsentif,
             'totalPasienDilayani' => $totalPasienDilayani,
             'ShiftTotalBiayaKlinik' => $ShiftTotalBiayaKlinik,
             'Shift8PasienLama' => $Shift8PasienLama,
+            'InsentifHariLibur' => $InsentifHariLibur,  // <<-- DITAMBAHKAN
             'Ringkasan' => $Ringkasan,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'kasirId' => $kasirId,
             'kodeCabang' => $kodeCabang,
-            'shiftFilter' => $shiftFilter,  // Penting: agar select shift tetap terpilih
+            'shiftFilter' => $shiftFilter,
         ];
 
         return view('laporan.resepsionis.index', compact('dokter', 'perawat', 'kasir', 'shift', 'data'));

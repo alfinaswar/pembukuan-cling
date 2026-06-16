@@ -40,7 +40,6 @@
             <h5 class="mb-0 fw-bold">Dashboard Resepsionis</h5>
             <small class="text-muted">Ringkasan pencapaian dan perhitungan insentif berdasarkan performa</small>
         </div>
-
         {{-- <div class="col-lg-6 col-md-6 col-sm-12 d-flex justify-content-end align-items-center">
             <div class="input-group me-2" style="max-width: 220px;">
                 <input type="text" class="form-control" placeholder="2024-06-04" id="mdate" />
@@ -52,7 +51,6 @@
                 <i class="ti ti-file-export"></i> Export
             </a>
         </div> --}}
-
     </div>
     <div class="row">
         <div class="col-lg-12">
@@ -94,8 +92,6 @@
                                 </select>
                             </div>
                         </div>
-
-
 
                         <div class="col-md-4">
                             <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
@@ -373,6 +369,68 @@
             </div>
         </div>
         <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-start mb-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning text-white me-3"
+                            style="width:32px; height:32px;">
+                            <span class="fw-bold fs-5" style="color:#e67e22;">6</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-semibold" style="color:#e67e22;">Insentif Hari Libur</h5>
+                            <small class="text-muted" style="color:#e67e22 !important;">Insentif untuk shift pada hari
+                                libur nasional</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pb-2">
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="fw-semibold" style="color:#e67e22;">Tanggal</th>
+                                    <th class="fw-semibold" style="color:#e67e22;">Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $insentifLibur = $data['InsentifHariLibur'] ?? [];
+                                    $totalInsentifLibur = 0;
+                                @endphp
+                                @if (is_iterable($insentifLibur) && count($insentifLibur) > 0)
+                                    @foreach ($insentifLibur as $row)
+                                        <tr>
+                                            <td style="color:#e67e22;">
+                                                {{ isset($row['created_at']) ? \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') : '-' }}
+                                            </td>
+
+                                            <td class="fw-semibold" style="color:#e67e22;">
+                                                {{ isset($row['Nominal']) ? 'Rp ' . number_format($row['Nominal'], 0, ',', '.') : '-' }}
+                                                @php $totalInsentifLibur += $row['Nominal'] ?? 0; @endphp
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="3" class="text-center" style="color:#e67e22;">Tidak ada data
+                                            insentif hari libur</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert"
+                        style="background: #fff9ed; border-color: #fff3cd;">
+                        <div class="fw-semibold" style="color:#e67e22;">Total Insentif Hari Libur</div>
+                        <div class="fw-bold" style="color:#e67e22; font-size:18px;">
+                            Rp {{ number_format($totalInsentifLibur, 0, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
             <div class="card shadow border-0"
                 style="background: linear-gradient(90deg, #665be7 0%, #28c76f 100%); color: white;">
                 <div class="card-body p-0">
@@ -401,20 +459,26 @@
                                             'badge' => 'bg-info',
                                             'order' => 2,
                                         ],
+                                        'hari_libur' => [
+                                            // Tambahan Insentif Hari Libur
+                                            'label' => 'Insentif Kehadiran Hari Libur',
+                                            'badge' => 'bg-success',
+                                            'order' => 3,
+                                        ],
                                         // 'transaksi' => [
                                         //     'label' => 'Billing ≥ Rp 1.000.000 per Transaksi',
                                         //     'badge' => 'bg-success',
-                                        //     'order' => 3,
+                                        //     'order' => 4,
                                         // ],
                                         // 'tindakan' => [
                                         //     'label' => 'Perawatan Odontektomi',
                                         //     'badge' => 'bg-warning text-white',
-                                        //     'order' => 4,
+                                        //     'order' => 5,
                                         // ],
                                         // 'pasien_baru' => [
                                         //     'label' => 'Pasien Baru',
                                         //     'badge' => 'bg-danger',
-                                        //     'order' => 5,
+                                        //     'order' => 6,
                                         // ],
                                     ];
                                     $ringkasan = $data['Ringkasan'] ?? [];
@@ -462,6 +526,17 @@
                             Rp {{ number_format($totalInsentifHariIni, 0, ',', '.') }}
                         </div>
 
+                        {{-- Penjelasan Insentif Hari Libur --}}
+                        <div class="mt-3">
+                            <div class="fw-semibold" style="font-size: 15px; color: #166534;">Keterangan Insentif Hari
+                                Libur:</div>
+                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #166534;">
+                                <li>Insentif kehadiran diberikan untuk setiap shift resepsionis di hari libur resmi (Hari
+                                    Minggu/libur nasional).</li>
+                                <li>Nominal dapat berubah sesuai kebijakan manajemen. Pastikan kehadiran direkap dengan
+                                    benar.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
