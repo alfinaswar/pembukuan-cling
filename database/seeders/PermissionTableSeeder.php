@@ -14,19 +14,39 @@ class PermissionTableSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            // Role permissions
             'role-list',
             'role-create',
             'role-edit',
             'role-delete',
+            // Product permissions (your old seed)
             'product-list',
             'product-create',
             'product-edit',
             'product-delete',
-            'Admin Cabang'
+            // Custom permissions from your table screenshot
+            'Admin Cabang',
+            'pembayaran-index',
+            'masterdata',
+            'laporan',
+            'laporan-umum',
+            'laporan-perawat',
+            'laporan-dokter',
+            'laporan-resepsionis',
+            'laporan-kasir',
+            'master-perawatan',
+            'master-dokter',
+            'master-perawat',
+            'master-kasir',
+            'master-shift',
+            'master-metodepembayaran',
+            'master-user',
+            'insentif',
+            'pengaturan'
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission], ['guard_name' => 'web']);
         }
     }
 }
