@@ -614,8 +614,8 @@ class LaporanController extends Controller
         // 5f. Insentif Hari Libur (rule: hari_libur)
         $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
             ->where('JenisRule', 'insentif_hari_libur')
-            ->sum('Nominal');
-
+            ->get();
+        // dd($InsentifHariLibur);
         // 5g. Ringkasan per JenisRule
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000', 'badge' => 'bg-primary', 'order' => 1],

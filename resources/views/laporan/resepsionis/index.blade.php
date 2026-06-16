@@ -396,6 +396,7 @@
                             <tbody>
                                 @php
                                     $insentifLibur = $data['InsentifHariLibur'] ?? [];
+                                    // dd($insentifLibur);
                                     $totalInsentifLibur = 0;
                                 @endphp
                                 @if (is_iterable($insentifLibur) && count($insentifLibur) > 0)
