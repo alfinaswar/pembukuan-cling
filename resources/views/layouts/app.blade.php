@@ -752,17 +752,17 @@
                                     <span class="hide-menu">Dashboard</span>
                                 </a>
                             </li>
-                            @can('pembayaran')
-                                <li class="sidebar-item">
-                                    <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"
-                                        href="{{ route('Transaksi.index') }}" aria-expanded="false">
-                                        <span>
-                                            <i class="ti ti-cash"></i>
-                                        </span>
-                                        <span class="hide-menu">Pembayaran</span>
-                                    </a>
-                                </li>
-                            @endcan
+                            {{-- @can('pembayaran') --}}
+                            <li class="sidebar-item">
+                                <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"
+                                    href="{{ route('Transaksi.index') }}" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-cash"></i>
+                                    </span>
+                                    <span class="hide-menu">Pembayaran</span>
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
                             @can('laporan')
                                 <li class="sidebar-item">
                                     <a class="sidebar-link has-arrow {{ request()->segment(1) == 'laporan' ? 'active' : '' }}"
