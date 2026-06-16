@@ -374,7 +374,7 @@
                     <div class="d-flex align-items-start mb-2">
                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning text-white me-3"
                             style="width:32px; height:32px;">
-                            <span class="fw-bold fs-5" style="color:#e67e22;">6</span>
+                            <span class="fw-bold fs-5" style="color:#e67e22;">3</span>
                         </div>
                         <div>
                             <h5 class="mb-0 fw-semibold" style="color:#e67e22;">Insentif Hari Libur</h5>

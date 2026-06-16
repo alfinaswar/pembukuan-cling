@@ -620,7 +620,7 @@ class LaporanController extends Controller
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000', 'badge' => 'bg-primary', 'order' => 1],
             'pasien_lama' => ['label' => 'Shift dengan 8 Pasien Lama', 'badge' => 'bg-info', 'order' => 2],
-            'hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning', 'order' => 3],
+            'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning', 'order' => 3],
         ];
 
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
