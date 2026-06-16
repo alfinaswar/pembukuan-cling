@@ -42,7 +42,8 @@ class PermissionTableSeeder extends Seeder
             'master-metodepembayaran',
             'master-user',
             'insentif',
-            'pengaturan'
+            'pengaturan',
+            'master-klinik',
         ];
 
         foreach ($permissions as $permission) {

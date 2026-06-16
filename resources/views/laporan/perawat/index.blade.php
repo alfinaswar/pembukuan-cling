@@ -683,6 +683,72 @@
             </div>
         </div>
 
+        {{-- Tambahan Kartu Insentif Hari Libur --}}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-start mb-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning text-white me-3"
+                            style="width:32px; height:32px;">
+                            <span class="fw-bold fs-5" style="color:#e67e22;">6</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-semibold" style="color:#e67e22;">Insentif Hari Libur</h5>
+                            <small class="text-muted" style="color:#e67e22 !important;">Insentif untuk shift pada hari
+                                libur nasional</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pb-2">
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="fw-semibold" style="color:#e67e22;">Tanggal</th>
+                                    <th class="fw-semibold" style="color:#e67e22;">Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $insentifLibur = $data['InsentifHariLibur'] ?? [];
+                                    $totalInsentifLibur = 0;
+                                @endphp
+                                @if (is_iterable($insentifLibur) && count($insentifLibur) > 0)
+                                    @foreach ($insentifLibur as $row)
+                                        <tr>
+                                            <td style="color:#e67e22;">
+                                                {{ isset($row['created_at']) ? \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') : '-' }}
+                                            </td>
+
+                                            <td class="fw-semibold" style="color:#e67e22;">
+                                                {{ isset($row['Nominal']) ? 'Rp ' . number_format($row['Nominal'], 0, ',', '.') : '-' }}
+                                                @php $totalInsentifLibur += $row['Nominal'] ?? 0; @endphp
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="3" class="text-center" style="color:#e67e22;">Tidak ada data
+                                            insentif hari libur</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert"
+                        style="background: #fff9ed; border-color: #fff3cd;">
+                        <div class="fw-semibold" style="color:#e67e22;">Total Insentif Hari Libur</div>
+                        <div class="fw-bold" style="color:#e67e22; font-size:18px;">
+                            Rp {{ number_format($totalInsentifLibur, 0, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
         <div class="col-md-4">
             <div class="card shadow border-0"
                 style="background: linear-gradient(90deg, #665be7 0%, #28c76f 100%); color: white;">

@@ -357,14 +357,13 @@ class LaporanController extends Controller
                 $first = $group->first();
                 return [
                     'created_at' => $first->created_at,
-                    'jumlah_pasien_lama' => $countpasienlama . ' Pasien',  // atau bisa custom sesuai kebutuhan judul kolom
+                    'jumlah_pasien_lama' => $countpasienlama . ' Pasien',
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
                 ];
             })
             ->values();
 
-        // dd($Shift8PasienLama);
         // 5f. Billing minimal 1jt (rule: transaksi, TotalBayar >= 1jt)
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
             ->where($scopeInsentif)
@@ -395,6 +394,7 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
+
         // 5h. Pasien lama (rule: pasien_lama) — grouped per tanggal+shift
         $countpasienlama = Transaksi::where('JenisPasien', 'Lama')->count();
         $PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
@@ -412,17 +412,27 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
-        // dd($PasienLama);
-        // 5i. Ringkasan per JenisRule
+
+        // 5j. Insentif Hari Libur (rule: insentif_hari_libur)
+        // Kumpulkan seluruh insentif dengan JenisRule 'insentif_hari_libur' dengan filter yang sama
+        $InsentifHariLibur = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+            ->where($scopeInsentif)
+            ->where('JenisRule', 'insentif_hari_libur')
+            ->get();
+
+        // ================================
+        // 5i. Ringkasan per JenisRule (+ insentif_hari_libur)
+        // ================================
         $jenisRuleInfo = [
             'omzet_shift' => ['label' => 'Omset Shift ≥ Rp 6.000.000', 'badge' => 'bg-primary', 'order' => 1],
             'transaksi' => ['label' => 'Transaksi ≥ Rp 1.000.000', 'badge' => 'bg-success', 'order' => 2],
             'pasien_lama' => ['label' => '8 Pasien Lama per Shift', 'badge' => 'bg-info', 'order' => 3],
             'pasien_baru' => ['label' => 'Pasien Baru', 'badge' => 'bg-danger', 'order' => 4],
             'tindakan' => ['label' => 'Tindakan Odontektomi', 'badge' => 'bg-warning text-white', 'order' => 5],
+            'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-purple text-white', 'order' => 6],
         ];
 
-        // Ambil sum per JenisRule sekali query
+        // Ambil sum per JenisRule sekali query termasuk insentif_hari_libur
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
             ->selectRaw('JenisRule, SUM(Nominal) as total_insentif, COUNT(*) as total_data')
             ->groupBy('JenisRule')
@@ -461,6 +471,8 @@ class LaporanController extends Controller
             'pasienBillingMinimal' => $pasienBillingMinimal,
             'Odontektomi' => $Odontektomi,
             'PasienBaru' => $PasienBaru,
+            'PasienLama' => $PasienLama,
+            'InsentifHariLibur' => $InsentifHariLibur,
             'Ringkasan' => $Ringkasan,
             'startDate' => $startDate,
             'endDate' => $endDate,
