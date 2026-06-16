@@ -613,7 +613,7 @@ class LaporanController extends Controller
 
         // 5f. Insentif Hari Libur (rule: hari_libur)
         $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
-            ->where('JenisRule', 'hari_libur')
+            ->where('JenisRule', 'insentif_hari_libur')
             ->sum('Nominal');
 
         // 5g. Ringkasan per JenisRule
@@ -642,11 +642,12 @@ class LaporanController extends Controller
         })->sortBy('order')->values();
 
         // 6. DROPDOWN (Data untuk Filter)
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
-        $shift = MasterShift::get();
+        $dokter = User::role('Dokter')->where('kodeperusahaan', auth()->user()->kodeperusahaan)->get();
+        $perawat = User::role('Perawat')->where('kodeperusahaan', auth()->user()->kodeperusahaan)->get();
+        $kasir = User::role('Kasir / Resepsionis')->where('kodeperusahaan', auth()->user()->kodeperusahaan)->get();
 
+        $shift = MasterShift::get();
+        // dd($InsentifHariLibur);
         // 7. KIRIM KE VIEW
         $data = [
             'OmsetSatuShift' => $OmsetSatuShift,
