@@ -21,10 +21,10 @@ class DatabaseSeeder extends Seeder
             MasterMetodePembayaranSeeder::class,
             MasterShiftSeeder::class,
             MasterDokterSeeder::class,
+            UserManagementSeeder::class,
             UserResepsionisSeeder::class,
             UserPerawatSeeder::class,
             RuleInsentifSeeder::class,
-
         ]);
     }
 }
