@@ -14,97 +14,94 @@ class MasterDokterSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
-
-        // 1️⃣ Pastikan role "Dokter" tersedia
         $roleDokter = Role::firstOrCreate(['name' => 'Dokter']);
-
-        $doctors = [
-            // CINERE
-            ['Tiara Monica Safiera', 'KLN-CINERE'],
-            ['Octavia Andina Putri', 'KLN-CINERE'],
-            ['Nadine Khalissya', 'KLN-CINERE'],
-            ['Tifani Sandri', 'KLN-CINERE'],
-            ['Nicholas Limanda', 'KLN-CINERE'],
-            ['Monica Dwi Anggraini', 'KLN-CINERE'],
-            ['Rizka Putri Apriandini', 'KLN-CINERE'],
-            ['Vidya Asri Ayuningtyas', 'KLN-CINERE'],
-            ['Stella Advena Anindita', 'KLN-CINERE'],
-            ['Sofie Bosoma Syamra', 'KLN-CINERE'],
-            ['Mutiara Ayu Sisworini', 'KLN-CINERE'],
-            ['Nathassa Astrioni', 'KLN-CINERE'],
+        $doctorsMulti = [
+            ['Monica Dwi Anggraini', ['KLN-CINERE']],
+            ['Octavia Andina Putri', ['KLN-CINERE']],
+            ['Nicholas Limanda', ['KLN-CINERE', 'KLN-SERPONG']],
+            ['Stella Advena Anindita', ['KLN-CINERE']],
+            ['Rizka Putri Apriandini', ['KLN-CINERE']],
+            ['Mutiara Ayu Sisworini', ['KLN-CINERE']],
+            ['Tifani Sandri', ['KLN-CINERE']],
+            ['Sofie Bosoma Syamra', ['KLN-CINERE']],
+            ['Nadine Khalissya', ['KLN-CINERE']],
+            ['Nathassa Astrioni', ['KLN-CINERE', 'KLN-CILEDUG']],
+            ['Tiara Monica Safiera', ['KLN-CINERE']],
+            ['Vidya Asri Ayuningtyas', ['KLN-HARAPANINDAH', 'KLN-CINERE', 'KLN-TEBET']],
             // SERPONG
-            ['Grace Esther', 'KLN-SERPONG'],
-            ['Yessy Josephine Sijabat', 'KLN-SERPONG'],
-            ['Meilina Fatimah', 'KLN-SERPONG'],
-            ['Niky Ustrina', 'KLN-SERPONG'],
-            ['Chintia Herrera', 'KLN-SERPONG'],
-            // HARAPAN INDAH
-            ['Shinta Dewi Ritati', 'KLN-HARAPANINDAH'],
-            ['Calvin Pascananda', 'KLN-HARAPANINDAH'],
-            ['Annisa Mazaya', 'KLN-HARAPANINDAH'],
-            ['Esther Julita Palupi', 'KLN-HARAPANINDAH'],
-            ['Aldy Anzhari Ayub', 'KLN-HARAPANINDAH'],
+            ['Grace Esther', ['KLN-SERPONG']],  // Per prompt: Christien Grace Esther Maria, di Serpong (satu nama, asumsikan Grace Esther sbg formal)
+            ['Yessy Josephine Sijabat', ['KLN-SERPONG']],
+            ['Meilina Fatimah', ['KLN-SERPONG']],
+            ['Niky Ustrina', ['KLN-SERPONG']],
+            ['Chintia Herrera', ['KLN-SERPONG']],
+            // HARAPAN INDAH & JATIASIH & TEBET
+            ['Esther Julita Palupi', ['KLN-HARAPANINDAH', 'KLN-JATIASIH']],
+            ['Annisa Mazaya', ['KLN-HARAPANINDAH', 'KLN-JATIASIH']],
+            ['Shinta Dewi Ritati', ['KLN-HARAPANINDAH', 'KLN-JATIASIH']],
+            ['Aldy Anzhari Ayub', ['KLN-HARAPANINDAH', 'KLN-JATIASIH']],
+            ['Calvin Pascananda', ['KLN-HARAPANINDAH', 'KLN-TEBET']],
             // TEBET
-            ['Siti Hanna Yasvitha', 'KLN-TEBET'],
-            ['Nada Avaffia', 'KLN-TEBET'],
-            ['Hammam Habib Al Falah', 'KLN-TEBET'],
-            ['Rais Dzakwan Hidayatullah', 'KLN-TEBET'],
-            ['Devasya Nathania Kamilla', 'KLN-TEBET'],
-            ['Amellia Sekar Ramadhani', 'KLN-TEBET'],
-            ['Catherine', 'KLN-TEBET'],
-            ['Ni Komang P. Pradianty', 'KLN-TEBET'],
-            ['Hanna Safira', 'KLN-TEBET'],
+            ['Siti Hanna Yavitha', ['KLN-TEBET']],  // Typo pada prompt bisa "Yasvitha" → "Yavitha"
+            ['Nada Avaffia', ['KLN-TEBET']],
+            ['Devasya Nathania Kamilla', ['KLN-TEBET']],
+            ['Rais Dzakwan Hidayatullah', ['KLN-TEBET']],
+            ['Amellia Sekar Ramadhani', ['KLN-TEBET']],
+            ['Catherine', ['KLN-TEBET']],
+            ['Ni Komang P. Pradianty', ['KLN-TEBET']],
+            ['Jessica Quiteria Florenthe', ['KLN-TEBET']],
+            ['Hanna Safira', ['KLN-TEBET']],
+            ['Hammam Habib Al Falah', ['KLN-TEBET']],
+            ['Sabrina Annisa', ['KLN-TEBET']],
             // CILEDUG
-            ['Putu Natasha Diska Agusjaya', 'KLN-CILEDUG'],
-            ['Nathania Chrisnovita M.', 'KLN-CILEDUG'],
-            ['Suci Mumpuni Pekerti', 'KLN-CILEDUG'],
-            ['Faradina Azzahra', 'KLN-CILEDUG'],
+            ['Suci Mumpuni Pekerti', ['KLN-CILEDUG']],
+            ['Nathania Chrisnovita M.', ['KLN-CILEDUG']],
+            ['Faradina Azzahra', ['KLN-CILEDUG']],
+            ['Putu Natasha Diska Agusjaya', ['KLN-CILEDUG']],
             // TAMAN PALEM
-            ['Salsa Nabila Evandi', 'KLN-TAMANPALEM'],
-            ['Imammuddin Thaariq', 'KLN-TAMANPALEM'],
-            ['Putri Askia', 'KLN-TAMANPALEM'],
-            ['Raisa Milenia Syukma', 'KLN-TAMANPALEM'],
+            ['Imammuddin Thaariq', ['KLN-TAMANPALEM']],
+            ['Raisa Milenia Syukma', ['KLN-TAMANPALEM']],
+            ['Salsa Nabila Evandi', ['KLN-TAMANPALEM']],
             // JATIASIH
-            ['Tri Utomo', 'KLN-JATIASIH'],
-            ['Muthia Alifah Khansa', 'KLN-JATIASIH'],
-            ['Morita Ananda Baihaty', 'KLN-JATIASIH'],
-            ['Christianus George A.', 'KLN-JATIASIH'],
-            ['Urfi Fadhilah', 'KLN-JATIASIH'],
-            ['Methildis', 'KLN-JATIASIH'],
+            ['Morita Ananda Baihaty', ['KLN-JATIASIH']],
+            ['Urfi Fadhilah', ['KLN-JATIASIH']],
+            ['Tri Utomo', ['KLN-JATIASIH']],
+            ['Christianus George A.', ['KLN-JATIASIH']],
+            ['Muthia Alifah Khansa', ['KLN-JATIASIH']],
+            ['Methildis Victoria Donya Asri', ['KLN-JATIASIH']],
         ];
 
-        $seenNames = [];
+        $seen = [];
 
-        foreach ($doctors as $doctor) {
-            $name = $doctor[0];
-            $kodeKlinik = $doctor[1];
+        foreach ($doctorsMulti as [$name, $kodeKliniks]) {
+            foreach ($kodeKliniks as $kodeKlinik) {
+                $uniqueKey = $name . '|' . $kodeKlinik;
+                if (isset($seen[$uniqueKey]))
+                    continue;
+                $seen[$uniqueKey] = true;
 
-            // Skip duplikat nama
-            if (in_array($name, $seenNames))
-                continue;
-            $seenNames[] = $name;
+                // Email harus unik, jadi jika dokter ada di lebih dari satu klinik, pake kode klinik sebagai suffix
+                $emailName = Str::slug($name, '.');
+                $email = $emailName . '.' . strtolower($kodeKlinik) . '@klinik.example.com';
 
-            $email = Str::slug($name, '.') . '@klinik.example.com';
+                $user = User::firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => $name,
+                        'email_verified_at' => $now,
+                        'password' => Hash::make('password'),
+                        'kodeperusahaan' => $kodeKlinik,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]
+                );
 
-            // 2️⃣ Buat atau ambil user via Eloquent
-            $user = User::firstOrCreate(
-                ['email' => $email],
-                [
-                    'name' => $name,
-                    'email_verified_at' => $now,
-                    'password' => Hash::make('password'),
-                    'kodeperusahaan' => $kodeKlinik,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]
-            );
-
-            // 3️⃣ Assign role "Dokter"
-            if (!$user->hasRole('Dokter')) {
-                $user->syncRoles($roleDokter);
+                // Assign role "Dokter"
+                if (!$user->hasRole('Dokter')) {
+                    $user->syncRoles($roleDokter);
+                }
             }
         }
 
-        $this->command->info('✅ ' . count($seenNames) . ' dokter berhasil dibuat & di-assign role "Dokter".');
+        $this->command->info('✅ ' . count($seen) . ' dokter berhasil dibuat & di-assign role "Dokter".');
     }
 }

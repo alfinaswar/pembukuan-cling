@@ -47,8 +47,6 @@ class TransaksiController extends Controller
                     $klinikId = $request->input('klinik');
                     $query->where('KodeCabang', $klinikId);
                 })
-
-
                 ->latest();
             $summary = [
                 'total_omset' => (clone $data)->sum('TotalBayar'),
@@ -86,7 +84,6 @@ class TransaksiController extends Controller
                     }
                     return '<span class="badge bg-secondary">' . e($row->getShift->Nama) . '</span>';
                 })
-
                 ->addColumn('JenisPasien', function ($row) {
                     $jenis = $row->JenisPasien ?? '-';
                     if ($jenis === 'Baru')
@@ -146,9 +143,6 @@ class TransaksiController extends Controller
                     $html .= '</dl>';
                     return $html;
                 })
-
-
-
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
@@ -350,8 +344,9 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->where('KodePerusahaan', $kodeCabang)->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+        $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
+        $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
+
         // dd($transaksi);
         return view('transaksi.kasir.edit', compact(
             'transaksi',
