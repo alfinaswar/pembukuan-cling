@@ -298,16 +298,16 @@
                                 <span class="hide-menu">Pasien</span>
                             </a>
                         </li>
-                        @can('pembayaran-index')
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-cash"></i>
-                                    </span>
-                                    <span class="hide-menu">Pembayaran</span>
-                                </a>
-                            </li>
-                        @endcan
+                        {{-- @can('pembayaran-index') --}}
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route('Transaksi.index') }}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-cash"></i>
+                                </span>
+                                <span class="hide-menu">Pembayaran</span>
+                            </a>
+                        </li>
+                        {{-- @endcan --}}
                         @can('laporan')
                             <li class="sidebar-item">
                                 <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
