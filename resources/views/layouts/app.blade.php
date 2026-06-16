@@ -389,16 +389,16 @@
                                             </a>
                                         </li>
                                     @endcan
-                                    @can('master-pembayaran')
-                                        <li class="sidebar-item">
-                                            <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
-                                                <div class="round-16 d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-credit-card"></i>
-                                                </div>
-                                                <span class="hide-menu">Metode Pembayaran</span>
-                                            </a>
-                                        </li>
-                                    @endcan
+                                    {{-- @can('master-pembayaran') --}}
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('MetodePembayaran.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-credit-card"></i>
+                                            </div>
+                                            <span class="hide-menu">Metode Pembayaran</span>
+                                        </a>
+                                    </li>
+                                    {{-- @endcan --}}
                                     @can('master-shift')
                                         <li class="sidebar-item">
                                             <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
