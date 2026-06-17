@@ -281,7 +281,13 @@ class LaporanController extends Controller
         $endDate = Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
         $perawatId = $request->perawat;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
-        $kodeCabang = auth()->user()->kodeperusahaan;
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $perawatUser = User::find($request->perawat);
+            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
 
         // =============================================
         // 3. BASE SCOPE — dua closure reusable
@@ -490,7 +496,7 @@ class LaporanController extends Controller
     public function indexResepsionis(Request $request)
     {
         $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Kasir / Resepsionis')->get();
+        $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
         // dd($OmsetSatuShift);
@@ -537,7 +543,14 @@ class LaporanController extends Controller
 
         $kasirId = $request->perawat;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
-        $kodeCabang = auth()->user()->kodeperusahaan;
+
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $perawatUser = User::find($request->perawat);
+            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
 
         // 3. BASE SCOPE (Reusable Closures)
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
@@ -642,10 +655,9 @@ class LaporanController extends Controller
         })->sortBy('order')->values();
 
         // 6. DROPDOWN (Data untuk Filter)
-        $dokter = User::role('Dokter')->where('kodeperusahaan', auth()->user()->kodeperusahaan)->get();
-        $perawat = User::role('Perawat')->where('kodeperusahaan', auth()->user()->kodeperusahaan)->get();
-        $kasir = User::role('Kasir / Resepsionis')->where('kodeperusahaan', auth()->user()->kodeperusahaan)->get();
-
+        $dokter = User::role('Dokter')->get();
+        $perawat = User::role('Perawat')->get();
+        $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
         // dd($InsentifHariLibur);
         // 7. KIRIM KE VIEW
@@ -663,8 +675,9 @@ class LaporanController extends Controller
             'kodeCabang' => $kodeCabang,
             'shiftFilter' => $shiftFilter,
         ];
-
-        return view('laporan.resepsionis.index', compact('dokter', 'perawat', 'kasir', 'shift', 'data'));
+        $data_req = $request->all();
+        // dd($data_req);
+        return view('laporan.resepsionis.index', compact('dokter', 'perawat', 'kasir', 'shift', 'data', 'data_req'));
     }
 
     /**

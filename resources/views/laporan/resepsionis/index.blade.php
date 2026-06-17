@@ -61,31 +61,28 @@
                         @csrf
                         @php
                             $user = Auth::user();
-                            $kasir_id = old('kasir', request('kasir', $user->id ?? ''));
+                            $perawat_id = old('perawat', request('perawat', $user->id ?? ''));
                             $isSuperadminOrManagement =
                                 $user && ($user->hasRole('Superadmin') || $user->hasRole('Management'));
-                            $isKasirResepsionis = $user && $user->hasRole('Kasir / Resepsionis');
+                            $isDisabled = !$isSuperadminOrManagement;
                         @endphp
 
                         <div class="col-md-4">
-                            <label for="kasirSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Kasir /
-                                Resepsionis</label>
+                            <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
+                                Perawat</label>
 
-                            <div class="input-group mb-2">
-                                @if ($isKasirResepsionis)
-                                    <input type="hidden" name="perawat" value="{{ $user->id }}">
-                                @endif
-
-                                <select id="kasirSelect" name="perawat" class="select2 form-control"
-                                    style="width:100%; font-size: 0.96em; min-height:36px;" {{-- 🔥 Gunakan disabled native HTML --}}
-                                    @if ($isKasirResepsionis) disabled @endif>
-                                    <option value="">Pilih Kasir / Resepsionis</option>
+                            {{-- Tambahkan class 'select2-readonly-wrapper' jika user bukan Superadmin/Management --}}
+                            <div class="input-group mb-2 {{ $isDisabled ? 'select2-readonly-wrapper' : '' }}">
+                                <select id="perawatSelect" name="perawat" class="select2 form-control"
+                                    style="width:100%; font-size: 0.96em; min-height:36px;"
+                                    {{ $isDisabled ? 'tabindex="-1" aria-disabled="true"' : '' }}>
+                                    <option value="">Pilih Perawat</option>
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            @if ($isKasirResepsionis) {{ $user->id == $p->id ? 'selected' : '' }}
+                                            @if (!$isDisabled) {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
                     @else
-                        {{-- Logic selection normal --}}
-                        {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }} @endif>
+
+                        {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
