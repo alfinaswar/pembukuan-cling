@@ -457,7 +457,7 @@
                                             'badge' => 'bg-info',
                                             'order' => 2,
                                         ],
-                                        'hari_libur' => [
+                                        'insentif_hari_libur' => [
                                             // Tambahan Insentif Hari Libur
                                             'label' => 'Insentif Kehadiran Hari Libur',
                                             'badge' => 'bg-success',
@@ -529,8 +529,8 @@
                             <div class="fw-semibold" style="font-size: 15px; color: #166534;">Keterangan Insentif Hari
                                 Libur:</div>
                             <ul class="mb-0 ps-3" style="font-size: 14px; color: #166534;">
-                                <li>Insentif kehadiran diberikan untuk setiap shift resepsionis di hari libur resmi (Hari
-                                    Minggu/libur nasional).</li>
+                                <li>Insentif kehadiran diberikan untuk setiap shift resepsionis di hari libur resmi (libur
+                                    nasional).</li>
                                 <li>Nominal dapat berubah sesuai kebijakan manajemen. Pastikan kehadiran direkap dengan
                                     benar.</li>
                             </ul>

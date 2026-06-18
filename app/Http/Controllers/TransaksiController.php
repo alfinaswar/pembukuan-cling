@@ -451,8 +451,7 @@ class TransaksiController extends Controller
             }
         }
 
-        // 🎁 Proses ulang insentif (karena data berubah)
-        // Pastikan service Anda mendukung re-calculation atau hapus dulu history lama jika perlu
+        app(InsentifService::class)->hapusSebelumProses($transaksi);
         app(InsentifService::class)->proses($transaksi);
 
         return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil diperbarui.');

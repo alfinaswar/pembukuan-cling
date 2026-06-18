@@ -10,8 +10,22 @@
             <form method="POST" action="{{ route('laporan-umum.store') }}">
                 @csrf
                 <div class="input-group mb-3">
+                    @if (auth()->user() && auth()->user()->hasRole('Superadmin'))
+                        <select class="form-select" name="FilterCabang" id="FilterCabang" style="max-width:200px;">
+                            <option value="">-- Pilih Cabang --</option>
+                            @foreach ($cabang ?? [] as $c)
+                                <option value="{{ $c->Kode }}" @if (
+                                    (old('FilterCabang') !== null && old('FilterCabang') == $c->Kode) ||
+                                        (old('FilterCabang') === null && request('FilterCabang') == $c->Kode)) selected @endif>
+                                    {{ $c->Nama ?? $c->Kode }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+
                     <input type="text" id="FilterTanggal" class="form-control shawCalRanges" name="FilterTanggal"
-                        data-url="{{ route('laporan-umum.index') }}" readonly />
+                        data-url="{{ route('laporan-umum.index') }}" readonly
+                        value="{{ old('FilterTanggal', request('FilterTanggal')) }}" />
                     <span class="input-group-text">
                         <i class="ti ti-calendar fs-5"></i>
                     </span>
@@ -19,6 +33,7 @@
                         Terapkan
                     </button>
                 </div>
+
             </form>
         </div>
 
@@ -119,7 +134,8 @@
                                         $color =
                                             $persen > 0 ? 'text-info' : ($persen < 0 ? 'text-danger' : 'text-muted');
                                     @endphp
-                                    <span class="{{ $color }}" id="persen-pasien-baru">{{ $sign . $persen }}%</span>
+                                    <span class="{{ $color }}"
+                                        id="persen-pasien-baru">{{ $sign . $persen }}%</span>
                                 </span>
                                 dibanding bulan kemarin
                             </small>
@@ -523,6 +539,19 @@
                 }
             }
             renderChart(paymentChartLabels, paymentChartTotals);
+
+            // Jika ingin filter tanggal tetap tampil di input meski setelah refresh/pindah/reload,
+            // pastikan komponen date range picker menginisialisasi value dari input yang sudah ada (server-side dari old/request).
+            // Jika plugin berlangsung secara JS, inisialisasi nilainya di bawah (jangan menimpa value):
+            @if (old('FilterTanggal', request('FilterTanggal')))
+                document.addEventListener('DOMContentLoaded', function() {
+                    var tanggal = @json(old('FilterTanggal', request('FilterTanggal')));
+                    var input = document.getElementById('FilterTanggal');
+                    if (input && tanggal) {
+                        input.value = tanggal;
+                    }
+                });
+            @endif
 
         });
     </script>

@@ -238,10 +238,12 @@ class InsentifService
             // =================================================
             // 3. CEK DUPLICATE & SIMPAN
             // =================================================
-            if ($rule->BerlakuPer == 'shift' &&
-                    $rule->Operator != 'kelipatan' &&
-                    $rule->JenisRule != 'target_tercapai' &&
-                    $rule->JenisRule != 'insentif_hari_libur') {
+            if (
+                $rule->BerlakuPer == 'shift' &&
+                $rule->Operator != 'kelipatan' &&
+                $rule->JenisRule != 'target_tercapai' &&
+                $rule->JenisRule != 'insentif_hari_libur'
+            ) {
                 $exists = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\TransactionExport;
 use App\Models\InsentifKaryawan;
+use App\Models\MasterKlinik;
 use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
 use App\Models\Transaksi;
@@ -19,10 +20,12 @@ class LaporanController extends Controller
 {
     public function indexUmum(Request $request)
     {
+
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
+        $cabang = MasterKlinik::get();
 
         if ($request->filled('FilterTanggal')) {
             $parts = explode(' - ', $request->FilterTanggal);
@@ -120,6 +123,7 @@ class LaporanController extends Controller
             'endDate' => $endDate->format('d/m/Y'),
             'transaksiTerbaru' => $transaksiTerbaru,
             'jenisPerawatanTerbanyak' => $jenisPerawatanTerbanyak,
+            'cabang' => $cabang,
         ];
 
         return view('laporan.umum.index', $data);
@@ -131,6 +135,11 @@ class LaporanController extends Controller
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
+        $cabang = MasterKlinik::get();
+
+        $kodeCabang = $request->filled('FilterCabang') && $request->FilterCabang
+            ? $request->FilterCabang
+            : auth()->user()->kodeperusahaan;
 
         if ($request->filled('FilterTanggal')) {
             $parts = explode(' - ', $request->FilterTanggal);
@@ -143,48 +152,51 @@ class LaporanController extends Controller
 
         // Total Biaya
         $totalBiaya = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang)
             ->sum('TotalBayar');
-        // jumlah total pasien
         $totalPasien = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang)
             ->count();
-        // Pasien Baru & Lama
         $pasienBaru = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Baru')
             ->count();
 
         $pasienLama = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Lama')
             ->count();
-
-        // Chart Payment
-        $paymentChartData = Transaksi::select('MetodePembayaran', 'KodeCabang', DB::raw('SUM(TotalBayar) as jumlah'))
+        $paymentChartData = Transaksi::with('getMetodePembayaran')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
-            ->groupBy('MetodePembayaran', 'KodeCabang')
-            ->with('getMetodePembayaran')  // assuming the relation name is getMetodePembayaran
             ->get();
 
-        // ambil label nama metode pembayaran jika relasi ada, kalau tidak fallback ke field MetodePembayaran
-        $paymentChartLabels = $paymentChartData->map(function ($item) {
-            return $item->getMetodePembayaran->Nama ?? $item->MetodePembayaran ?? '-';
-        });
+        // Ambil data label dan total pembayaran dari relasi getMetodePembayaran
+        $metodePembayaranTotals = [];
 
-        $paymentChartTotals = $paymentChartData->pluck('jumlah');
+        foreach ($paymentChartData as $transaksi) {
+            foreach ($transaksi->getMetodePembayaran as $pembayaran) {
+                $nama = $pembayaran->getMetodeBayar->Nama ?? ($pembayaran->MetodePembayaran ?? '-');
+                if (!isset($metodePembayaranTotals[$nama])) {
+                    $metodePembayaranTotals[$nama] = 0;
+                }
+                $metodePembayaranTotals[$nama] += (float) $pembayaran->Nominal;
+            }
+        }
 
-        // Transaksi Terbaru
+        $paymentChartLabels = array_keys($metodePembayaranTotals);
+        $paymentChartTotals = array_values($metodePembayaranTotals);
+
+
         $transaksiTerbaru = Transaksi::with(['getPerawat'])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->latest()
             ->get();
 
         // Jenis Perawatan Terbanyak
         $jenisPerawatanTerbanyak = Transaksi::whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang)
             ->with([
                 'TransaksiDetail' => function ($q) {
                     $q
@@ -221,6 +233,7 @@ class LaporanController extends Controller
             'endDate' => $endDate->format('d/m/Y'),
             'transaksiTerbaru' => $transaksiTerbaru,
             'jenisPerawatanTerbanyak' => $jenisPerawatanTerbanyak,
+            'cabang' => $cabang,
         ];
 
         return view('laporan.umum.index', $data);
