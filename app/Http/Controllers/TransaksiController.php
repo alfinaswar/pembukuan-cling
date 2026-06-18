@@ -146,9 +146,11 @@ class TransaksiController extends Controller
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     return '
-                    <a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                        <i class="fa fa-edit"></i>
-                    </a>
+                    ' . ((auth()->user()->hasRole('Kasir / Resepsionis') || auth()->user()->hasRole('Superadmin'))
+                        ? '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i>
+                        </a>' : '') . '
+
                     <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
                         <i class="fa fa-trash"></i>
                     </button>
