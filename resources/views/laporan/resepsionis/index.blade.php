@@ -95,18 +95,21 @@
                                     style="width:100%; font-size: 0.96em; min-height:36px;"
                                     {{ $isDisabled ? 'tabindex="-1" aria-disabled="true"' : '' }}>
                                     <option value="">Pilih Kasir / Resepsionis</option>
+                                    @php
+                                        // Ambil prioritas: old input -> request() -> user id
+                                        $selectedKasirId = old('perawat', request('perawat', $user->id ?? ''));
+                                    @endphp
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            @if (!$isDisabled) {{-- Jika Superadmin/Management, pilih berdasarkan request atau user id --}}
-                        {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
-                    @else
-
-                        {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
+                                            @if (!$isDisabled) {{ $selectedKasirId == $p->id ? 'selected' : '' }}
+                                            @else
+                                                {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
                                             {{ $p->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
+
                         </div>
 
                         <div class="col-md-4">

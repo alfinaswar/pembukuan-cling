@@ -265,13 +265,13 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'required|exists:users,id',
+            'perawat' => 'required|exists:transaksis,IdPerawat',
             'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'perawat.required' => 'Perawat wajib dipilih.',
-            'perawat.exists' => 'Perawat tidak valid.',
+            'perawat.exists' => 'Perawat tidak bertugas di tanggal / shift tersebut.',
             'shift.exists' => 'Tidak Bertugas di Shit Tersebut.',
         ]);
 
@@ -530,13 +530,14 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'required',
+            'perawat' => 'required|exists:transaksis,IdResepsionis',
             'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
             'perawat.required' => 'Kasir / Resepsionis wajib dipilih.',
             'shift.exists' => 'Shift tidak valid / tidak ditemukan.',
+            'perawat.exists' => 'Kasir tidak bertugas di tanggal / shift tersebut',
         ]);
         if ($validator->fails()) {
             $errorHtml = collect(['FilterTanggal', 'perawat', 'shift'])
