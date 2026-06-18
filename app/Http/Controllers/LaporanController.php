@@ -166,9 +166,11 @@ class LaporanController extends Controller
             ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Lama')
             ->count();
+
+        // PERBAIKAN DI SINI: Ganti auth()->user()->kodeperusahaan menjadi $kodeCabang
         $paymentChartData = Transaksi::with('getMetodePembayaran')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', auth()->user()->kodeperusahaan)
+            ->where('KodeCabang', $kodeCabang) // ✅ SUDAH BENAR
             ->get();
 
         // Ambil data label dan total pembayaran dari relasi getMetodePembayaran
