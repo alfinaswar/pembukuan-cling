@@ -69,17 +69,18 @@
 
                         <div class="col-md-4">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
-                                Perawat</label>
+                                Kasir / Resepsionis</label>
 
                             {{-- Tambahkan class 'select2-readonly-wrapper' jika user bukan Superadmin/Management --}}
                             <div class="input-group mb-2 {{ $isDisabled ? 'select2-readonly-wrapper' : '' }}">
                                 <select id="perawatSelect" name="perawat" class="select2 form-control"
                                     style="width:100%; font-size: 0.96em; min-height:36px;"
                                     {{ $isDisabled ? 'tabindex="-1" aria-disabled="true"' : '' }}>
-                                    <option value="">Pilih Perawat</option>
+                                    <option value="">Pilih Kasir / Resepsionis</option>
                                     @foreach ($kasir as $p)
                                         <option value="{{ $p->id }}"
-                                            @if (!$isDisabled) {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
+                                            @if (!$isDisabled) {{-- Jika Superadmin/Management, pilih berdasarkan request atau user id --}}
+                        {{ ($user && $user->id == $p->id) || request('perawat') == $p->id ? 'selected' : '' }}
                     @else
 
                         {{ $user && $user->id == $p->id ? 'selected' : '' }} @endif>
