@@ -268,7 +268,7 @@
                                 Perhitungan Insentif
                             </div>
                             <ul class="mb-0 ps-3" style="font-size: 13px; color: #3a037b; line-height: 1.5;">
-                                <li>Rp 50.000 untuk setiap kelipatan Rp 6.000.000</li>
+                                <li>Rp 100.000 untuk setiap kelipatan Rp 6.000.000</li>
 
                             </ul>
                         </div>
