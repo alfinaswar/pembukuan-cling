@@ -38,15 +38,18 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Klinik</label>
-                            <select id="filter_klinik" class="form-control form-control-sm">
-                                <option value="">Semua Klinik</option>
-                                @foreach ($klinik as $item)
-                                    <option value="{{ $item->Kode }}">{{ $item->Nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        @if (auth()->user() && auth()->user()->role == 'Superadmin')
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Klinik</label>
+                                <select id="filter_klinik" class="form-control form-control-sm">
+                                    <option value="">Semua Klinik</option>
+                                    @foreach ($klinik as $item)
+                                        <option value="{{ $item->Kode }}">{{ $item->Nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
                         <div class="col-12 d-flex justify-content-end gap-2 mt-3">
                             <button id="btnFilter" class="btn btn-primary btn-sm">
                                 <i class="ti ti-filter me-1"></i> Filter

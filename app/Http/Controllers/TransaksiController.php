@@ -43,10 +43,13 @@ class TransaksiController extends Controller
                 ->when($shiftId, function ($query) use ($shiftId) {
                     $query->where('Shift', $shiftId);
                 })
-                ->when($request->filled('klinik'), function ($query) use ($request) {
+                ->when($request->filled('klinik') && $request->input('klinik') != '', function ($query) use ($request) {
                     $klinikId = $request->input('klinik');
                     $query->where('KodeCabang', $klinikId);
+                }, function ($query) use ($user) {
+                    $query->where('KodeCabang', $user->kodeperusahaan);
                 })
+
                 ->latest();
             $summary = [
                 'total_omset' => (clone $data)->sum('TotalBayar'),
