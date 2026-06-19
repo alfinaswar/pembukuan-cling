@@ -841,12 +841,13 @@ class LaporanController extends Controller
         // 2. PARSE PARAMETER
         // =============================================
         [$startRaw, $endRaw] = explode(' - ', $request->FilterTanggal);
-        $startDate = Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
-        $endDate = Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
+        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay()->format('Y-m-d H:i:s');
+        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay()->format('Y-m-d H:i:s');
+
         $dokterId = $request->dokter;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
         $kodeCabang = auth()->user()->kodeperusahaan;
-
+        // dd($startDate);
         // =============================================
         // 3. BASE SCOPE — satu closure reusable
         //    untuk semua query ke tabel Transaksi
