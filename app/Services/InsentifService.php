@@ -208,7 +208,7 @@ class InsentifService
                         $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
 
                         if ($kelipatanBaru > 0) {
-                            $finalNominal = $kelipatanBaru * $rule->Nominal;
+                            $finalNominal = $rule->Nominal;
                         } else {
                             continue;
                         }
