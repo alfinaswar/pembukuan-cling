@@ -796,8 +796,8 @@ class LaporanController extends Controller
             })
             ->get();
         // dd($dataTransaksi);
-
-        return view('laporan.dokter.index', compact('TotalPasienBaru', 'TotalBiayaAdmin', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
+        $klinik = MasterKlinik::get();
+        return view('laporan.dokter.index', compact('klinik', 'TotalPasienBaru', 'TotalBiayaAdmin', 'dataTransaksi', 'TotalPerawatan', 'TotalBiayaPerawatan', 'TotalPasienLama', 'TotalPasien', 'dokter', 'perawat', 'kasir', 'shift'));
     }
 
     /**
@@ -823,7 +823,6 @@ class LaporanController extends Controller
             'dokter.exists' => 'Dokter tidak valid.',
             'shift.exists' => 'Tidak Bertugas di Shit Tersebut.',
         ]);
-
         if ($validator->fails()) {
             $errorHtml = collect(['FilterTanggal', 'dokter', 'shift'])
                 ->filter(fn($field) => $validator->errors()->has($field))
@@ -843,10 +842,10 @@ class LaporanController extends Controller
         [$startRaw, $endRaw] = explode(' - ', $request->FilterTanggal);
         $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay()->format('Y-m-d H:i:s');
         $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay()->format('Y-m-d H:i:s');
-
+        // dd($endDate);
         $dokterId = $request->dokter;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
-        $kodeCabang = auth()->user()->kodeperusahaan;
+        $kodeCabang = $request->KodeCabang;
         // dd($startDate);
         // =============================================
         // 3. BASE SCOPE — satu closure reusable
@@ -901,7 +900,7 @@ class LaporanController extends Controller
             ->where($scopeTransaksi)
             ->orderByDesc('created_at')
             ->get();
-
+        // dd($dataTransaksi);
         // 5e. Rincian per jenis perawatan (sidebar)
         $RincianJenisPerawatan = TransaksiDetail::with('MasterJenisPerawatan')
             ->selectRaw('JenisPerawatan, COUNT(*) as jumlah, AVG(Biaya) as rata_rata_biaya')
@@ -914,7 +913,7 @@ class LaporanController extends Controller
 
         $NamaDokter = User::where('id', $dokterId)->first();
         setlocale(LC_TIME, 'id_ID.utf8');  // Pastikan locale Bahasa Indonesia tersedia di server
-        $Hari = $startDate->translatedFormat('l, d F Y');
+        $Hari = \Carbon\Carbon::parse($startDate)->translatedFormat('l, d F Y');
 
         // Ambil perawat yang bertugas pada shift dan tanggal tersebut (via relasi pada transaksi)
         $PerawatBertugas = Transaksi::with('getPerawat')

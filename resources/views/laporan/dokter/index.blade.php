@@ -51,10 +51,8 @@
                     <form id="perawatFilterForm" class="row align-items-end g-2" method="POST"
                         action="{{ route('laporan-dokter.store') }}" style="font-size: 0.925rem;">
                         @csrf
-                        <!-- 1. Pilih Dokter -->
                         @php
                             $user = Auth::user();
-                            // Ambil nilai terakhir yang dipilih: prioritas -> old() -> request() -> default (user id untuk dokter biasa)
                             $dokter_selected = old(
                                 'dokter',
                                 request(
@@ -65,7 +63,7 @@
                             $isSuperadminOrManagement =
                                 $user && ($user->hasRole('Superadmin') || $user->hasRole('Management'));
                         @endphp
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="perawatSelect" class="form-label mb-1" style="font-size: 0.95em;">
                                 Pilih Dokter
                             </label>
@@ -84,11 +82,35 @@
                             </div>
                         </div>
 
-
+                        <!-- Tambahan Pilih Klinik (Khusus Superadmin/Management) -->
+                        @php
+                            // Ambil nilai yang terpilih dari old() -> request() -> kosong
+                            $klinik_selected = old('KodeCabang', request('KodeCabang', ''));
+                        @endphp
+                        @if ($isSuperadminOrManagement)
+                            <div class="col-md-3">
+                                <label for="klinikSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih
+                                    Klinik</label>
+                                <div class="input-group mb-2">
+                                    <select id="klinikSelect" name="KodeCabang" class="select2 form-control"
+                                        style="width:100%; font-size:0.96em; min-height:36px;">
+                                        <option value="">Semua Klinik</option>
+                                        @if (isset($klinik) && count($klinik) > 0)
+                                            @foreach ($klinik as $item)
+                                                <option value="{{ $item->Kode }}"
+                                                    {{ $klinik_selected == $item->Kode ? 'selected' : '' }}>
+                                                    {{ $item->Nama }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                        @endif
 
 
                         <!-- 2. Pilih Periode -->
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="periodeInput" class="form-label mb-1" style="font-size: 0.95em;">Pilih
                                 Periode</label>
                             <div class="input-group mb-2">
@@ -102,7 +124,7 @@
                         </div>
 
                         <!-- 3. Pilih Shift (TAMBAHAN BARU) -->
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="shiftSelect" class="form-label mb-1" style="font-size: 0.95em;">Pilih Shift</label>
                             <div class="input-group mb-2">
                                 <select id="shiftSelect" name="shift" class="form-select"
@@ -132,11 +154,9 @@
                                 class="btn btn-sm" style="font-size: 0.96em; background-color: #27ae60; color: #fff;">
                                 <i class="fa fa-file-excel"></i> Export
                             </a>
-
-
                         </div>
-
                     </form>
+
                 </div>
             </div>
         </div>
@@ -650,6 +670,16 @@
                 icon: 'error',
                 title: 'Oops...',
                 html: `{!! session('fail_message') !!}`,
+                confirmButtonColor: '#665be7'
+            });
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                html: `{!! session('error') !!}`,
                 confirmButtonColor: '#665be7'
             });
         </script>

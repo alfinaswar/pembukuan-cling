@@ -38,7 +38,10 @@
                                 @endforeach
                             </select>
                         </div>
-                        @if (auth()->user() && auth()->user()->role == 'Superadmin')
+                        {{-- @php
+                            dd(auth()->user()->getRoleNames()->toArray());
+                        @endphp --}}
+                        @if (auth()->user() && in_array('Superadmin', auth()->user()->getRoleNames()->toArray()))
                             <div class="col-md-3">
                                 <label class="form-label small text-muted">Klinik</label>
                                 <select id="filter_klinik" class="form-control form-control-sm">
