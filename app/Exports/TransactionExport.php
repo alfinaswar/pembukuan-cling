@@ -112,6 +112,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     'no' => $detailIndex === 0 ? $transactionIndex : '',
                     'patient_name' => $detailIndex === 0 ? $transaksi->NamaPasien : '',
                     'treatment' => $detail->MasterJenisPerawatan->Nama ?? '',
+                    'keterangan' => $detail->Keterangan ?? '', // Add this field
                     'revenue' => $detail->Biaya ?? 0,
                 ];
                 $rowNumber++;
@@ -173,14 +174,22 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function map($row): array
     {
+        $revenue = !empty($row['revenue']) ? (float) $row['revenue'] : 0;
+        $formattedRevenue = number_format($revenue, 0, ',', '.');
+
+        $treatment = $row['treatment'];
+        if (!empty($row['keterangan'])) {
+            $treatment .= ' - ' . $row['keterangan'];
+        }
+
         return [
             $row['day'],
             $row['date'],
             $row['branch'],
             $row['no'] !== '' ? $row['no'] : '',
             $row['patient_name'],
-            $row['treatment'],
-            $row['revenue'] > 0 ? number_format((float) $row['revenue'], 0, ',', '.') : '',
+            $treatment,
+            $formattedRevenue,
         ];
     }
 
@@ -200,6 +209,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
                 $lastDataRow = 2 + $this->totalRows;  // row 2 = header, data mulai row 3
+                $totalRow = $lastDataRow + 1; // Row for total
 
                 // ═══════════════════════════════════════════════
                 // ROW 1 — Judul "Januari 2026"
@@ -251,6 +261,33 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                         ],
                     ],
                 ]);
+                // Add TOTAL row
+                $sheet->mergeCells("A{$totalRow}:F{$totalRow}");
+                $sheet->setCellValue("A{$totalRow}", 'TOTAL REVENUE');
+                $sheet->setCellValue("G{$totalRow}", "=SUM(G3:G{$lastDataRow})");
+
+                $sheet->getRowDimension($totalRow)->setRowHeight(20);
+                $sheet->getStyle("A{$totalRow}:G{$totalRow}")->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 11,
+                        'name' => 'Arial',
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E8F4F8'], // Light blue
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_RIGHT,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '999999'],
+                        ],
+                    ],
+                ]);
 
                 // ═══════════════════════════════════════════════
                 // ROWS DATA — border tipis, background putih
@@ -286,7 +323,8 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     $sheet->getStyle("E3:E{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle("F3:F{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
                     $sheet->getStyle("G3:G{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
+                    $sheet->getStyle("G{$totalRow}")->getNumberFormat()
+                        ->setFormatCode('#,##0');
                     // Merge kolom2 (A, B, C, D, E) sesuai instruksi
                     foreach ($this->mergeInstructions as $merge) {
                         if ($merge['row_start'] !== $merge['row_end']) {
