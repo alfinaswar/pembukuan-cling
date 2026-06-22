@@ -451,6 +451,8 @@ class LaporanController extends Controller
             'pasien_baru' => ['label' => 'Pasien Baru', 'badge' => 'bg-danger', 'order' => 4],
             'tindakan' => ['label' => 'Tindakan Odontektomi', 'badge' => 'bg-warning text-white', 'order' => 5],
             'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-purple text-white', 'order' => 6],
+            'target_tercapai' => ['label' => 'Target klinik tercapai', 'badge' => 'bg-success', 'order' => 7],
+
         ];
 
         // Ambil sum per JenisRule sekali query termasuk insentif_hari_libur
@@ -650,6 +652,8 @@ class LaporanController extends Controller
             'omzet_shift' => ['label' => 'Shift ≥ Rp 6.000.000 / 2 ≥ Rp 12.000.000', 'badge' => 'bg-primary', 'order' => 1],
             'pasien_lama' => ['label' => 'Shift dengan 8 Pasien Lama', 'badge' => 'bg-info', 'order' => 2],
             'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning', 'order' => 3],
+            'target_tercapai' => ['label' => 'Target Tercapai', 'badge' => 'bg-success', 'order' => 4],
+
         ];
 
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)

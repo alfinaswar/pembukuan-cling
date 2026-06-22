@@ -450,6 +450,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card shadow border-0"
                 style="background: linear-gradient(90deg, #665be7 0%, #28c76f 100%); color: white;">
@@ -485,11 +486,11 @@
                                             'badge' => 'bg-success',
                                             'order' => 3,
                                         ],
-                                        // 'transaksi' => [
-                                        //     'label' => 'Billing ≥ Rp 1.000.000 per Transaksi',
-                                        //     'badge' => 'bg-success',
-                                        //     'order' => 4,
-                                        // ],
+                                        'target_tercapai' => [
+                                            'label' => 'Target klinik tercapai',
+                                            'badge' => 'bg-success',
+                                            'order' => 4,
+                                        ],
                                         // 'tindakan' => [
                                         //     'label' => 'Perawatan Odontektomi',
                                         //     'badge' => 'bg-warning text-white',
