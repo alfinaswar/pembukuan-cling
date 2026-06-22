@@ -174,8 +174,6 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function map($row): array
     {
-        $revenue = (float) $row['revenue'];
-
         return [
             $row['day'],
             $row['date'],
@@ -183,8 +181,8 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
             $row['no'] !== '' ? $row['no'] : '',
             $row['patient_name'],
             $row['treatment'],
-
-            number_format($revenue, 0, ',', '.'),
+            // Kembalikan sebagai angka, BUKAN string
+            (float) $row['revenue'],
         ];
     }
 
@@ -205,7 +203,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                 $sheet = $event->sheet->getDelegate();
                 $lastDataRow = 2 + $this->totalRows;  // row 2 = header, data mulai row 3
                 $totalRow = $lastDataRow + 1; // Row for total
-    
+
                 // ═══════════════════════════════════════════════
                 // ROW 1 — Judul "Januari 2026"
                 // ═══════════════════════════════════════════════
@@ -320,8 +318,12 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     $sheet->getStyle("G3:G{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                     $sheet->getStyle("G{$totalRow}")->getNumberFormat()
                         ->setFormatCode('#,##0');
+                    // $sheet->getStyle("G3:G{$lastDataRow}")->getNumberFormat()
+                    //     ->setFormatCode('#,##0');
                     $sheet->getStyle("G3:G{$lastDataRow}")->getNumberFormat()
                         ->setFormatCode('#,##0');
+                    // Atau kalau mau dengan format Rupiah lengkap:
+// ->setFormatCode('_("Rp"* #,##0_);_("Rp"* \-#,##0;_("Rp"* "-"??_);_(@_)');
                     // Merge kolom2 (A, B, C, D, E) sesuai instruksi
                     foreach ($this->mergeInstructions as $merge) {
                         if ($merge['row_start'] !== $merge['row_end']) {
@@ -343,7 +345,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                 $sheet->getColumnDimension('E')->setAutoSize(false)->setWidth(22);  // PATIENT NAME
                 $sheet->getColumnDimension('F')->setAutoSize(true);  // TREATMENT(S) — auto
                 $sheet->getColumnDimension('G')->setAutoSize(false)->setWidth(13);  // REVENUE
-    
+
                 // Freeze di bawah header
                 $sheet->freezePane('A3');
             },
