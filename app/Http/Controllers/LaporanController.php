@@ -945,6 +945,7 @@ class LaporanController extends Controller
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
+        $klinik = MasterKlinik::get();
         // dd(123);
         // =============================================
         // 7. KIRIM KE VIEW
@@ -965,7 +966,8 @@ class LaporanController extends Controller
             'NamaDokter',
             'Hari',
             'PerawatBertugas',
-            'ResepsionisBertugas'
+            'ResepsionisBertugas',
+            'klinik'
         ));
     }
 
