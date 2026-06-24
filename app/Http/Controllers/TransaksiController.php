@@ -168,7 +168,169 @@ class TransaksiController extends Controller
         $klinik = MasterKlinik::get();
         return view('transaksi.kasir.index', compact('shift', 'klinik'));
     }
+    public function indexKunjungan(Request $request)
+    {
+        if ($request->ajax()) {
+            $user = auth()->user();
+            $kodeCabang = $user->kodeperusahaan;
+            $searchNama = $request->input('search_nama');
 
+            $data = Transaksi::with('TransaksiDetail')
+                ->select('transaksis.*', \DB::raw('
+                (SELECT MAX(t2.created_at)
+                 FROM transaksis AS t2
+                 WHERE t2.NamaPasien = transaksis.NamaPasien
+                 AND t2.id < transaksis.id) as last_visit
+            '))
+                ->when(!$user->hasRole('Superadmin'), function ($query) use ($kodeCabang) {
+                    $query->where('KodeCabang', $kodeCabang);
+                })
+                ->when($searchNama, function ($query) use ($searchNama) {
+                    $query->where('NamaPasien', 'LIKE', '%' . $searchNama . '%');
+                })
+                ->latest();
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('TotalBayar', function ($row) {
+                    return 'Rp ' . number_format($row->TotalBayar, 0, ',', '.');
+                })
+                ->addColumn('MetodePembayaran', function ($row) {
+                    if (!$row->getMetodePembayaran || $row->getMetodePembayaran->isEmpty()) {
+                        return '-';
+                    }
+                    $html = '<dl class="mb-0">';
+                    foreach ($row->getMetodePembayaran as $pembayaran) {
+                        $nama = e($pembayaran->getMetodeBayar->Nama ?? '-');
+                        $nominal = number_format($pembayaran->Nominal ?? 0, 0, ',', '.');
+                        $html .= '<dt style="font-weight:500;">' . $nama . '</dt>';
+                        $html .= '<dd style="margin-bottom:4px;">Rp ' . $nominal . '</dd>';
+                    }
+                    $html .= '</dl>';
+                    return $html;
+                })
+                ->addColumn('Shift', function ($row) {
+                    if (!$row->getShift)
+                        return '-';
+                    $nama = strtolower($row->getShift->Nama);
+                    if ($nama === 'pagi' || $row->getShift->id == 1) {
+                        return '<span class="badge bg-warning text-dark"><i class="fa fa-sun me-1"></i>Pagi</span>';
+                    } elseif ($nama === 'siang' || $row->getShift->id == 2) {
+                        return '<span class="badge bg-primary"><i class="fa fa-moon me-1"></i>Siang</span>';
+                    }
+                    return '<span class="badge bg-secondary">' . e($row->getShift->Nama) . '</span>';
+                })
+                ->addColumn('JenisPasien', function ($row) {
+                    $jenis = $row->JenisPasien ?? '-';
+                    if ($jenis === 'Baru')
+                        return '<span class="badge bg-success"><i class="fa fa-user-plus me-1"></i>Baru</span>';
+                    if ($jenis === 'Lama')
+                        return '<span class="badge bg-info"><i class="fa fa-user-check me-1"></i>Lama</span>';
+                    return '-';
+                })
+                ->addColumn('TerakhirBerkunjung', function ($row) {
+                    if (!$row->last_visit) {
+                        return '<span class="badge bg-secondary"><i class="fa fa-user-plus me-1"></i>Pertama Kali</span>';
+                    }
+
+                    $lastVisit = \Carbon\Carbon::parse($row->last_visit);
+                    $now = \Carbon\Carbon::parse($row->created_at);
+                    $diff = $lastVisit->diff($now);
+
+                    if ($diff->days == 0) {
+                        $text = 'Hari ini';
+                        $class = 'bg-success';
+                    } elseif ($diff->days == 1) {
+                        $text = 'Kemarin';
+                        $class = 'bg-info';
+                    } elseif ($diff->days < 7) {
+                        $text = $diff->days . ' hari lalu';
+                        $class = 'bg-primary';
+                    } elseif ($diff->days < 30) {
+                        $weeks = floor($diff->days / 7);
+                        $text = $weeks . ' minggu lalu';
+                        $class = 'bg-warning text-dark';
+                    } elseif ($diff->days < 365) {
+                        $months = floor($diff->days / 30);
+                        $text = $months . ' bulan lalu';
+                        $class = 'bg-orange';
+                    } else {
+                        $years = floor($diff->days / 365);
+                        $text = $years . ' tahun lalu';
+                        $class = 'bg-danger';
+                    }
+
+                    return '<span class="badge ' . $class . '">' . $text . '</span>';
+                })
+                ->addColumn('Layanan', function ($row) {
+                    if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0)
+                        return '-';
+                    $rekap = [];
+                    foreach ($row->TransaksiDetail as $detail) {
+                        $nama = optional($detail->MasterJenisPerawatan)->Nama;
+                        $biaya = (int) ($detail->Biaya ?? 0);
+                        $keterangan = $detail->Keterangan ?? null;
+                        if ($nama) {
+                            if (!isset($rekap[$nama])) {
+                                $rekap[$nama] = [
+                                    'nama' => $nama,
+                                    'harga' => 0,
+                                    'count' => 0,
+                                    'keterangan' => []
+                                ];
+                            }
+                            $rekap[$nama]['harga'] += $biaya;
+                            $rekap[$nama]['count'] += 1;
+                            if ($keterangan && !in_array($keterangan, $rekap[$nama]['keterangan'])) {
+                                $rekap[$nama]['keterangan'][] = $keterangan;
+                            }
+                        }
+                    }
+                    if (empty($rekap))
+                        return '-';
+                    $html = '<dl class="mb-0">';
+                    foreach ($rekap as $item) {
+                        $namaStr = e($item['nama']) . ($item['count'] > 1 ? ' x' . $item['count'] : '');
+                        $html .= '<dt style="font-weight:500;">' . $namaStr . ':</dt>';
+                        $html .= '<dd style="margin-bottom:4px;">Rp ' . number_format($item['harga'], 0, ',', '.') . '</dd>';
+                        if (!empty($item['keterangan'])) {
+                            foreach ($item['keterangan'] as $ket) {
+                                $html .= '<dd style="margin-bottom:2px;"><small><i class="fa fa-info-circle me-1"></i>' . e($ket) . '</small></dd>';
+                            }
+                        }
+                    }
+                    $html .= '</dl>';
+                    return $html;
+                })
+                ->addColumn('Petugas', function ($row) {
+                    $dokter = $row->getDokter?->name ?? '-';
+                    $perawat = $row->getPerawat?->name ?? '-';
+                    $resepsionis = $row->getResepsionis?->name ?? '-';
+                    $html = '<dl class="mb-0">';
+                    $html .= '<dt style="font-weight:500;">Dokter</dt><dd>' . e($dokter) . '</dd>';
+                    $html .= '<dt style="font-weight:500;">Perawat</dt><dd>' . e($perawat) . '</dd>';
+                    $html .= '<dt style="font-weight:500;">Resepsionis</dt><dd>' . e($resepsionis) . '</dd>';
+                    $html .= '</dl>';
+                    return $html;
+                })
+                ->addColumn('action', function ($row) {
+                    $encryptedId = encrypt($row->id);
+                    return '
+                ' . ((auth()->user()->hasRole('Kasir / Resepsionis') || auth()->user()->hasRole('Superadmin'))
+                        ? '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
+                        <i class="fa fa-edit"></i>
+                    </a>' : '') . '
+                <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
+                    <i class="fa fa-trash"></i>
+                </button>
+            ';
+                })
+                ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran', 'TerakhirBerkunjung'])
+                ->make(true);
+        }
+
+        return view('transaksi.kasir.history-pembayaran');
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -198,7 +360,7 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $kodeCabang = auth()->user()->kodeperusahaan;
-        $dokter = User::role('Dokter')->where('KodePerusahaan', $kodeCabang)->get();
+        $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
 
@@ -348,7 +510,7 @@ class TransaksiController extends Controller
             ->count();
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
-        $dokter = User::role('Dokter')->where('KodePerusahaan', $kodeCabang)->get();
+        $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
 

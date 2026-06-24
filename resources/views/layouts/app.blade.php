@@ -307,6 +307,15 @@
                                     <span class="hide-menu">Pembayaran</span>
                                 </a>
                             </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="{{ route('Transaksi.index-kunjungan') }}"
+                                    aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-cash"></i>
+                                    </span>
+                                    <span class="hide-menu">Riwayat Kunjungan</span>
+                                </a>
+                            </li>
                         @endcan
                         @can('laporan')
                             <li class="sidebar-item">
@@ -497,20 +506,17 @@
                                     <span id="currentDateTime" class="fw-semibold" style="font-size: 15px;"></span>
                                     <span class="mx-3 fw-semibold" style="font-size: 15px;">
                                         Shift: {{ auth()->user()?->getShift?->Nama ?? '-' }}
-
-
                                     </span>
                                 </div>
                                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
-                                    <!-- ... Remaining Icons ... -->
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link pe-0" href="javascript:void(0)" id="drop1"
-                                            aria-expanded="false">
+                                    <li class="nav-item">
+                                        <a class="nav-link pe-0" href="{{ route('profile.edit') }}"
+                                            title="Edit Profile">
                                             <div class="d-flex align-items-center">
                                                 <div class="user-profile-img">
                                                     <img src="{{ asset('') }}assets/images/profile/user-1.jpg"
                                                         class="rounded-circle" width="35" height="35"
-                                                        alt="modernize-img" />
+                                                        alt="profile-img" />
                                                 </div>
                                             </div>
                                         </a>
@@ -555,6 +561,15 @@
                                                     <i class="ti ti-cash"></i>
                                                 </span>
                                                 <span class="hide-menu">Pembayaran</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link" href="{{ route('Transaksi.index-kunjungan') }}"
+                                                aria-expanded="false">
+                                                <span>
+                                                    <i class="ti ti-cash"></i>
+                                                </span>
+                                                <span class="hide-menu">Riwayat Kunjungan</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -754,12 +769,21 @@
                             </li>
                             {{-- @can('pembayaran') --}}
                             <li class="sidebar-item">
-                                <a class="sidebar-link {{ Str::contains(Request::path(), 'transaksi/kasir') ? 'active' : '' }}"
+                                <a class="sidebar-link {{ Request::is('transaksi/kasir') ? 'active' : '' }}"
                                     href="{{ route('Transaksi.index') }}" aria-expanded="false">
                                     <span>
                                         <i class="ti ti-cash"></i>
                                     </span>
                                     <span class="hide-menu">Pembayaran</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link {{ Request::is('transaksi/kasir/riwayat-kunjungan*') ? 'active' : '' }}"
+                                    href="{{ route('Transaksi.index-kunjungan') }}" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-cash"></i>
+                                    </span>
+                                    <span class="hide-menu">Riwayat Kunjungan</span>
                                 </a>
                             </li>
                             {{-- @endcan --}}

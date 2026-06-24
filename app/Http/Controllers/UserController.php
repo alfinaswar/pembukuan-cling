@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 use Yajra\DataTables\DataTables;
 use DB;
 use Hash;
+use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
@@ -180,5 +181,38 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['status' => 200, 'message' => 'User berhasil dihapus']);
+    }
+    public function editProfile()
+    {
+        return view('profile.edit');
+    }
+
+    /**
+     * Update password
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'new_password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^_+\-=\[\]{};:\'",<>.\/\\|`~])[A-Za-z\d@$!%*?&#^_+\-=\[\]{};:\'",<>.\/\\|`~]{8,}$/'
+            ],
+        ], [
+            'new_password.required' => 'Password baru wajib diisi.',
+            'new_password.min' => 'Password minimal 8 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'new_password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan simbol.',
+        ]);
+
+        // Update password
+        $user->password = Hash::make($validated['new_password']);
+        $user->save();
+
+        return back()->with('success', 'Password berhasil diperbarui!');
     }
 }

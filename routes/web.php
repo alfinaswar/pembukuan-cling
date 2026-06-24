@@ -36,10 +36,12 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::post('/home/update-shift', [HomeController::class, 'updateShift'])->name('home.update-shift');
 
 Route::group(['middleware' => ['auth']], function () {
+
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('products', ProductController::class);
-
+    Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
+    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
     Route::prefix('master/jenis-perawatan')->group(function () {
         Route::get('/', [MasterJenisPerawatanController::class, 'index'])->name('JenisPerawatan.index');
         Route::get('/create', [MasterJenisPerawatanController::class, 'create'])->name('JenisPerawatan.create');
@@ -95,6 +97,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
     Route::prefix('transaksi/kasir')->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('Transaksi.index');
+        Route::get('/riwayat-kunjungan', [TransaksiController::class, 'indexKunjungan'])->name('Transaksi.index-kunjungan');
         Route::get('/create', [TransaksiController::class, 'create'])->name('Transaksi.create');
         Route::post('/store', [TransaksiController::class, 'store'])->name('Transaksi.store');
         Route::get('/edit/{id}', [TransaksiController::class, 'edit'])->name('Transaksi.edit');
