@@ -176,12 +176,7 @@ class TransaksiController extends Controller
             $searchNama = $request->input('search_nama');
 
             $data = Transaksi::with('TransaksiDetail')
-                ->select('transaksis.*', \DB::raw('
-                (SELECT MAX(t2.created_at)
-                 FROM transaksis AS t2
-                 WHERE t2.NamaPasien = transaksis.NamaPasien
-                 AND t2.id < transaksis.id) as last_visit
-            '))
+
                 ->when(!$user->hasRole('Superadmin'), function ($query) use ($kodeCabang) {
                     $query->where('KodeCabang', $kodeCabang);
                 })
@@ -229,38 +224,28 @@ class TransaksiController extends Controller
                     return '-';
                 })
                 ->addColumn('TerakhirBerkunjung', function ($row) {
-                    if (!$row->last_visit) {
-                        return '<span class="badge bg-secondary"><i class="fa fa-user-plus me-1"></i>Pertama Kali</span>';
-                    }
 
                     $lastVisit = \Carbon\Carbon::parse($row->last_visit);
                     $now = \Carbon\Carbon::parse($row->created_at);
-                    $diff = $lastVisit->diff($now);
 
-                    if ($diff->days == 0) {
-                        $text = 'Hari ini';
+                    $text = $now->diffForHumans($lastVisit);
+                    $days = $now->diffInDays($lastVisit);
+
+                    if ($days == 0) {
                         $class = 'bg-success';
-                    } elseif ($diff->days == 1) {
-                        $text = 'Kemarin';
+                    } elseif ($days == 1) {
                         $class = 'bg-info';
-                    } elseif ($diff->days < 7) {
-                        $text = $diff->days . ' hari lalu';
+                    } elseif ($days < 7) {
                         $class = 'bg-primary';
-                    } elseif ($diff->days < 30) {
-                        $weeks = floor($diff->days / 7);
-                        $text = $weeks . ' minggu lalu';
+                    } elseif ($days < 30) {
                         $class = 'bg-warning text-dark';
-                    } elseif ($diff->days < 365) {
-                        $months = floor($diff->days / 30);
-                        $text = $months . ' bulan lalu';
+                    } elseif ($days < 365) {
                         $class = 'bg-orange';
                     } else {
-                        $years = floor($diff->days / 365);
-                        $text = $years . ' tahun lalu';
                         $class = 'bg-danger';
                     }
 
-                    return '<span class="badge ' . $class . '">' . $text . '</span>';
+                    return '<span class="badge ' . $class . '">' . ucfirst($text) . '</span>';
                 })
                 ->addColumn('Layanan', function ($row) {
                     if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0)
