@@ -450,11 +450,21 @@
                                             billing minimal.</td>
                                     </tr>
                                 @endforelse
-
-
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- Link to show all data if there are more than 5 --}}
+                    @if (($data['pasienBillingMinimal'] ?? collect())->count() > 5)
+                        <div class="mt-3 text-end">
+                            <a href="{{ route('laporan-perawat.billing-minimal', request()->all()) }}"
+                                style="color: #162878; font-size: 14px; text-decoration: underline;" target="_blank"
+                                rel="noopener">
+                                Lihat semua data &raquo;
+                            </a>
+                        </div>
+                    @endif
+
                     <div class="alert alert-primary d-flex justify-content-between align-items-center" role="alert"
                         style="background: #f5f6ff; border-color: #d9e0fc; min-height: 90px;">
                         <div class="d-flex align-items-center" style="flex: 1;">

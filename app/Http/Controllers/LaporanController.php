@@ -102,11 +102,18 @@ class LaporanController extends Controller
                 return [
                     'JenisPerawatan' => $items->first()->MasterJenisPerawatan->Nama ?? '-',
                     'jumlah' => $items->count(),
+                    'jenis_perawatan_id' => $items->first()->JenisPerawatan, // tambahkan ID sebagai tiebreaker
                 ];
             })
-            ->sortByDesc('jumlah')
+            ->sort(function ($a, $b) {
+                if ($b['jumlah'] === $a['jumlah']) {
+                    return strcmp($a['JenisPerawatan'], $b['JenisPerawatan']);
+                }
+                return $b['jumlah'] <=> $a['jumlah'];
+            })
             ->take(5)
             ->values();
+
 
         $data = [
             'dokter' => $dokter,
@@ -450,8 +457,8 @@ class LaporanController extends Controller
             'pasien_lama' => ['label' => '8 Pasien Lama per Shift', 'badge' => 'bg-info', 'order' => 3],
             'pasien_baru' => ['label' => 'Pasien Baru', 'badge' => 'bg-danger', 'order' => 4],
             'tindakan' => ['label' => 'Tindakan Odontektomi', 'badge' => 'bg-warning text-white', 'order' => 5],
-            'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-purple text-white', 'order' => 6],
-            'target_tercapai' => ['label' => 'Target klinik tercapai', 'badge' => 'bg-success', 'order' => 7],
+            'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning text-white', 'order' => 6],
+            'target_tercapai' => ['label' => 'Target klinik tercapai', 'badge' => 'bg-success text-white', 'order' => 7],
 
         ];
 
@@ -988,5 +995,50 @@ class LaporanController extends Controller
             new TransactionExport($validated),
             $filename
         );
+    }
+
+    public function billingMinimalPerawat(Request $request)
+    {
+        $validated = $request->validate([
+            'FilterTanggal' => 'required|string',
+            'perawat' => 'nullable|integer',
+            'shift' => 'nullable|integer',
+        ]);
+        // Pisahkan FilterTanggal menjadi $startRaw dan $endRaw, lalu parsing ke Carbon
+        [$startRaw, $endRaw] = explode(' - ', $validated['FilterTanggal']);
+        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
+        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
+
+
+        $perawatId = $validated['perawat'] ?? null;
+        $shift = $validated['shift'] ?? null;
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $perawatUser = User::find($perawatId);
+            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
+
+        // Query billing minimal per perawat, disimpan di $billingByPerawat
+        $billingByPerawat = InsentifKaryawan::with('getTransaksi')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('JenisRule', 'transaksi')
+            ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
+            ->when($perawatId, fn($q) => $q->where('UserId', $perawatId))
+            ->when($shift, fn($q) => $q->where('Shift', $shift))
+            ->whereHas('getTransaksi', fn($q) => $q->where('TotalBayar', '>=', 1_000_000))
+            ->orderByDesc('created_at')
+            ->get();
+        // dd($billingByPerawat);
+
+        return view('laporan.perawat.billing_minimal', [
+            'billingByPerawat' => $billingByPerawat,
+            // Format tanggal Indonesia: "dd/mm/yyyy - dd/mm/yyyy"
+            'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
+
+            'shift' => $billingByPerawat->first()?->Shift ?? null,
+
+        ]);
     }
 }

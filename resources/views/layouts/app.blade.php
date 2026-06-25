@@ -767,26 +767,26 @@
                                     <span class="hide-menu">Dashboard</span>
                                 </a>
                             </li>
-                            {{-- @can('pembayaran') --}}
-                            <li class="sidebar-item">
-                                <a class="sidebar-link {{ Request::is('transaksi/kasir') ? 'active' : '' }}"
-                                    href="{{ route('Transaksi.index') }}" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-cash"></i>
-                                    </span>
-                                    <span class="hide-menu">Pembayaran</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link {{ Request::is('transaksi/kasir/riwayat-kunjungan*') ? 'active' : '' }}"
-                                    href="{{ route('Transaksi.index-kunjungan') }}" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-cash"></i>
-                                    </span>
-                                    <span class="hide-menu">Riwayat Kunjungan</span>
-                                </a>
-                            </li>
-                            {{-- @endcan --}}
+                            @can('pembayaran-index')
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link {{ Request::is('transaksi/kasir') ? 'active' : '' }}"
+                                        href="{{ route('Transaksi.index') }}" aria-expanded="false">
+                                        <span>
+                                            <i class="ti ti-cash"></i>
+                                        </span>
+                                        <span class="hide-menu">Pembayaran</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link {{ Request::is('transaksi/kasir/riwayat-kunjungan*') ? 'active' : '' }}"
+                                        href="{{ route('Transaksi.index-kunjungan') }}" aria-expanded="false">
+                                        <span>
+                                            <i class="ti ti-cash"></i>
+                                        </span>
+                                        <span class="hide-menu">Riwayat Kunjungan</span>
+                                    </a>
+                                </li>
+                            @endcan
                             @can('laporan')
                                 <li class="sidebar-item">
                                     <a class="sidebar-link has-arrow {{ request()->segment(1) == 'laporan' ? 'active' : '' }}"

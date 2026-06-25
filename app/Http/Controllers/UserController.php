@@ -49,7 +49,12 @@ class UserController extends Controller
                         </button>
                     ';
                 })
-                ->rawColumns(['roles', 'action'])
+                ->addColumn('Penempatan', function ($row) {
+                    return $row->getPerusahaan->Nama ?? '-';
+                })
+
+
+                ->rawColumns(['roles', 'action', 'Penempatan'])
                 ->make(true);
         }
 

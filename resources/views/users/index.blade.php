@@ -50,6 +50,7 @@
                                             <th>Nama</th>
                                             <th>Email</th>
                                             <th>Role</th>
+                                            <th>Cabang</th>
                                             <th style="width: 90px;" class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
@@ -206,6 +207,10 @@
                     {
                         data: 'roles',
                         name: 'roles'
+                    },
+                    {
+                        data: 'Penempatan',
+                        name: 'Penempatan'
                     },
                     {
                         data: 'action',
