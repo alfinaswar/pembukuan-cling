@@ -9,9 +9,12 @@
                         <i class="ti ti-currency-dollar me-2"></i>
                         Kasir - Daftar Transaksi
                     </h5>
-                    <a href="{{ route('Transaksi.create') }}" class="btn btn-primary">
-                        <i class="ti ti-plus"></i> Transaksi Baru
-                    </a>
+                    @if (auth()->user() && (auth()->user()->hasRole('Superadmin') || auth()->user()->hasRole('Kasir / Resepsionis')))
+                        <a href="{{ route('Transaksi.create') }}" class="btn btn-primary">
+                            <i class="ti ti-plus"></i> Transaksi Baru
+                        </a>
+                    @endif
+
                 </div>
                 <div class="card-body">
 

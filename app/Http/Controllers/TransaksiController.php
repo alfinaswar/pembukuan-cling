@@ -148,17 +148,26 @@ class TransaksiController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
-                    return '
-                    ' . ((auth()->user()->hasRole('Kasir / Resepsionis') || auth()->user()->hasRole('Superadmin'))
-                        ? '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i>
-                        </a>' : '') . '
+                    $user = auth()->user();
+                    $isKasir = method_exists($user, 'hasRole') && $user->hasRole('Kasir / Resepsionis');
+                    $isAdmin = method_exists($user, 'hasRole') && $user->hasRole('Superadmin');
 
-                    <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                ';
+                    $actionButtons = '';
+
+                    // Hanya tampilkan tombol edit dan hapus jika user adalah kasir atau admin
+                    if ($isKasir || $isAdmin) {
+                        $actionButtons .= '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i>
+                        </a>';
+                        $actionButtons .= '
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
+                            <i class="fa fa-trash"></i>
+                        </button>';
+                    }
+
+                    return $actionButtons;
                 })
+
                 ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran'])
                 ->with(['summary' => $summary])
                 ->make(true);
@@ -300,16 +309,22 @@ class TransaksiController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
-                    return '
-                ' . ((auth()->user()->hasRole('Kasir / Resepsionis') || auth()->user()->hasRole('Superadmin'))
-                        ? '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                        <i class="fa fa-edit"></i>
-                    </a>' : '') . '
-                <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                    <i class="fa fa-trash"></i>
-                </button>
-            ';
+
+                    if (auth()->user()->hasRole('Kasir / Resepsionis') || auth()->user()->hasRole('Superadmin')) {
+                        return '
+                            <a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        ';
+                    } else {
+
+                        return '';
+                    }
                 })
+
                 ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran', 'TerakhirBerkunjung'])
                 ->make(true);
         }
