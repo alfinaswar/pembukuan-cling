@@ -1,0 +1,55 @@
+name: 🚀 Deploy to Production
+
+on:
+  push:
+    branches:
+      - main  # ganti ke "master" kalau branch utamamu beda
+
+jobs:
+  deploy:
+    name: Deploy ke VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout kode terbaru
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Setup PHP 8.3 supaya composer.lock kompatibel dengan server
+      - name: 🐘 Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, bcmath, ctype, fileinfo, openssl, pdo, tokenizer, xml, curl, zip
+          coverage: none
+
+      # 3. Cache dependencies Composer supaya workflow lebih cepat
+      - name: 📦 Cache Composer Dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      # 4. Install dependencies dengan PHP 8.3
+      #    Ini sekaligus memvalidasi composer.lock sebelum dikirim ke server
+      - name: 🔧 Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      # 5. SSH ke server dan jalankan deploy.sh
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            echo "=============================="
+            echo "🚀 Memulai proses deploy..."
+            echo "=============================="
+            ~/deploy.sh
+            echo "=============================="
+            echo "✅ Deploy selesai!"
+            echo "=============================="
