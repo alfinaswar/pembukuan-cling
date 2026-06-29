@@ -65,7 +65,7 @@
                                         @enderror
                                     </div>
                                     <div class="mb-4">
-                                        <label for="userPassword" class="form-label">Kata Sandi.</label>
+                                        <label for="userPassword" class="form-label">Kata Sandi..</label>
                                         <div class="position-relative-password">
                                             <input type="password"
                                                 class="form-control @error('password') is-invalid @enderror"
@@ -97,7 +97,7 @@
                                             <input class="form-check-input primary" type="checkbox" name="remember"
                                                 id="flexCheckChecked" {{ old('remember') ? 'checked' : '' }}>
                                             <label class="form-check-label text-dark" for="flexCheckChecked">
-                                                Ingat Perangkat Ini
+                                                Ingat Perangkat Ini.
                                             </label>
                                         </div>
                                         {{-- @if (Route::has('password.request'))
