@@ -97,7 +97,7 @@
                                             <input class="form-check-input primary" type="checkbox" name="remember"
                                                 id="flexCheckChecked" {{ old('remember') ? 'checked' : '' }}>
                                             <label class="form-check-label text-dark" for="flexCheckChecked">
-                                                Ingat Perangkat Ini Test Deploy OK2
+                                                Ingat Perangkat Ini Test Deploy OK222
                                             </label>
                                         </div>
                                         {{-- @if (Route::has('password.request'))
