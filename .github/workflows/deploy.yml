@@ -3,7 +3,7 @@ name: Auto Deploy to VPS
 on:
   push:
     branches:
-      - main  # Ganti ke 'master' jika branch utama kamu bernama master
+      - main
 
 jobs:
   deploy:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Execute Deploy Script on VPS
+      - name: 🚀 Execute Deploy Script on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -19,4 +19,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # Panggil script deploy sesuai path aslinya di server
             /home/clingdental_kasirftp/deploy.sh
