@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exports\TransactionExport;
+use App\Exports\TransaksiExport;
 use App\Models\InsentifKaryawan;
+use App\Models\MasterJenisPerawatan;
+use App\Models\MasterJenisPerawatans;
 use App\Models\MasterKlinik;
 use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
@@ -15,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
+
 
 class LaporanController extends Controller
 {
@@ -1040,5 +1044,276 @@ class LaporanController extends Controller
             'shift' => $billingByPerawat->first()?->Shift ?? null,
 
         ]);
+    }
+
+    public function indexTransaksi(Request $request)
+    {
+        $klinik = MasterKlinik::get();
+        return view('laporan.transaksi.index', compact('klinik'));
+    }
+
+    public function preview(Request $request)
+    {
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        // dd($klinikId);
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        $query = Transaksi::with([
+                'getCabang',
+                'TransaksiDetail',
+                'getMetodePembayaran.getMetodeBayar',
+                'getShift',
+                'getDokter',
+                'getPerawat',
+                'getResepsionis',
+            ])
+            ->when($klinikId, function ($q) use ($klinikId) {
+                $q->where('KodeCabang', $klinikId);
+            })
+            ->when($request->tanggal_mulai, function ($q) use ($request) {
+                $q->whereDate('created_at', '>=', $request->tanggal_mulai);
+            })
+            ->when($request->tanggal_akhir, function ($q) use ($request) {
+                $q->whereDate('created_at', '<=', $request->tanggal_akhir);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->values()->map(function ($item, $idx) {
+                $metodePembayaran = '-';
+                if (isset($item->getMetodePembayaran) && $item->getMetodePembayaran->count()) {
+                    $pembayaranList = [];
+                    foreach ($item->getMetodePembayaran as $p) {
+                        $pembayaranList[] = ($p->getMetodeBayar->Nama ?? '-') . ': Rp ' . number_format($p->Nominal ?? 0, 0, ',', '.');
+                    }
+                    $metodePembayaran = implode('; ', $pembayaranList);
+                }
+                $layananOut = '-';
+                if (isset($item->TransaksiDetail) && $item->TransaksiDetail->count()) {
+                    $rekap = [];
+                    foreach ($item->TransaksiDetail as $detail) {
+                        $layananNama = optional($detail->MasterJenisPerawatan)->Nama;
+                        if ($layananNama) {
+                            if (!isset($rekap[$layananNama])) {
+                                $rekap[$layananNama] = [
+                                    'nama' => $layananNama,
+                                    'harga' => 0,
+                                    'count' => 0
+                                ];
+                            }
+                            $rekap[$layananNama]['harga'] += (int) ($detail->Biaya ?? 0);
+                            $rekap[$layananNama]['count'] += 1;
+                        }
+                    }
+                    $layananStrs = [];
+                    foreach ($rekap as $itemLayanan) {
+                        $str = $itemLayanan['nama'];
+                        if ($itemLayanan['count'] > 1) {
+                            $str .= ' x' . $itemLayanan['count'];
+                        }
+                        $str .= ' [Rp ' . number_format($itemLayanan['harga'], 0, ',', '.') . ']';
+                        $layananStrs[] = $str;
+                    }
+                    $layananOut = implode('; ', $layananStrs);
+                }
+
+                return [
+                    'no' => $idx + 1,
+                    'kode' => $item->Kode ?? '-',
+                    'tanggal' => $item->Tanggal ?? $item->tanggal ?? $item->created_at,
+                    'nama_pasien' => $item->pelanggan->nama ?? $item->NamaPasien ?? '-',
+                    'jenis_pasien' => $item->JenisPasien ?? '-',
+                    'metode_pembayaran' => $metodePembayaran,
+                    'layanan' => $layananOut,
+                    'total_bayar' => $item->total ?? $item->TotalBayar ?? 0,
+                    // Pakai 'dd' (Dokter) atau 'dt' (Perawat) sebagai petugas
+                    'petugas' =>
+                        // Tampilkan dokter, perawat, dan resepsionis dengan label dan <br>
+                        (isset($item->getDokter) && $item->getDokter ? 'Dokter: ' . $item->getDokter->name . '<br>' : '') .
+                        (isset($item->getPerawat) && $item->getPerawat ? 'Perawat: ' . $item->getPerawat->name . '<br>' : '') .
+                        (isset($item->getResepsionis) && $item->getResepsionis ? 'Resepsionis: ' . $item->getResepsionis->name : '')
+                        ?: '-',
+
+                    'shift' => $item->getShift?->Nama ?? '-',
+                    'aksi' => null
+                ];
+
+            })
+        ]);
+    }
+
+    public function downloadTransaksi(Request $request)
+    {
+        $request->validate([
+            'format' => 'required|in:excel,pdf'
+        ]);
+
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        $query = Transaksi::with([
+
+            'getCabang',
+            'TransaksiDetail.MasterJenisPerawatan',
+            'getMetodePembayaran.getMetodeBayar',
+            'getShift',
+            'getDokter',
+            'getPerawat',
+            'getResepsionis',
+        ])
+            ->when($klinikId, function ($q) use ($klinikId) {
+                $q->where('KodeCabang', $klinikId);
+            })
+            ->when($request->tanggal_mulai, function ($q) use ($request) {
+                $q->whereDate('created_at', '>=', $request->tanggal_mulai);
+            })
+            ->when($request->tanggal_akhir, function ($q) use ($request) {
+                $q->whereDate('created_at', '<=', $request->tanggal_akhir);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Ambil nama klinik untuk filter info
+        $klinikNama = 'Semua';
+        if ($klinikId) {
+            $klinikNama = MasterKlinik::where('Kode', $klinikId)->value('Nama') ?? $klinikId;
+        }
+
+        $filterInfo = [
+            'klinik' => $klinikNama,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_akhir' => $request->tanggal_akhir,
+        ];
+
+        return Excel::download(
+            new TransaksiExport($query, $filterInfo),
+            'Laporan-Transaksi-' . date('Y-m-d') . '.xlsx'
+        );
+    }
+    public function indexJenisPerawatan(Request $request)
+    {
+        $klinik = MasterKlinik::get();
+        $jenisPerawatan = MasterJenisPerawatan::get();
+        return view('laporan.jenis-perawatan.index', compact('klinik','jenisPerawatan'));
+    }
+    public function previewJenisPerawatan(Request $request)
+    {
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        // ✅ Cast ke array (saat pilih 1 item)
+        $jenisPerawatanIds = $request->jenis_perawatan;
+        if (is_string($jenisPerawatanIds)) {
+            $jenisPerawatanIds = [$jenisPerawatanIds];
+        }
+        $jenisPerawatanIds = $jenisPerawatanIds ?: [];
+
+        // ✅ ELOQUENT WAY dengan leftJoin + filter di callback
+        $query = MasterJenisPerawatan::select(
+            'master_jenis_perawatans.id',
+            'master_jenis_perawatans.Nama',
+            DB::raw('COALESCE(SUM(td.Biaya), 0) as total_revenue'),
+            DB::raw('COUNT(td.id) as jumlah_terjual')
+        )
+            ->leftJoin('transaksi_details as td', function ($join) use ($request, $klinikId) {
+                $join->on('master_jenis_perawatans.id', '=', 'td.JenisPerawatan')
+                    ->whereHas('transaksis', function ($q) use ($request, $klinikId) {
+                        // Filter klinik
+                        $q->when($klinikId, function ($q2) use ($klinikId) {
+                            $q2->where('KodeCabang', $klinikId);
+                        });
+                        // Filter tanggal
+                        $q->when($request->tanggal_mulai, function ($q2) use ($request) {
+                            $q2->whereDate('Tanggal', '>=', $request->tanggal_mulai);
+                        });
+                        $q->when($request->tanggal_akhir, function ($q2) use ($request) {
+                            $q2->whereDate('Tanggal', '<=', $request->tanggal_akhir);
+                        });
+                    });
+            })
+            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
+                $q->whereIn('master_jenis_perawatans.id', $jenisPerawatanIds);
+            })
+            ->groupBy('master_jenis_perawatans.id', 'master_jenis_perawatans.Nama')
+            ->orderByDesc('total_revenue')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->map(fn($item) => [
+                'id' => $item->id,
+                'nama_perawatan' => $item->Nama,
+                'jumlah_terjual' => (int) $item->jumlah_terjual,
+                'total_revenue' => (float) $item->total_revenue,
+            ]),
+        ]);
+    }
+
+    public function downloadJenisPerawatan(Request $request)
+    {
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        $jenisPerawatanIds = $request->jenis_perawatan;
+        if (is_string($jenisPerawatanIds)) {
+            $jenisPerawatanIds = [$jenisPerawatanIds];
+        }
+        $jenisPerawatanIds = $jenisPerawatanIds ?: [];
+
+        $query = MasterJenisPerawatan::select(
+            'MasterJenisPerawatan.id',
+            'MasterJenisPerawatan.Nama',
+            \DB::raw('COALESCE(SUM(td.Biaya), 0) as total_revenue'),
+            \DB::raw('COUNT(td.id) as jumlah_terjual')
+        )
+            ->leftJoin('transaksi_details as td', function ($join) use ($request, $klinikId) {
+                $join->on('MasterJenisPerawatan.id', '=', 'td.JenisPerawatan')
+                    ->whereHas('transaksi', function ($q) use ($request, $klinikId) {
+                        $q->when($klinikId, fn($q2) => $q2->where('KodeCabang', $klinikId));
+                        $q->when($request->tanggal_mulai, fn($q2) => $q2->whereDate('Tanggal', '>=', $request->tanggal_mulai));
+                        $q->when($request->tanggal_akhir, fn($q2) => $q2->whereDate('Tanggal', '<=', $request->tanggal_akhir));
+                    });
+            })
+            ->when(!empty($jenisPerawatanIds), fn($q) => $q->whereIn('MasterJenisPerawatan.id', $jenisPerawatanIds))
+            ->groupBy('MasterJenisPerawatan.id', 'MasterJenisPerawatan.Nama')
+            ->orderByDesc('total_revenue')
+            ->get();
+
+        // Info untuk Excel header
+        $klinikNama = $klinikId
+            ? (MasterKlinik::where('Kode', $klinikId)->value('Nama') ?? $klinikId)
+            : 'Semua';
+
+        $jenisPerawatanNama = 'Semua';
+        if (!empty($jenisPerawatanIds)) {
+            $jenisPerawatanNama = MasterJenisPerawatan::whereIn('id', $jenisPerawatanIds)
+                ->pluck('Nama')->implode(', ');
+        }
+
+        $filterInfo = [
+            'klinik' => $klinikNama,
+            'jenis_perawatan' => $jenisPerawatanNama,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_akhir' => $request->tanggal_akhir,
+        ];
+
+        return Excel::download(
+            new JenisPerawatanExport($query, $filterInfo),
+            'Laporan-Jenis-Perawatan-' . date('Y-m-d') . '.xlsx'
+        );
     }
 }

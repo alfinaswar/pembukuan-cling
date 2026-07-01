@@ -131,6 +131,14 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/dokter/export-excel', [LaporanController::class, 'downloadExcel'])->name('laporan-dokter.download-excel');
 
         Route::get('/perawat/billing-minimal', [LaporanController::class, 'billingMinimalPerawat'])->name('laporan-perawat.billing-minimal');
+
+        Route::get('/transaksi', [LaporanController::class, 'indexTransaksi'])->name('laporan-transaksi.index');
+        Route::post('/laporan-transaksi/preview', [LaporanController::class, 'preview'])->name('laporan-transaksi.preview');
+        Route::post('/download-data-transaksi', [LaporanController::class, 'downloadTransaksi'])->name('laporan-transaksi.store');
+
+        Route::get('/jenis-perawatan', [LaporanController::class, 'indexJenisPerawatan'])->name('laporan-jenis-perawatan.index');
+        Route::post('/laporan-jenis-perawatan/preview', [LaporanController::class, 'previewJenisPerawatan'])->name('laporan-jenis-perawatan.preview');
+        Route::post('/laporan-jenis-perawatan/download', [LaporanController::class, 'downloadJenisPerawatan'])->name('laporan-jenis-perawatan.download');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });
