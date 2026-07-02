@@ -13,7 +13,12 @@ class MasterJenisPerawatan extends Model
     protected $table = 'master_jenis_perawatans';
 
     protected $guarded = ['id'];
-
+    public function getJumlahTransaksi()
+    {
+        return $this->hasMany(TransaksiDetail::class, 'JenisPerawatan', 'id')
+            ->selectRaw('JenisPerawatan, COUNT(*) as jumlah_terjual, COALESCE(SUM(Biaya),0) as total_revenue')
+            ->groupBy('JenisPerawatan');
+    }
     protected static function boot()
     {
         parent::boot();

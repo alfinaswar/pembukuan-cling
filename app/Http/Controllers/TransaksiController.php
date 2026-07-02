@@ -398,7 +398,8 @@ class TransaksiController extends Controller
             'Perawat' => 'required|exists:users,id',
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
-            'MetodePembayaran' => 'required|array|min:1',
+            'MetodePembayaran' => ['required', 'array', 'min:1'],
+
             'NominalBayar' => 'required|array',
             'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
@@ -421,6 +422,8 @@ class TransaksiController extends Controller
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
+            'MetodePembayaran.array' => 'Metode pembayaran harus berupa array',
+
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);

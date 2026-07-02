@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\JenisPerawatanExport;
 use App\Exports\TransactionExport;
 use App\Exports\TransaksiExport;
 use App\Models\InsentifKaryawan;
@@ -1205,60 +1206,54 @@ class LaporanController extends Controller
         return view('laporan.jenis-perawatan.index', compact('klinik','jenisPerawatan'));
     }
     public function previewJenisPerawatan(Request $request)
-    {
-        $user = auth()->user();
-        $klinikId = $request->klinik_id;
-        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
-            $klinikId = $user->kodeperusahaan;
-        }
-
-        // ✅ Cast ke array (saat pilih 1 item)
-        $jenisPerawatanIds = $request->jenis_perawatan;
-        if (is_string($jenisPerawatanIds)) {
-            $jenisPerawatanIds = [$jenisPerawatanIds];
-        }
-        $jenisPerawatanIds = $jenisPerawatanIds ?: [];
-
-        // ✅ ELOQUENT WAY dengan leftJoin + filter di callback
-        $query = MasterJenisPerawatan::select(
-            'master_jenis_perawatans.id',
-            'master_jenis_perawatans.Nama',
-            DB::raw('COALESCE(SUM(td.Biaya), 0) as total_revenue'),
-            DB::raw('COUNT(td.id) as jumlah_terjual')
-        )
-            ->leftJoin('transaksi_details as td', function ($join) use ($request, $klinikId) {
-                $join->on('master_jenis_perawatans.id', '=', 'td.JenisPerawatan')
-                    ->whereHas('transaksis', function ($q) use ($request, $klinikId) {
-                        // Filter klinik
-                        $q->when($klinikId, function ($q2) use ($klinikId) {
-                            $q2->where('KodeCabang', $klinikId);
-                        });
-                        // Filter tanggal
-                        $q->when($request->tanggal_mulai, function ($q2) use ($request) {
-                            $q2->whereDate('Tanggal', '>=', $request->tanggal_mulai);
-                        });
-                        $q->when($request->tanggal_akhir, function ($q2) use ($request) {
-                            $q2->whereDate('Tanggal', '<=', $request->tanggal_akhir);
-                        });
-                    });
-            })
-            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
-                $q->whereIn('master_jenis_perawatans.id', $jenisPerawatanIds);
-            })
-            ->groupBy('master_jenis_perawatans.id', 'master_jenis_perawatans.Nama')
-            ->orderByDesc('total_revenue')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $query->map(fn($item) => [
-                'id' => $item->id,
-                'nama_perawatan' => $item->Nama,
-                'jumlah_terjual' => (int) $item->jumlah_terjual,
-                'total_revenue' => (float) $item->total_revenue,
-            ]),
-        ]);
+{
+    $user = auth()->user();
+    $klinikId = $request->klinik_id;
+    if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+        $klinikId = $user->kodeperusahaan;
     }
+
+    // Cast ke array (saat pilih 1 item)
+    $jenisPerawatanIds = $request->jenis_perawatan;
+    if (is_string($jenisPerawatanIds)) {
+        $jenisPerawatanIds = [$jenisPerawatanIds];
+    }
+    $jenisPerawatanIds = $jenisPerawatanIds ?: [];
+    $query =TransaksiDetail::select(
+            'transaksi_details.JenisPerawatan',
+            \DB::raw('COUNT(*) as jumlah_penjualan'),
+            \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
+        )
+        ->join('Transaksis', 'Transaksis.id', '=', 'transaksi_details.IdTransaksi')
+        ->when($klinikId, function ($q) use ($klinikId) {
+            $q->where('Transaksis.KodeCabang', $klinikId);
+        })
+        ->when($request->tanggal_mulai, function ($q) use ($request) {
+            $q->whereDate('Transaksis.Tanggal', '>=', $request->tanggal_mulai);
+        })
+        ->when($request->tanggal_akhir, function ($q) use ($request) {
+            $q->whereDate('Transaksis.Tanggal', '<=', $request->tanggal_akhir);
+        })
+        ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
+            $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
+        })
+        ->groupBy('transaksi_details.JenisPerawatan')
+        ->orderByDesc('total_revenue')
+        ->get();
+    $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
+
+    return response()->json([
+        'success' => true,
+        'data' => $query->map(function ($item) use ($masterJenisPerawatan) {
+            return [
+                'id'              => $item->JenisPerawatan,
+                'nama_perawatan'  => $masterJenisPerawatan[$item->JenisPerawatan]->Nama ?? '-',
+                'jumlah_terjual'  => (int) $item->jumlah_penjualan,
+                'total_revenue'   => (float) $item->total_revenue,
+            ];
+        }),
+    ]);
+}
 
     public function downloadJenisPerawatan(Request $request)
     {
@@ -1268,30 +1263,36 @@ class LaporanController extends Controller
             $klinikId = $user->kodeperusahaan;
         }
 
+        // Cast ke array (saat pilih 1 item)
         $jenisPerawatanIds = $request->jenis_perawatan;
         if (is_string($jenisPerawatanIds)) {
             $jenisPerawatanIds = [$jenisPerawatanIds];
         }
         $jenisPerawatanIds = $jenisPerawatanIds ?: [];
 
-        $query = MasterJenisPerawatan::select(
-            'MasterJenisPerawatan.id',
-            'MasterJenisPerawatan.Nama',
-            \DB::raw('COALESCE(SUM(td.Biaya), 0) as total_revenue'),
-            \DB::raw('COUNT(td.id) as jumlah_terjual')
-        )
-            ->leftJoin('transaksi_details as td', function ($join) use ($request, $klinikId) {
-                $join->on('MasterJenisPerawatan.id', '=', 'td.JenisPerawatan')
-                    ->whereHas('transaksi', function ($q) use ($request, $klinikId) {
-                        $q->when($klinikId, fn($q2) => $q2->where('KodeCabang', $klinikId));
-                        $q->when($request->tanggal_mulai, fn($q2) => $q2->whereDate('Tanggal', '>=', $request->tanggal_mulai));
-                        $q->when($request->tanggal_akhir, fn($q2) => $q2->whereDate('Tanggal', '<=', $request->tanggal_akhir));
-                    });
+        $query = TransaksiDetail::select(
+                'transaksi_details.JenisPerawatan',
+                \DB::raw('COUNT(*) as jumlah_penjualan'),
+                \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
+            )
+            ->join('Transaksis', 'Transaksis.id', '=', 'transaksi_details.IdTransaksi')
+            ->when($klinikId, function ($q) use ($klinikId) {
+                $q->where('Transaksis.KodeCabang', $klinikId);
             })
-            ->when(!empty($jenisPerawatanIds), fn($q) => $q->whereIn('MasterJenisPerawatan.id', $jenisPerawatanIds))
-            ->groupBy('MasterJenisPerawatan.id', 'MasterJenisPerawatan.Nama')
+            ->when($request->tanggal_mulai, function ($q) use ($request) {
+                $q->whereDate('Transaksis.Tanggal', '>=', $request->tanggal_mulai);
+            })
+            ->when($request->tanggal_akhir, function ($q) use ($request) {
+                $q->whereDate('Transaksis.Tanggal', '<=', $request->tanggal_akhir);
+            })
+            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
+                $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
+            })
+            ->groupBy('transaksi_details.JenisPerawatan')
             ->orderByDesc('total_revenue')
             ->get();
+
+        $masterJenisPerawatan =MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
 
         // Info untuk Excel header
         $klinikNama = $klinikId
@@ -1311,8 +1312,18 @@ class LaporanController extends Controller
             'tanggal_akhir' => $request->tanggal_akhir,
         ];
 
+        // Sesuaikan structure data untuk export
+        $data = $query->map(function ($item) use ($masterJenisPerawatan) {
+            return [
+                'id'              => $item->JenisPerawatan,
+                'nama_perawatan'  => $masterJenisPerawatan[$item->JenisPerawatan]->Nama ?? '-',
+                'jumlah_terjual'  => (int) $item->jumlah_penjualan,
+                'total_revenue'   => (float) $item->total_revenue,
+            ];
+        });
+
         return Excel::download(
-            new JenisPerawatanExport($query, $filterInfo),
+            new JenisPerawatanExport($data, $filterInfo),
             'Laporan-Jenis-Perawatan-' . date('Y-m-d') . '.xlsx'
         );
     }
