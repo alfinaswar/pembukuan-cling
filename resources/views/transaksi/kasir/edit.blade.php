@@ -960,11 +960,13 @@
             recalculateTotal();
         });
 
-        $(function() {
-            $('.perawatan-select').each(function() {
-                let harga = $(this).find('option:selected').data('harga') ?? 0;
-                $(this).closest('tr').find('.biaya-perawatan').val(rupiahFormat(harga));
+                $(function() {
+            // ✅ Format nilai biaya perawatan yang sudah ada dari database, jangan ditimpa dengan harga default
+            $('.biaya-perawatan').each(function() {
+                let val = parseRupiah($(this).val());
+                $(this).val(rupiahFormat(val));
             });
+
             $('#body-perawatan tr').each(function(i) {
                 $(this).find('td:first').text(i + 1);
             });
