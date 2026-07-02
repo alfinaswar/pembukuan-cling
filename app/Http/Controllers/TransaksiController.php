@@ -49,7 +49,6 @@ class TransaksiController extends Controller
                 }, function ($query) use ($user) {
                     $query->where('KodeCabang', $user->kodeperusahaan);
                 })
-
                 ->latest();
             $summary = [
                 'total_omset' => (clone $data)->sum('TotalBayar'),
@@ -167,7 +166,6 @@ class TransaksiController extends Controller
 
                     return $actionButtons;
                 })
-
                 ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran'])
                 ->with(['summary' => $summary])
                 ->make(true);
@@ -177,6 +175,7 @@ class TransaksiController extends Controller
         $klinik = MasterKlinik::get();
         return view('transaksi.kasir.index', compact('shift', 'klinik'));
     }
+
     public function indexKunjungan(Request $request)
     {
         if ($request->ajax()) {
@@ -185,7 +184,6 @@ class TransaksiController extends Controller
             $searchNama = $request->input('search_nama');
 
             $data = Transaksi::with('TransaksiDetail')
-
                 ->when(!$user->hasRole('Superadmin'), function ($query) use ($kodeCabang) {
                     $query->where('KodeCabang', $kodeCabang);
                 })
@@ -233,7 +231,6 @@ class TransaksiController extends Controller
                     return '-';
                 })
                 ->addColumn('TerakhirBerkunjung', function ($row) {
-
                     $lastVisit = \Carbon\Carbon::parse($row->last_visit);
                     $now = \Carbon\Carbon::parse($row->created_at);
 
@@ -320,17 +317,16 @@ class TransaksiController extends Controller
                             </button>
                         ';
                     } else {
-
                         return '';
                     }
                 })
-
                 ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran', 'TerakhirBerkunjung'])
                 ->make(true);
         }
 
         return view('transaksi.kasir.history-pembayaran');
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -388,7 +384,6 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-
             'NamaPasien' => 'required|string|max:255',
             'JenisPasien' => 'required|in:Baru,Lama',
             'JenisPerawatan' => 'required|array|min:1',
@@ -399,7 +394,6 @@ class TransaksiController extends Controller
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => ['required', 'array', 'min:1'],
-
             'NominalBayar' => 'required|array',
             'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
@@ -423,7 +417,6 @@ class TransaksiController extends Controller
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
             'MetodePembayaran.array' => 'Metode pembayaran harus berupa array',
-
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
@@ -542,16 +535,15 @@ class TransaksiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // dd($request->all());
+        // dd($id);
         try {
             $decodedId = decrypt($id);
         } catch (\Exception $e) {
             return redirect()->route('Transaksi.index')->with('error', 'ID Transaksi tidak valid.');
         }
 
-        // 🔍 Cari data transaksi
-        $transaksi = Transaksi::findOrFail($decodedId);
-
+        $transaksi = Transaksi::with('TransaksiDetail', 'getMetodePembayaran')->findOrFail($decodedId);
+        // dd($transaksi);
         $validatedData = $request->validate([
             'Tanggal' => [
                 'required',
@@ -591,7 +583,7 @@ class TransaksiController extends Controller
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
-
+        // dd($metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran]);
         // 🔄 Update Header Transaksi
         $transaksi->update([
             'Tanggal' => $request->Tanggal,
@@ -624,6 +616,22 @@ class TransaksiController extends Controller
                         'UserDelete' => null,
                     ]);
                 }
+            }
+        }
+        if ($transaksi->getMetodePembayaran) {
+            $transaksi->getMetodePembayaran()->delete();
+        }
+        if ($request->has('MetodePembayaran') && !empty($request->MetodePembayaran)) {
+            $metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran];
+            foreach ($metodes as $key => $metode) {
+                $transaksi->getMetodePembayaran()->create([
+                    'IdTransaksi' => $transaksi->id,
+                    'MetodePembayaran' => $metode,
+                    'Nominal' => isset($request->NominalBayar[$key]) ? $request->NominalBayar[$key] : 0,
+                    'UserCreate' => auth()->user()->name,
+                    'UserUpdate' => null,
+                    'UserDelete' => null,
+                ]);
             }
         }
 
