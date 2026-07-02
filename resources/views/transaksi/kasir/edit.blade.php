@@ -960,11 +960,14 @@
             recalculateTotal();
         });
 
-                $(function() {
-            // ✅ Format nilai biaya perawatan yang sudah ada dari database, jangan ditimpa dengan harga default
+                        $(function() {
+            // ✅ Handle format decimal dari database (150000.00 -> 150000)
             $('.biaya-perawatan').each(function() {
-                let val = parseRupiah($(this).val());
-                $(this).val(rupiahFormat(val));
+                let rawVal = $(this).val();
+                // Konversi decimal ke number, lalu bulatkan ke integer
+                let numVal = parseFloat(rawVal) || 0;
+                let intVal = Math.round(numVal);
+                $(this).val(rupiahFormat(intVal));
             });
 
             $('#body-perawatan tr').each(function(i) {
@@ -973,7 +976,9 @@
 
             let adminVal = $('#biaya_admin').val();
             if (adminVal && !adminVal.includes('Rp')) {
-                $('#biaya_admin').val(rupiahFormat(adminVal));
+                // Handle juga untuk biaya admin
+                let adminNum = parseFloat(adminVal) || 0;
+                $('#biaya_admin').val(rupiahFormat(Math.round(adminNum)));
             }
             recalculateTotal();
         });
