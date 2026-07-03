@@ -21,16 +21,13 @@ class TransaksiController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $kodeCabang = auth()->user()->kodeperusahaan;
+            $user = auth()->user();
+            $kodeCabang = $user->kodeperusahaan;
             $tanggalMulai = $request->input('tanggal_mulai');
             $tanggalAkhir = $request->input('tanggal_akhir');
             $shiftId = $request->input('shift');
-            // dd($shiftId);
-            $user = auth()->user();
+
             $data = Transaksi::with('TransaksiDetail')
-                ->when(!$user->hasRole('Superadmin'), function ($query) use ($kodeCabang) {
-                    $query->where('KodeCabang', $kodeCabang);
-                })
                 ->when(!$tanggalMulai && !$tanggalAkhir, function ($query) {
                     $query->whereDate('created_at', today());
                 })
@@ -43,19 +40,24 @@ class TransaksiController extends Controller
                 ->when($shiftId, function ($query) use ($shiftId) {
                     $query->where('Shift', $shiftId);
                 })
-                ->when($request->filled('klinik') && $request->input('klinik') != '', function ($query) use ($request) {
-                    $klinikId = $request->input('klinik');
-                    $query->where('KodeCabang', $klinikId);
-                }, function ($query) use ($user) {
-                    $query->where('KodeCabang', $user->kodeperusahaan);
+                ->when($user->hasRole('Superadmin'), function ($query) use ($request) {
+                    // Jika Superadmin, boleh filter kode cabang dari input klinik (dropdown)
+                    if ($request->filled('klinik') && $request->input('klinik') != '') {
+                        $query->where('KodeCabang', $request->input('klinik'));
+                    }
+                }, function ($query) use ($kodeCabang) {
+                    // Selain Superadmin, pakai dari user login
+                    $query->where('KodeCabang', $kodeCabang);
                 })
                 ->latest();
+
             $summary = [
                 'total_omset' => (clone $data)->sum('TotalBayar'),
                 'pasien_baru' => (clone $data)->where('JenisPasien', 'Baru')->count(),
                 'pasien_lama' => (clone $data)->where('JenisPasien', 'Lama')->count(),
                 'pasien_total' => (clone $data)->count(),
             ];
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('TotalBayar', function ($row) {
@@ -535,7 +537,7 @@ class TransaksiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // dd($id);
+        // dd($request->all());
         try {
             $decodedId = decrypt($id);
         } catch (\Exception $e) {
@@ -548,7 +550,16 @@ class TransaksiController extends Controller
             'Tanggal' => [
                 'required',
                 'date',
+                function ($attribute, $value, $fail) {
+                    $inputDate = strtotime($value);
+                    $today = strtotime(date('Y-m-d'));
+                    // Hanya validasi supaya tidak bisa memilih tanggal ke depan (future date)
+                    if ($inputDate > $today) {
+                        $fail('Tidak boleh memilih tanggal ke depan (future date).');
+                    }
+                }
             ],
+
             'NamaPasien' => 'required|string|max:255',
             'JenisPasien' => 'required|in:Baru,Lama',
             'JenisPerawatan' => 'required|array|min:1',
@@ -558,7 +569,10 @@ class TransaksiController extends Controller
             'Perawat' => 'required|exists:users,id',
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
-            'MetodePembayaran' => 'required',
+            'MetodePembayaran' => ['required', 'array', 'min:1'],
+            'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id', // ensure no null values, and exists in master
+            'NominalBayar' => 'required|array',
+            'NominalBayar.*' => 'required|numeric|min:1', // must be >=1, not null or zero
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
@@ -578,11 +592,20 @@ class TransaksiController extends Controller
             'Kasir.exists' => 'Kasir tidak valid',
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
-            'MetodePembayaran.required' => 'Pilih metode pembayaran',
-            'MetodePembayaran.exists' => 'Metode pembayaran tidak valid',
+            'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
+            'MetodePembayaran.array' => 'Metode pembayaran harus berupa array',
+            'MetodePembayaran.*.required' => 'Metode pembayaran tidak boleh kosong',
+            'MetodePembayaran.*.integer' => 'Metode pembayaran tidak boleh kosong',
+            'MetodePembayaran.*.exists' => 'Metode pembayaran tidak valid',
+            'NominalBayar.required' => 'Minimal satu nominal pembayaran harus diisi',
+            'NominalBayar.array' => 'Nominal pembayaran harus berupa array',
+            'NominalBayar.*.required' => 'Nominal pembayaran tidak boleh kosong atau nol',
+            'NominalBayar.*.numeric' => 'Nominal pembayaran harus angka',
+            'NominalBayar.*.min' => 'Nominal pembayaran harus lebih dari 0',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
+
         // dd($metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran]);
         // 🔄 Update Header Transaksi
         $transaksi->update([
