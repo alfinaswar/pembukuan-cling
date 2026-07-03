@@ -1224,15 +1224,15 @@ class LaporanController extends Controller
             \DB::raw('COUNT(*) as jumlah_penjualan'),
             \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
         )
-        ->join('Transaksis', 'Transaksis.id', '=', 'transaksi_details.IdTransaksi')
+        ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
         ->when($klinikId, function ($q) use ($klinikId) {
-            $q->where('Transaksis.KodeCabang', $klinikId);
+            $q->where('transaksis.KodeCabang', $klinikId);
         })
         ->when($request->tanggal_mulai, function ($q) use ($request) {
-            $q->whereDate('Transaksis.Tanggal', '>=', $request->tanggal_mulai);
+            $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai);
         })
         ->when($request->tanggal_akhir, function ($q) use ($request) {
-            $q->whereDate('Transaksis.Tanggal', '<=', $request->tanggal_akhir);
+            $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir);
         })
         ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
             $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
@@ -1275,15 +1275,15 @@ class LaporanController extends Controller
                 \DB::raw('COUNT(*) as jumlah_penjualan'),
                 \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
             )
-            ->join('Transaksis', 'Transaksis.id', '=', 'transaksi_details.IdTransaksi')
+            ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
             ->when($klinikId, function ($q) use ($klinikId) {
-                $q->where('Transaksis.KodeCabang', $klinikId);
+                $q->where('transaksis.KodeCabang', $klinikId);
             })
             ->when($request->tanggal_mulai, function ($q) use ($request) {
-                $q->whereDate('Transaksis.Tanggal', '>=', $request->tanggal_mulai);
+                $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai);
             })
             ->when($request->tanggal_akhir, function ($q) use ($request) {
-                $q->whereDate('Transaksis.Tanggal', '<=', $request->tanggal_akhir);
+                $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir);
             })
             ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
                 $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);

