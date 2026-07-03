@@ -117,7 +117,7 @@
                             </div>
                         </div>
                         <p class="text-center text-muted mt-4 mb-0">
-                            &copy; <span data-current-year>{{ date('Y') }}</span> Klinik Cling Dental
+                            &copy; <span data-current-year>{{ date('Y') }}</span> Klinik Cling Dental. All rights reserved.
                         </p>
                     </div>
                 </div>
