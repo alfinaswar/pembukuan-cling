@@ -18,5 +18,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            ~/deploy-production.sh
+            /home/clingdental_kasirftp/deploy/deploy-production.sh
+
+
 
