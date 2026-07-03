@@ -79,7 +79,6 @@ class LoginController extends Controller
         $user = Auth::user();
         if ($user) {
             $user->shift = null;
-            $user->shift_selected_at = null;
             $user->save();
             $request->session()->forget('shift');
         }
