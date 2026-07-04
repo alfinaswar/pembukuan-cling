@@ -584,7 +584,7 @@
 
                             <!-- Action buttons -->
                             <div class="d-flex justify-content-end gap-2 mt-3">
-                                <a href="{{ route('MasterShift.index') }}" class="btn-cancel">
+                                <a href="{{ route('Transaksi.index') }}" class="btn-cancel">
                                     <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
                                 </a>
                                 <button type="submit" class="btn-save">
