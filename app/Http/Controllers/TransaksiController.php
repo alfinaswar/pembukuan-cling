@@ -394,7 +394,22 @@ class TransaksiController extends Controller
             'Perawat' => 'required|exists:users,id',
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
-            'MetodePembayaran' => ['required', 'array', 'min:1'],
+            'MetodePembayaran' => [
+                'required',
+                'array',
+                'min:1',
+                function ($attribute, $value, $fail) {
+                    if (is_array($value)) {
+                        foreach ($value as $item) {
+                            if (is_null($item) || $item === '') {
+                                $fail('Metode pembayaran tidak boleh kosong.');
+                                break;
+                            }
+                        }
+                    }
+                }
+            ],
+
             'NominalBayar' => 'required|array',
             'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',

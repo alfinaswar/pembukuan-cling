@@ -660,8 +660,7 @@
                                                                 @endforeach
                                                             </select>
                                                             @error('MetodePembayaran.' . $i)
-                                                                <span
-                                                                    class="invalid-feedback d-block">{{ $message }}</span>
+                                                                <span class="invalid-feedback d-block">{{ $message }}</span>
                                                             @enderror
                                                         </td>
                                                         <td style="width: 180px; min-width: 180px; max-width: 180px;">
@@ -671,8 +670,7 @@
                                                                 value="{{ isset($oldNominal[$i]) ? number_format($oldNominal[$i], 0, ',', '.') : '' }}"
                                                                 placeholder="Nominal Bayar" required>
                                                             @error('NominalBayar.' . $i)
-                                                                <span
-                                                                    class="invalid-feedback d-block">{{ $message }}</span>
+                                                                <span class="invalid-feedback d-block">{{ $message }}</span>
                                                             @enderror
                                                         </td>
                                                         <td class="text-center"
@@ -694,13 +692,14 @@
                                                         </td>
                                                     </tr>
                                                 @endfor
+
                                             </tbody>
                                         </table>
 
                                     </div>
                                     <button type="button" class="btn btn-outline-primary btn-sm mt-2"
                                         id="addPembayaranRow">
-                                        <i data-lucide="plus" style="width:15px;height:15px;"></i> Tambah Baris
+                                        <i data-lucide="plus" style="width:15px;height:15px;"></i> Tambah Metode Pembayaran
                                     </button>
 
                                     <hr class="cara-bayar-divider mt-3 mb-3">
@@ -902,13 +901,15 @@
             <tr>
                 <td class="text-center align-middle"></td>
                 <td>
-                    <select class="form-control perawatan-select" name="JenisPerawatan[${idx}][id]">
+                    <select class="form-control perawatan-select" name="JenisPerawatan[${idx}][id]" required>
                         ${selectOpt}
                     </select>
+
                 </td>
                 <td>
-                    <input type="text" class="form-control biaya-perawatan bg-light" name="JenisPerawatan[${idx}][Biaya]" placeholder="Rp 0">
+                    <input type="text" class="form-control biaya-perawatan bg-light" name="JenisPerawatan[${idx}][Biaya]" placeholder="Rp 0" required>
                 </td>
+
                 <td>
                     <input type="text" class="form-control" name="JenisPerawatan[${idx}][Keterangan]" placeholder="Keterangan">
                 </td>
@@ -1077,7 +1078,7 @@
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                                     <td>
-                                        <select name="MetodePembayaran[]" class="form-select">
+                                        <select name="MetodePembayaran[]" class="form-select" required>
                                             <option value="">-- Pilih Metode --</option>
                                             @foreach ($MetodePembayaran as $mp)
                                                 <option value="{{ $mp->id }}">{{ $mp->Nama }}</option>
@@ -1085,13 +1086,15 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" min="0" name="NominalBayar[]" class="form-control nominal-input-bayar currency-format" placeholder="Nominal">
+                                        <input type="text" min="0" name="NominalBayar[]" class="form-control nominal-input-bayar currency-format" placeholder="Nominal" required>
                                     </td>
+
                                     <td class="text-center">
                                         <button type="button" class="btn btn-sm btn-danger remove-row" title="Hapus Baris">
-                                            <i data-lucide="trash" style="width:16px;height:16px;"></i>
+                                            <i class="ti ti-trash" style="font-size:16px;"></i>
                                         </button>
                                     </td>
+
                                 `;
                 document.querySelector('#pembayaran-table tbody').appendChild(tr);
 
