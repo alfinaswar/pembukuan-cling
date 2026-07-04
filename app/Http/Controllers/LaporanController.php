@@ -20,12 +20,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
-
 class LaporanController extends Controller
 {
     public function indexUmum(Request $request)
     {
-
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->get();
         $kasir = User::role('Kasir / Resepsionis')->get();
@@ -42,27 +40,27 @@ class LaporanController extends Controller
         }
 
         // Total Biaya
-        $totalBiaya = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $totalBiaya = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->sum('TotalBayar');
         // jumlah total pasien
-        $totalPasien = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $totalPasien = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->count();
         // Pasien Baru & Lama
-        $pasienBaru = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $pasienBaru = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->where('JenisPasien', 'Baru')
             ->count();
 
-        $pasienLama = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $pasienLama = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->where('JenisPasien', 'Lama')
             ->count();
 
         // Chart Payment
         $paymentChartData = Transaksi::with('getMetodePembayaran')
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->get();
 
@@ -85,12 +83,12 @@ class LaporanController extends Controller
         // Transaksi Terbaru
         $transaksiTerbaru = Transaksi::with(['getPerawat'])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
             ->latest()
             ->get();
 
         // Jenis Perawatan Terbanyak
-        $jenisPerawatanTerbanyak = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $jenisPerawatanTerbanyak = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', auth()->user()->kodeperusahaan)
             ->with([
                 'TransaksiDetail' => function ($q) {
@@ -107,7 +105,7 @@ class LaporanController extends Controller
                 return [
                     'JenisPerawatan' => $items->first()->MasterJenisPerawatan->Nama ?? '-',
                     'jumlah' => $items->count(),
-                    'jenis_perawatan_id' => $items->first()->JenisPerawatan, // tambahkan ID sebagai tiebreaker
+                    'jenis_perawatan_id' => $items->first()->JenisPerawatan,  // tambahkan ID sebagai tiebreaker
                 ];
             })
             ->sort(function ($a, $b) {
@@ -118,7 +116,6 @@ class LaporanController extends Controller
             })
             ->take(5)
             ->values();
-
 
         $data = [
             'dokter' => $dokter,
@@ -163,26 +160,26 @@ class LaporanController extends Controller
         }
 
         // Total Biaya
-        $totalBiaya = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $totalBiaya = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->sum('TotalBayar');
-        $totalPasien = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $totalPasien = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->count();
-        $pasienBaru = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $pasienBaru = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Baru')
             ->count();
 
-        $pasienLama = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $pasienLama = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Lama')
             ->count();
 
         // PERBAIKAN DI SINI: Ganti auth()->user()->kodeperusahaan menjadi $kodeCabang
         $paymentChartData = Transaksi::with('getMetodePembayaran')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('KodeCabang', $kodeCabang) // ✅ SUDAH BENAR
+            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->where('KodeCabang', $kodeCabang)  // ✅ SUDAH BENAR
             ->get();
 
         // Ambil data label dan total pembayaran dari relasi getMetodePembayaran
@@ -201,15 +198,14 @@ class LaporanController extends Controller
         $paymentChartLabels = array_keys($metodePembayaranTotals);
         $paymentChartTotals = array_values($metodePembayaranTotals);
 
-
         $transaksiTerbaru = Transaksi::with(['getPerawat'])
             ->where('KodeCabang', $kodeCabang)
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
             ->latest()
             ->get();
 
         // Jenis Perawatan Terbanyak
-        $jenisPerawatanTerbanyak = Transaksi::whereBetween('created_at', [$startDate, $endDate])
+        $jenisPerawatanTerbanyak = Transaksi::whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->with([
                 'TransaksiDetail' => function ($q) {
@@ -464,7 +460,6 @@ class LaporanController extends Controller
             'tindakan' => ['label' => 'Tindakan Odontektomi', 'badge' => 'bg-warning text-white', 'order' => 5],
             'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning text-white', 'order' => 6],
             'target_tercapai' => ['label' => 'Target klinik tercapai', 'badge' => 'bg-success text-white', 'order' => 7],
-
         ];
 
         // Ambil sum per JenisRule sekali query termasuk insentif_hari_libur
@@ -665,7 +660,6 @@ class LaporanController extends Controller
             'pasien_lama' => ['label' => 'Shift dengan 8 Pasien Lama', 'badge' => 'bg-info', 'order' => 2],
             'insentif_hari_libur' => ['label' => 'Insentif Hari Libur', 'badge' => 'bg-warning', 'order' => 3],
             'target_tercapai' => ['label' => 'Target Tercapai', 'badge' => 'bg-success', 'order' => 4],
-
         ];
 
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
@@ -1014,7 +1008,6 @@ class LaporanController extends Controller
         $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
         $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
 
-
         $perawatId = $validated['perawat'] ?? null;
         $shift = $validated['shift'] ?? null;
         $user = auth()->user();
@@ -1041,9 +1034,7 @@ class LaporanController extends Controller
             'billingByPerawat' => $billingByPerawat,
             // Format tanggal Indonesia: "dd/mm/yyyy - dd/mm/yyyy"
             'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
-
             'shift' => $billingByPerawat->first()?->Shift ?? null,
-
         ]);
     }
 
@@ -1063,14 +1054,14 @@ class LaporanController extends Controller
         }
 
         $query = Transaksi::with([
-                'getCabang',
-                'TransaksiDetail',
-                'getMetodePembayaran.getMetodeBayar',
-                'getShift',
-                'getDokter',
-                'getPerawat',
-                'getResepsionis',
-            ])
+            'getCabang',
+            'TransaksiDetail',
+            'getMetodePembayaran.getMetodeBayar',
+            'getShift',
+            'getDokter',
+            'getPerawat',
+            'getResepsionis',
+        ])
             ->when($klinikId, function ($q) use ($klinikId) {
                 $q->where('KodeCabang', $klinikId);
             })
@@ -1135,15 +1126,13 @@ class LaporanController extends Controller
                     // Pakai 'dd' (Dokter) atau 'dt' (Perawat) sebagai petugas
                     'petugas' =>
                         // Tampilkan dokter, perawat, dan resepsionis dengan label dan <br>
-                        (isset($item->getDokter) && $item->getDokter ? 'Dokter: ' . $item->getDokter->name . '<br>' : '') .
-                        (isset($item->getPerawat) && $item->getPerawat ? 'Perawat: ' . $item->getPerawat->name . '<br>' : '') .
-                        (isset($item->getResepsionis) && $item->getResepsionis ? 'Resepsionis: ' . $item->getResepsionis->name : '')
-                        ?: '-',
-
+                        (isset($item->getDokter) && $item->getDokter ? 'Dokter: ' . $item->getDokter->name . '<br>' : '')
+                        . (isset($item->getPerawat) && $item->getPerawat ? 'Perawat: ' . $item->getPerawat->name . '<br>' : '')
+                        . (isset($item->getResepsionis) && $item->getResepsionis ? 'Resepsionis: ' . $item->getResepsionis->name : '')
+                            ?: '-',
                     'shift' => $item->getShift?->Nama ?? '-',
                     'aksi' => null
                 ];
-
             })
         ]);
     }
@@ -1161,7 +1150,6 @@ class LaporanController extends Controller
         }
 
         $query = Transaksi::with([
-
             'getCabang',
             'TransaksiDetail.MasterJenisPerawatan',
             'getMetodePembayaran.getMetodeBayar',
@@ -1199,61 +1187,63 @@ class LaporanController extends Controller
             'Laporan-Transaksi-' . date('Y-m-d') . '.xlsx'
         );
     }
+
     public function indexJenisPerawatan(Request $request)
     {
         $klinik = MasterKlinik::get();
         $jenisPerawatan = MasterJenisPerawatan::get();
-        return view('laporan.jenis-perawatan.index', compact('klinik','jenisPerawatan'));
-    }
-    public function previewJenisPerawatan(Request $request)
-{
-    $user = auth()->user();
-    $klinikId = $request->klinik_id;
-    if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
-        $klinikId = $user->kodeperusahaan;
+        return view('laporan.jenis-perawatan.index', compact('klinik', 'jenisPerawatan'));
     }
 
-    // Cast ke array (saat pilih 1 item)
-    $jenisPerawatanIds = $request->jenis_perawatan;
-    if (is_string($jenisPerawatanIds)) {
-        $jenisPerawatanIds = [$jenisPerawatanIds];
-    }
-    $jenisPerawatanIds = $jenisPerawatanIds ?: [];
-    $query =TransaksiDetail::select(
+    public function previewJenisPerawatan(Request $request)
+    {
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        // Cast ke array (saat pilih 1 item)
+        $jenisPerawatanIds = $request->jenis_perawatan;
+        if (is_string($jenisPerawatanIds)) {
+            $jenisPerawatanIds = [$jenisPerawatanIds];
+        }
+        $jenisPerawatanIds = $jenisPerawatanIds ?: [];
+        $query = TransaksiDetail::select(
             'transaksi_details.JenisPerawatan',
             \DB::raw('COUNT(*) as jumlah_penjualan'),
             \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
         )
-        ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
-        ->when($klinikId, function ($q) use ($klinikId) {
-            $q->where('transaksis.KodeCabang', $klinikId);
-        })
-        ->when($request->tanggal_mulai, function ($q) use ($request) {
-            $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai);
-        })
-        ->when($request->tanggal_akhir, function ($q) use ($request) {
-            $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir);
-        })
-        ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
-            $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
-        })
-        ->groupBy('transaksi_details.JenisPerawatan')
-        ->orderByDesc('total_revenue')
-        ->get();
-    $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
+            ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
+            ->when($klinikId, function ($q) use ($klinikId) {
+                $q->where('transaksis.KodeCabang', $klinikId);
+            })
+            ->when($request->tanggal_mulai, function ($q) use ($request) {
+                $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai);
+            })
+            ->when($request->tanggal_akhir, function ($q) use ($request) {
+                $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir);
+            })
+            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
+                $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
+            })
+            ->groupBy('transaksi_details.JenisPerawatan')
+            ->orderByDesc('total_revenue')
+            ->get();
+        $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
 
-    return response()->json([
-        'success' => true,
-        'data' => $query->map(function ($item) use ($masterJenisPerawatan) {
-            return [
-                'id'              => $item->JenisPerawatan,
-                'nama_perawatan'  => $masterJenisPerawatan[$item->JenisPerawatan]->Nama ?? '-',
-                'jumlah_terjual'  => (int) $item->jumlah_penjualan,
-                'total_revenue'   => (float) $item->total_revenue,
-            ];
-        }),
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'data' => $query->map(function ($item) use ($masterJenisPerawatan) {
+                return [
+                    'id' => $item->JenisPerawatan,
+                    'nama_perawatan' => $masterJenisPerawatan[$item->JenisPerawatan]->Nama ?? '-',
+                    'jumlah_terjual' => (int) $item->jumlah_penjualan,
+                    'total_revenue' => (float) $item->total_revenue,
+                ];
+            }),
+        ]);
+    }
 
     public function downloadJenisPerawatan(Request $request)
     {
@@ -1271,10 +1261,10 @@ class LaporanController extends Controller
         $jenisPerawatanIds = $jenisPerawatanIds ?: [];
 
         $query = TransaksiDetail::select(
-                'transaksi_details.JenisPerawatan',
-                \DB::raw('COUNT(*) as jumlah_penjualan'),
-                \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
-            )
+            'transaksi_details.JenisPerawatan',
+            \DB::raw('COUNT(*) as jumlah_penjualan'),
+            \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
+        )
             ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
             ->when($klinikId, function ($q) use ($klinikId) {
                 $q->where('transaksis.KodeCabang', $klinikId);
@@ -1292,7 +1282,7 @@ class LaporanController extends Controller
             ->orderByDesc('total_revenue')
             ->get();
 
-        $masterJenisPerawatan =MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
+        $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
 
         // Info untuk Excel header
         $klinikNama = $klinikId
@@ -1302,7 +1292,8 @@ class LaporanController extends Controller
         $jenisPerawatanNama = 'Semua';
         if (!empty($jenisPerawatanIds)) {
             $jenisPerawatanNama = MasterJenisPerawatan::whereIn('id', $jenisPerawatanIds)
-                ->pluck('Nama')->implode(', ');
+                ->pluck('Nama')
+                ->implode(', ');
         }
 
         $filterInfo = [
@@ -1315,10 +1306,10 @@ class LaporanController extends Controller
         // Sesuaikan structure data untuk export
         $data = $query->map(function ($item) use ($masterJenisPerawatan) {
             return [
-                'id'              => $item->JenisPerawatan,
-                'nama_perawatan'  => $masterJenisPerawatan[$item->JenisPerawatan]->Nama ?? '-',
-                'jumlah_terjual'  => (int) $item->jumlah_penjualan,
-                'total_revenue'   => (float) $item->total_revenue,
+                'id' => $item->JenisPerawatan,
+                'nama_perawatan' => $masterJenisPerawatan[$item->JenisPerawatan]->Nama ?? '-',
+                'jumlah_terjual' => (int) $item->jumlah_penjualan,
+                'total_revenue' => (float) $item->total_revenue,
             ];
         });
 
