@@ -29,13 +29,13 @@ class TransaksiController extends Controller
 
             $data = Transaksi::with('TransaksiDetail')
                 ->when(!$tanggalMulai && !$tanggalAkhir, function ($query) {
-                    $query->whereDate('created_at', today());
+                    $query->whereDate('Tanggal', today());
                 })
                 ->when($tanggalMulai, function ($query) use ($tanggalMulai) {
-                    $query->whereDate('created_at', '>=', $tanggalMulai);
+                    $query->whereDate('Tanggal', '>=', $tanggalMulai);
                 })
                 ->when($tanggalAkhir, function ($query) use ($tanggalAkhir) {
-                    $query->whereDate('created_at', '<=', $tanggalAkhir);
+                    $query->whereDate('Tanggal', '<=', $tanggalAkhir);
                 })
                 ->when($shiftId, function ($query) use ($shiftId) {
                     $query->where('Shift', $shiftId);
@@ -46,7 +46,6 @@ class TransaksiController extends Controller
                         $query->where('KodeCabang', $request->input('klinik'));
                     }
                 }, function ($query) use ($kodeCabang) {
-                    // Selain Superadmin, pakai dari user login
                     $query->where('KodeCabang', $kodeCabang);
                 })
                 ->latest();
