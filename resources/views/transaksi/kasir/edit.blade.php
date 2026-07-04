@@ -624,7 +624,7 @@
                             </div>
                         </div>
 
-                        <!-- Metode Pembayaran -->
+                                               <!-- Metode Pembayaran -->
                         <div class="col-12">
                             <div class="card mb-0">
                                 <div class="card-body py-3 px-4">
@@ -646,20 +646,26 @@
                                                     $oldPembayaran = old('MetodePembayaran');
                                                     $oldNominal = old('NominalBayar');
                                                     // Gunakan data existing jika tidak ada old input
-                                                    $pembayarans =
-                                                        $oldPembayaran ?: $transaksi->getMetodePembayaran ?? [];
+                                                    $pembayarans = $oldPembayaran ?: ($transaksi->getMetodePembayaran ?? []);
                                                     $barisPembayaran = max(1, count($pembayarans));
                                                 @endphp
                                                 @for ($i = 0; $i < $barisPembayaran; $i++)
                                                     @php
-                                                        $metodeId = isset($oldPembayaran[$i])
-                                                            ? $oldPembayaran[$i]
-                                                            : $pembayarans[$i]->id_metode_pembayaran ??
-                                                                ($pembayarans[$i]->MetodePembayaran ?? '');
-                                                        $nominalVal = isset($oldNominal[$i])
-                                                            ? $oldNominal[$i]
-                                                            : $pembayarans[$i]->Nominal;
-                                                        // dd($nominalVal);
+                                                        $metodeId = '';
+                                                        $nominalVal = 0;
+
+                                                        // Cek apakah ada data dari old input atau data existing
+                                                        if (isset($oldPembayaran[$i])) {
+                                                            $metodeId = $oldPembayaran[$i];
+                                                        } elseif (isset($pembayarans[$i])) {
+                                                            $metodeId = $pembayarans[$i]->id_metode_pembayaran ?? ($pembayarans[$i]->MetodePembayaran ?? '');
+                                                        }
+
+                                                        if (isset($oldNominal[$i])) {
+                                                            $nominalVal = $oldNominal[$i];
+                                                        } elseif (isset($pembayarans[$i])) {
+                                                            $nominalVal = $pembayarans[$i]->Nominal ?? 0;
+                                                        }
                                                     @endphp
                                                     <tr>
                                                         <td style="width: 240px; min-width: 240px; max-width: 240px;">
@@ -683,7 +689,8 @@
                                                             <input type="text" min="0" name="NominalBayar[]"
                                                                 class="form-control nominal-input-bayar currency-format @error('NominalBayar.' . $i) is-invalid @enderror"
                                                                 style="width: 100%; min-width: 100%; max-width: 100%;"
-                                                                value="{{ number_format($nominalVal, 2, ',', '.') }}"
+                                                                {{-- Tambahan: Jika nominalVal kosong/0, biarkan input kosong agar tidak memunculkan "0,00" --}}
+                                                                value="{{ $nominalVal ? number_format($nominalVal, 2, ',', '.') : '' }}"
                                                                 placeholder="Nominal Bayar">
                                                             @error('NominalBayar.' . $i)
                                                                 <span

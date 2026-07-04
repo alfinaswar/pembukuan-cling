@@ -515,8 +515,9 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
-        $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
+        $perawat = User::role('Perawat')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
+        $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
+
 
         // dd($transaksi);
         return view('transaksi.kasir.edit', compact(
@@ -545,7 +546,6 @@ class TransaksiController extends Controller
         }
 
         $transaksi = Transaksi::with('TransaksiDetail', 'getMetodePembayaran')->findOrFail($decodedId);
-        // dd($transaksi);
         $validatedData = $request->validate([
             'Tanggal' => [
                 'required',
@@ -553,7 +553,6 @@ class TransaksiController extends Controller
                 function ($attribute, $value, $fail) {
                     $inputDate = strtotime($value);
                     $today = strtotime(date('Y-m-d'));
-                    // Hanya validasi supaya tidak bisa memilih tanggal ke depan (future date)
                     if ($inputDate > $today) {
                         $fail('Tidak boleh memilih tanggal ke depan (future date).');
                     }
@@ -572,7 +571,7 @@ class TransaksiController extends Controller
             'MetodePembayaran' => ['required', 'array', 'min:1'],
             'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id', // ensure no null values, and exists in master
             'NominalBayar' => 'required|array',
-            'NominalBayar.*' => 'required|numeric|min:1', // must be >=1, not null or zero
+            'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
