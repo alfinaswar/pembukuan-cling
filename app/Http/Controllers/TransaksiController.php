@@ -378,14 +378,13 @@ class TransaksiController extends Controller
                 function ($attribute, $value, $fail) {
                     $inputDate = strtotime($value);
                     $today = strtotime(date('Y-m-d'));
-                    if ($inputDate < $today) {
-                        $fail('Tidak boleh memilih tanggal ke belakang (backdate).');
-                    }
+                    // Mengizinkan backdate, cukup validasi tidak bisa ke depan (future date)
                     if ($inputDate > $today) {
                         $fail('Tidak boleh memilih tanggal ke depan (future date).');
                     }
                 }
             ],
+
             'NamaPasien' => 'required|string|max:255',
             'JenisPasien' => 'required|in:Baru,Lama',
             'JenisPerawatan' => 'required|array|min:1',
