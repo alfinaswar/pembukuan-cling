@@ -29,7 +29,6 @@
             </a>
         </div>
 
-
         <!-- Content Card -->
         <div class="row">
             <div class="col-12">
@@ -86,25 +85,26 @@
                                                         @endphp
                                                         {{ $bulanList[(int) $target->Bulan] ?? $target->Bulan }}
                                                     </td>
-
                                                     <td>Rp.{{ number_format($target->BesarTarget, 0, ',', '.') }}</td>
                                                     <td class="text-center">
-                                                        <!-- Placeholder for actions (edit/delete) -->
+                                                        <!-- Link Edit -->
                                                         <a href="{{ route('Klinik.edit-target', encrypt($target->id)) }}"
-                                                            class="btn btn-sm btn-warning">
-                                                            <i class="ti ti-edit"></i>
+                                                            class="btn btn-sm btn-warning me-1">
+                                                            <i class="ti ti-edit"></i> Edit
                                                         </a>
-
-                                                        <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                                            data-id="{{ $target->id }}">
-                                                            <i class="ti ti-trash"></i>
-                                                        </button>
+                                                        <!-- Link Hapus -->
+                                                        <a href="javascript:void(0);"
+                                                           class="btn btn-sm btn-danger btn-delete-target"
+                                                           data-id="{{ $target->id }}"
+                                                           data-nama="{{ $bulanList[(int) $target->Bulan] ?? $target->Bulan }} {{ $target->Tahun }}">
+                                                            <i class="ti ti-trash"></i> Hapus
+                                                        </a>
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="4" class="text-center text-muted">Tidak ada data Target
+                                                <td colspan="5" class="text-center text-muted">Tidak ada data Target
                                                     Capaian.</td>
                                             </tr>
                                         @endif
@@ -122,4 +122,54 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <!-- SweetAlert2 -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.btn-delete-target').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var targetId = this.getAttribute('data-id');
+                        var targetNama = this.getAttribute('data-nama') || '';
+
+                        Swal.fire({
+                            title: 'Yakin hapus data?',
+                            html: "<div>Anda yakin ingin menghapus target capaian:<br><b>" + targetNama + "</b>?</div>",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#e3342f',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Ya, Hapus!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Kirim request DELETE ke route hapus target yang baru
+                                fetch("{{ route('Klinik.delete-target', ['id' => '__ID__']) }}".replace('__ID__', encodeURIComponent(targetId)), {
+                                    method: "DELETE",
+                                    headers: {
+                                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                        "Accept": "application/json"
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.status === 200) {
+                                        Swal.fire('Berhasil!', data.message, 'success').then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire('Gagal!', data.message || 'Terjadi kesalahan saat menghapus data.', 'error');
+                                    }
+                                })
+                                .catch(() => {
+                                    Swal.fire('Gagal!', 'Terjadi kesalahan koneksi.', 'error');
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+    @endpush
 @endsection

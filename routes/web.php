@@ -62,6 +62,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         //
         Route::get('/target-capaian/{id}', [MasterKlinikController::class, 'targetCapaian'])->name('Klinik.target-capaian');
+        Route::delete('/delete-target/{id}', [MasterKlinikController::class, 'deleteTarget'])->name('Klinik.delete-target');
         Route::get('/tambah-target/{id}', [MasterKlinikController::class, 'buatTarget'])->name('Klinik.tambah-target');
         Route::post('/store/{id}', [MasterKlinikController::class, 'storeTarget'])->name('Klinik.simpan-target');
         Route::get('/show/{id}', [MasterKlinikController::class, 'showTarget'])->name('Klinik.show');

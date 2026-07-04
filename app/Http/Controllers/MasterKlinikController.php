@@ -264,4 +264,25 @@ class MasterKlinikController extends Controller
 
         return response()->json(['status' => 200, 'message' => 'Master klinik berhasil dihapus']);
     }
+    public function deleteTarget($id)
+    {
+        // dd($id);
+        // $id = decrypt($id);
+        $target = TargetCapaian::find($id);
+        if (!$target) {
+            return response()->json(['status' => 404, 'message' => 'Data tidak ditemukan']);
+        }
+        $target->UserDelete = auth()->user()->name ?? null;
+        $target->save();
+
+        if (function_exists('activity')) {
+            activity('target-capaian-klinik')
+                ->causedBy(auth()->user()->id ?? null)
+                ->withProperties(['ip' => request()->ip()])
+                ->log('Menghapus target capaian: ' . $target->id);
+        }
+
+        $target->delete();
+        return response()->json(['status' => 200, 'message' => 'Target capaian berhasil dihapus']);
+    }
 }
