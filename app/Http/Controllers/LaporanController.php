@@ -381,7 +381,7 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
-            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
@@ -412,11 +412,11 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_baru')
             ->get()
-            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) {
                 $first = $group->first();
                 return [
-                    'tanggal' => $first->Tanggal->format('Y-m-d'),
+                    'tanggal' => $first->Tanggal,
                     'jumlah' => $group->count(),
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -430,11 +430,11 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
-            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
-                    'tanggal' => $first->Tanggal->format('Y-m-d'),
+                    'tanggal' => $first->Tanggal,
                     'jumlah' => $countpasienlama,
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -636,7 +636,7 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
-            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
