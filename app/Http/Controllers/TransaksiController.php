@@ -383,7 +383,6 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-
             'NamaPasien' => 'required|string|max:255',
             'JenisPasien' => 'required|in:Baru,Lama',
             'JenisPerawatan' => 'required|array|min:1',
@@ -408,7 +407,6 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-
             'NominalBayar' => 'required|array',
             'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
@@ -462,6 +460,7 @@ class TransaksiController extends Controller
                 ) {
                     $transaksi->TransaksiDetail()->create([
                         'IdTransaksi' => $transaksi->id,
+                        'Tanggal' => $transaksi->Tanggal,
                         'JenisPerawatan' => $perawatan['id'],
                         'Keterangan' => $perawatan['Keterangan'],
                         'Biaya' => $perawatan['Biaya'],
@@ -531,7 +530,6 @@ class TransaksiController extends Controller
         $perawat = User::role('Perawat')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
 
-
         // dd($transaksi);
         return view('transaksi.kasir.edit', compact(
             'transaksi',
@@ -571,7 +569,6 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-
             'NamaPasien' => 'required|string|max:255',
             'JenisPasien' => 'required|in:Baru,Lama',
             'JenisPerawatan' => 'required|array|min:1',
@@ -582,7 +579,7 @@ class TransaksiController extends Controller
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => ['required', 'array', 'min:1'],
-            'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id', // ensure no null values, and exists in master
+            'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id',  // ensure no null values, and exists in master
             'NominalBayar' => 'required|array',
             'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',

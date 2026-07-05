@@ -319,7 +319,7 @@ class LaporanController extends Controller
         // =============================================
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdPerawat', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -327,7 +327,7 @@ class LaporanController extends Controller
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -351,7 +351,7 @@ class LaporanController extends Controller
         // 5a. Omset & Total Shift
         $omsetRow = Transaksi::where($scopeTransaksi)
             ->selectRaw('
-            COUNT(DISTINCT CONCAT(DATE(created_at), "-", Shift)) as total_shift,
+            COUNT(DISTINCT CONCAT(DATE(Tanggal), "-", Shift)) as total_shift,
             SUM(TotalBayar) as total_omset
         ')
             ->first();
@@ -381,11 +381,11 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
-            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
-                    'created_at' => $first->created_at,
+                    'created_at' => $first->Tanggal,
                     'jumlah_pasien_lama' => $countpasienlama . ' Pasien',
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -398,7 +398,7 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'transaksi')
             ->whereHas('getTransaksi', fn($q) => $q->where('TotalBayar', '>=', 1_000_000))
-            ->orderByDesc('created_at')
+            ->orderByDesc('Tanggal')
             ->get();
 
         // 5g. Odontektomi (rule: tindakan)
@@ -412,11 +412,11 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_baru')
             ->get()
-            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
             ->map(function ($group) {
                 $first = $group->first();
                 return [
-                    'tanggal' => $first->created_at->format('Y-m-d'),
+                    'tanggal' => $first->Tanggal->format('Y-m-d'),
                     'jumlah' => $group->count(),
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -430,11 +430,11 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
-            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
-                    'tanggal' => $first->created_at->format('Y-m-d'),
+                    'tanggal' => $first->Tanggal->format('Y-m-d'),
                     'jumlah' => $countpasienlama,
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -580,7 +580,7 @@ class LaporanController extends Controller
         // 3. BASE SCOPE (Reusable Closures)
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('IdResepsionis', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -588,7 +588,7 @@ class LaporanController extends Controller
 
         $scopeInsentif = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->where('KodeCabang', $kodeCabang)
                 ->where('UserId', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -607,7 +607,7 @@ class LaporanController extends Controller
         // 5a. Omset & Total Shift
         $omsetRow = Transaksi::where($scopeTransaksi)
             ->selectRaw('
-            COUNT(DISTINCT CONCAT(DATE(created_at), "-", Shift)) as total_shift,
+            COUNT(DISTINCT CONCAT(DATE(Tanggal), "-", Shift)) as total_shift,
             SUM(TotalBayar) as total_omset
         ')
             ->first();
@@ -636,11 +636,11 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->get()
-            ->groupBy(fn($item) => $item->created_at->format('Y-m-d') . '|' . $item->Shift)
+            ->groupBy(fn($item) => $item->Tanggal->format('Y-m-d') . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
-                    'created_at' => $first->created_at,
+                    'created_at' => $first->Tanggal,
                     'jumlah_pasien_lama' => $countpasienlama,
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'shift' => $first->Shift ?? null,
@@ -760,7 +760,7 @@ class LaporanController extends Controller
                     $query->where('Shift', $request->shift);
                 }
                 if (isset($startDate) && isset($endDate)) {
-                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                    $query->whereBetween('Tanggal', [$startDate, $endDate]);
                 }
             });
         }
@@ -776,7 +776,7 @@ class LaporanController extends Controller
             $TotalBiayaPerawatan = $TotalBiayaPerawatan->where('Shift', $request->shift);
         }
         if (isset($startDate) && isset($endDate)) {
-            $TotalBiayaPerawatan = $TotalBiayaPerawatan->whereBetween('created_at', [$startDate, $endDate]);
+            $TotalBiayaPerawatan = $TotalBiayaPerawatan->whereBetween('Tanggal', [$startDate, $endDate]);
         }
         // Hitung Biaya Admin
         $TotalBiayaAdmin = Transaksi::where('KodeCabang', auth()->user()->kodeperusahaan);
@@ -788,7 +788,7 @@ class LaporanController extends Controller
             $TotalBiayaAdmin = $TotalBiayaAdmin->where('Shift', $request->shift);
         }
         if (isset($startDate) && isset($endDate)) {
-            $TotalBiayaAdmin = $TotalBiayaAdmin->whereBetween('created_at', [$startDate, $endDate]);
+            $TotalBiayaAdmin = $TotalBiayaAdmin->whereBetween('Tanggal', [$startDate, $endDate]);
         }
 
         $TotalBiayaAdmin = $TotalBiayaAdmin->sum('BiayaAdmin');
@@ -862,7 +862,7 @@ class LaporanController extends Controller
         //    untuk semua query ke tabel Transaksi
         // =============================================
         $scopeTransaksi = fn($q) => $q
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
             ->where('KodeCabang', $kodeCabang)
             ->where('IdDokter', $dokterId)
             ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
@@ -908,7 +908,7 @@ class LaporanController extends Controller
             'getResepsionis',
         ])
             ->where($scopeTransaksi)
-            ->orderByDesc('created_at')
+            ->orderByDesc('Tanggal')
             ->get();
         // dd($dataTransaksi);
         // 5e. Rincian per jenis perawatan (sidebar)
@@ -1020,13 +1020,13 @@ class LaporanController extends Controller
 
         // Query billing minimal per perawat, disimpan di $billingByPerawat
         $billingByPerawat = InsentifKaryawan::with('getTransaksi')
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
             ->where('JenisRule', 'transaksi')
             ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
             ->when($perawatId, fn($q) => $q->where('UserId', $perawatId))
             ->when($shift, fn($q) => $q->where('Shift', $shift))
             ->whereHas('getTransaksi', fn($q) => $q->where('TotalBayar', '>=', 1_000_000))
-            ->orderByDesc('created_at')
+            ->orderByDesc('Tanggal')
             ->get();
         // dd($billingByPerawat);
 
@@ -1066,12 +1066,12 @@ class LaporanController extends Controller
                 $q->where('KodeCabang', $klinikId);
             })
             ->when($request->tanggal_mulai, function ($q) use ($request) {
-                $q->whereDate('created_at', '>=', $request->tanggal_mulai);
+                $q->whereDate('Tanggal', '>=', $request->tanggal_mulai);
             })
             ->when($request->tanggal_akhir, function ($q) use ($request) {
-                $q->whereDate('created_at', '<=', $request->tanggal_akhir);
+                $q->whereDate('Tanggal', '<=', $request->tanggal_akhir);
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('Tanggal', 'desc')
             ->get();
 
         return response()->json([
@@ -1117,7 +1117,7 @@ class LaporanController extends Controller
                 return [
                     'no' => $idx + 1,
                     'kode' => $item->Kode ?? '-',
-                    'tanggal' => $item->Tanggal ?? $item->tanggal ?? $item->created_at,
+                    'tanggal' => $item->Tanggal ?? $item->tanggal ?? $item->Tanggal,
                     'nama_pasien' => $item->pelanggan->nama ?? $item->NamaPasien ?? '-',
                     'jenis_pasien' => $item->JenisPasien ?? '-',
                     'metode_pembayaran' => $metodePembayaran,
@@ -1162,12 +1162,12 @@ class LaporanController extends Controller
                 $q->where('KodeCabang', $klinikId);
             })
             ->when($request->tanggal_mulai, function ($q) use ($request) {
-                $q->whereDate('created_at', '>=', $request->tanggal_mulai);
+                $q->whereDate('Tanggal', '>=', $request->tanggal_mulai);
             })
             ->when($request->tanggal_akhir, function ($q) use ($request) {
-                $q->whereDate('created_at', '<=', $request->tanggal_akhir);
+                $q->whereDate('Tanggal', '<=', $request->tanggal_akhir);
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('Tanggal', 'desc')
             ->get();
 
         // Ambil nama klinik untuk filter info

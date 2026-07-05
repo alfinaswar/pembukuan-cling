@@ -90,7 +90,7 @@ class InsentifService
                 $sudahDapatHariIni = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
-                    ->whereDate('created_at', $tanggal)
+                    ->whereDate('Tanggal', $tanggal)
                     ->where('KodeCabang', $kodeCabang)
                     ->exists();
 
@@ -110,8 +110,8 @@ class InsentifService
                 $sudahDapatBulanIni = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
-                    ->whereYear('created_at', $tanggalCarbon->year)
-                    ->whereMonth('created_at', $tanggalCarbon->month)
+                    ->whereYear('Tanggal', $tanggalCarbon->year)
+                    ->whereMonth('Tanggal', $tanggalCarbon->month)
                     ->where('KodeCabang', $kodeCabang)
                     ->exists();
 
@@ -201,7 +201,7 @@ class InsentifService
                             ->where('Role', $rule->Role)
                             ->where('JenisRule', $rule->JenisRule)
                             ->where('Shift', $shift)
-                            ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
+                            ->whereDate('Tanggal', date('Y-m-d', strtotime($tanggal)))
                             ->where('KodeCabang', $kodeCabang)
                             ->count();
 
@@ -248,7 +248,7 @@ class InsentifService
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->where('Shift', $shift)
-                    ->whereDate('created_at', date('Y-m-d', strtotime($tanggal)))
+                    ->whereDate('Tanggal', date('Y-m-d', strtotime($tanggal)))
                     ->where('KodeCabang', $kodeCabang)
                     ->exists();
                 if ($exists)
@@ -258,6 +258,7 @@ class InsentifService
             // Simpan ke Database
             InsentifKaryawan::create([
                 'IdTransaksi' => $transaksi->id,
+                'Tanggal' => $transaksi->Tanggal,
                 'UserId' => $userId,
                 'Role' => $rule->Role,
                 'Nominal' => $finalNominal,
