@@ -87,7 +87,8 @@
                                         <tr>
                                             <td class="text-center" style="color: #162878;">{{ $index + 1 }}</td>
                                             <td style="color: #162878;">
-                                                {{ isset($item->created_at) ? \Carbon\Carbon::parse($item->created_at)->translatedFormat('d/m/Y H:i') : '-' }}
+                                                {{ isset($item->Tanggal) ? \Carbon\Carbon::parse($item->Tanggal)->format('d F Y') : '-' }}
+
                                             </td>
                                             <td style="color: #162878;">
                                                 {{ $item->getUser->name ?? '-' }}
