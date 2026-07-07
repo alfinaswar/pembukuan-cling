@@ -686,6 +686,7 @@ class TransaksiController extends Controller
             $transaksi = Transaksi::findOrFail($id);
             // dd($transaksi);
             $transaksi->TransaksiDetail()->delete();
+            $transaksi->getInsentif()->delete();
             $transaksi->getMetodePembayaran()->delete();
             $transaksi->delete();
 
