@@ -356,6 +356,12 @@
             white-space: nowrap !important;
             padding-right: 20px;
         }
+        .btn-save:disabled {
+    background-color: #99f6e4 !important; /* Warna teal lebih muda */
+    border-color: #99f6e4 !important;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
     </style>
 
     <div class="container-fluid">
@@ -797,7 +803,23 @@
             if (!num && num !== 0) return 'Rp 0';
             return 'Rp ' + Number(num).toLocaleString('id-ID');
         }
+ $('#formTransaksiKasir').on('submit', function() {
+            // 1. Cegah double submit & tampilkan loading spinner
+            let $btn = $(this).find('button[type="submit"]');
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Menyimpan...');
 
+            // 2. Convert format Rupiah ke angka mentah sebelum submit
+            $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
+
+            $('.biaya-perawatan').each(function() {
+                $(this).val(parseRupiah($(this).val()));
+            });
+
+            $('.nominal-input-bayar').each(function() {
+                $(this).val(parseRupiah($(this).val()));
+            });
+        });
         function parseRupiah(str) {
             return Number((str + '').replace(/[^0-9]/g, '')) || 0;
         }
