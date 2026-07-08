@@ -662,24 +662,10 @@ class LaporanController extends Controller
         ];
 
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
-            ->selectRaw("
-                JenisRule, 
-                SUM(Nominal) as total_insentif, 
-                COUNT(*) as total_data,
-                SUM(CASE WHEN JenisRule = 'pasien_lama' THEN 1 ELSE 0 END) as total_pasien_lama
-            ")
+            ->selectRaw('JenisRule, SUM(Nominal) as total_insentif, COUNT(*) as total_data')
             ->groupBy('JenisRule')
             ->get()
-            ->mapWithKeys(function ($item) {
-                if ($item->JenisRule === 'pasien_lama') {
-                    $item->total_data = Transaksi::where('JenisPasien', 'Lama')
-                        ->whereDate('Tanggal', '>=', request()->has('startDate') ? request()->startDate : now()->startOfMonth())
-                        ->whereDate('Tanggal', '<=', request()->has('endDate') ? request()->endDate : now()->endOfMonth())
-                        ->where($GLOBALS['scopeTransaksi'] ?? [])
-                        ->count();
-                }
-                return [$item->JenisRule => $item];
-            });
+            ->keyBy('JenisRule');
 
         $Ringkasan = collect($jenisRuleInfo)->map(function ($info, $key) use ($ringkasanDb) {
             $db = $ringkasanDb->get($key);
