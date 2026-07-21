@@ -327,7 +327,6 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color: #166534;">Tanggal</th>
-                                    <th class="fw-semibold" style="color: #166534;">Jumlah Pasien Lama</th>
                                     <th class="fw-semibold" style="color: #166534;">Perawat</th>
                                     <th class="fw-semibold" style="color: #166534;">Insentif</th>
                                 </tr>
@@ -340,21 +339,20 @@
                                             <td style="color: #166534;">
                                                 {{ \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') }}
                                             </td>
-
-                                            <td style="color: #166534;">{{ $row['jumlah_pasien_lama'] }} Pasien</td>
                                             <td style="color: #166534;">{{ $row['perawat_nama'] }}</td>
                                             <td class="fw-semibold" style="color: #166534;">Rp 30.000</td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr>
-                                        <td colspan="4" class="text-center" style="color: #166534;">Tidak ada data
+                                        <td colspan="3" class="text-center" style="color: #166534;">Tidak ada data
                                             shift dengan
                                             minimal 8 pasien lama.</td>
                                     </tr>
                                 @endif
                             </tbody>
                         </table>
+
                     </div>
                     @php
                         // Akumulasi total shift dan total insentif dari data Shift8PasienLama

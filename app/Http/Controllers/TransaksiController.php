@@ -483,6 +483,18 @@ class TransaksiController extends Controller
                 }
             }
         }
+
+        if (function_exists('activity')) {
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($transaksi)
+                ->withProperties([
+                    'attributes' => $transaksi->toArray(),
+                    'request' => $request->all(),
+                ])
+                ->log('Transaksi berhasil dibuat');
+        }
+
         app(InsentifService::class)->proses($transaksi);
         return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil disimpan.');
     }
