@@ -1,24 +1,20 @@
-name: Deploy to Production
+name: Deploy to VPS
 
 on:
   push:
     branches:
-      - main
+      - main   # ganti kalau branch production kamu beda, misal 'master' atau 'production'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 🚀 Execute Deploy Script on VPS
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
           script: |
-            /home/clingdental_kasirftp/deploy/deploy-production.sh
-
-
-
+            bash /home/clingdental_kasirftp/public_html/deploy.sh
