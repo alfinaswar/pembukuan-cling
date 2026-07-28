@@ -104,7 +104,15 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                 ];
             }
 
+            // === Tambahkan BiayaAdmin jika JenisPasien == 'Baru' ===
+            // Dianggap: field JenisPasien ada di model Transaksi, BiayaAdmin juga
+
+            // Logic: hanya pada detailIndex === 0, dan jika JenisPasien == 'Baru', tambahkan BiayaAdmin pada revenue dari treatment pertama
             foreach ($details as $detailIndex => $detail) {
+                $biaya = $detail->Biaya ?? 0;
+                if ($detailIndex === 0 && (strtolower($transaksi->JenisPasien ?? '') === 'baru')) {
+                    $biaya += ($transaksi->BiayaAdmin ?? 0);
+                }
                 $exportData[] = [
                     'day' => $detailIndex === 0 ? $dayName : '',
                     'date' => $detailIndex === 0 ? $dateFormatted : '',
@@ -113,7 +121,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     'patient_name' => $detailIndex === 0 ? $transaksi->NamaPasien : '',
                     'treatment' => $detail->MasterJenisPerawatan->Nama ?? '',
                     'keterangan' => $detail->Keterangan ?? '', // Add this field
-                    'revenue' => $detail->Biaya ?? 0,
+                    'revenue' => $biaya,
                 ];
                 $rowNumber++;
             }
