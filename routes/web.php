@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DentalUnitController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MasterHariLiburController;
@@ -95,6 +96,15 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [MasterHariLiburController::class, 'update'])->name('MasterHariLibur.update');
         Route::get('/show/{id}', [MasterHariLiburController::class, 'show'])->name('MasterHariLibur.show');
         Route::delete('/delete/{id}', [MasterHariLiburController::class, 'destroy'])->name('MasterHariLibur.destroy');
+    });
+    Route::prefix('master/dental-unit')->group(function () {
+        Route::get('/', [DentalUnitController::class, 'index'])->name('DentalUnit.index');
+        Route::get('/create/{id}', [DentalUnitController::class, 'create'])->name('DentalUnit.create');
+        Route::post('/store', [DentalUnitController::class, 'store'])->name('DentalUnit.store');
+        Route::get('/edit/{id}', [DentalUnitController::class, 'edit'])->name('DentalUnit.edit');
+        Route::put('/update/{id}', [DentalUnitController::class, 'update'])->name('DentalUnit.update');
+        Route::get('/show/{id}', [DentalUnitController::class, 'show'])->name('DentalUnit.show');
+        Route::delete('/delete/{id}', [DentalUnitController::class, 'destroy'])->name('DentalUnit.destroy');
     });
     Route::prefix('transaksi/kasir')->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('Transaksi.index');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DentalUnit;
 use App\Models\MasterJenisPerawatan;
 use App\Models\MasterKlinik;
 use App\Models\MasterMetodePembayaran;
@@ -360,8 +361,8 @@ class TransaksiController extends Controller
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
-
-        return view('transaksi.kasir.create', compact('Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
+        $dental = DentalUnit::where('KodeCabang',auth()->user()->kodeperusahaan)->get();
+        return view('transaksi.kasir.create', compact('dental','Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
     }
 
     /**
@@ -391,6 +392,10 @@ class TransaksiController extends Controller
             'Dokter' => 'required|exists:users,id',
             'Perawat' => 'required|exists:users,id',
             'Kasir' => 'required|exists:users,id',
+
+            // === TAMBAHAN: Validasi Dental Unit Wajib ===
+            'DentalUnit' => 'required', // <-- Sesuaikan 'dental_units' dengan nama tabel master dental unit Anda
+
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => [
                 'required',
@@ -426,6 +431,11 @@ class TransaksiController extends Controller
             'Perawat.exists' => 'Perawat tidak valid',
             'Kasir.required' => 'Pilih kasir/resepsionis',
             'Kasir.exists' => 'Kasir tidak valid',
+
+            // === TAMBAHAN: Pesan Error Dental Unit ===
+            'DentalUnit.required' => 'Dental Unit wajib dipilih',
+            'DentalUnit.exists' => 'Dental Unit tidak valid',
+
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
@@ -433,6 +443,7 @@ class TransaksiController extends Controller
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
+
         $shiftId = auth()->user()->shift;
         $transaksi = Transaksi::create([
             'Tanggal' => $request->Tanggal,
@@ -443,6 +454,7 @@ class TransaksiController extends Controller
             'IdResepsionis' => $request->Kasir,
             'IdPerawat' => $request->Perawat,
             'IdDokter' => $request->Dokter,
+            'DentalUnit' => $request->DentalUnit,
             'Shift' => $shiftId,
             'UserCreate' => auth()->user()->name,
             'UserUpdate' => null,
@@ -462,7 +474,7 @@ class TransaksiController extends Controller
                         'IdTransaksi' => $transaksi->id,
                         'Tanggal' => $transaksi->Tanggal,
                         'JenisPerawatan' => $perawatan['id'],
-                        'Keterangan' => $perawatan['Keterangan'],
+                        'Keterangan' => $perawatan['Keterangan'] ?? null,
                         'Biaya' => $perawatan['Biaya'],
                         'UserCreate' => auth()->user()->name,
                         'UserUpdate' => null,
@@ -472,6 +484,7 @@ class TransaksiController extends Controller
             }
         }
 
+        // Simpan Metode Pembayaran
         if ($request->has('MetodePembayaran') && is_array($request->MetodePembayaran)) {
             foreach ($request->MetodePembayaran as $key => $metode) {
                 if ($metode !== null) {
@@ -484,6 +497,7 @@ class TransaksiController extends Controller
             }
         }
 
+        // Activity Log
         if (function_exists('activity')) {
             activity()
                 ->causedBy(auth()->user())
@@ -495,7 +509,9 @@ class TransaksiController extends Controller
                 ->log('Transaksi berhasil dibuat');
         }
 
+        // Proses Insentif
         app(InsentifService::class)->proses($transaksi);
+
         return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil disimpan.');
     }
 

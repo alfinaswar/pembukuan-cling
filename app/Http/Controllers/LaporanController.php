@@ -339,7 +339,7 @@ class LaporanController extends Controller
         $adaTransaksi = Transaksi::where($scopeTransaksi)->exists();
         if (!$adaTransaksi) {
             return redirect()->back()->withInput()->with(
-                'error',
+                'fail_message',
                 'Data tidak ditemukan untuk filter yang dipilih.'
             );
         }

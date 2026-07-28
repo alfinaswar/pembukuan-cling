@@ -408,6 +408,16 @@
                                             </a>
                                         </li>
                                     @endcan
+                                    @can('master-dentalunit')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('DentalUnit.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-device-heart-monitor"></i>
+                                                </div>
+                                                <span class="hide-menu">Dental Unit</span>
+                                            </a>
+                                        </li>
+                                    @endcan
                                     @can('master-shift')
                                         <li class="sidebar-item">
                                             <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
@@ -701,6 +711,16 @@
                                                         </a>
                                                     </li>
                                                 @endcan
+                                                @can('master-dentalunit')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('DentalUnit.index') }}" class="sidebar-link">
+                                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-device-heart-monitor"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Dental Unit</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
                                                 @can('master-shift')
                                                     <li class="sidebar-item">
                                                         <a href="{{ route('MasterShift.index') }}" class="sidebar-link">
@@ -944,6 +964,17 @@
                                                         <i class="ti ti-credit-card"></i>
                                                     </div>
                                                     <span class="hide-menu">Metode Pembayaran</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('master-dentalunit')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('DentalUnit.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'dental-unit' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-device-heart-monitor"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Dental Unit</span>
                                                 </a>
                                             </li>
                                         @endcan

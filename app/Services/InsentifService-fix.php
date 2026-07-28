@@ -6,6 +6,7 @@ use App\Models\InsentifKaryawan;
 use App\Models\MasterHariLibur;
 use App\Models\MasterKlinik;
 use App\Models\RuleInsentif;
+use App\Models\TargetBulanan;  // <-- 🔥 Tambahkan import Model TargetBulanan
 use App\Models\TargetCapaian;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -25,30 +26,25 @@ class InsentifService
         $tanggal = $transaksi->Tanggal;
         $shift = $transaksi->Shift;
         $kodeCabang = $transaksi->KodeCabang;
-        $dentalUnit = $transaksi->DentalUnit ?? null; // 🔥 Ambil Dental Unit dari transaksi
         $tanggalCarbon = Carbon::parse($tanggal);
 
         // =====================================================
         // 1. HITUNG DATA SHIFT (Akumulasi Real-time)
         // =====================================================
-
-        // Buat base query agar bisa di-clone untuk efisiensi
-        $baseQuery = Transaksi::whereDate('Tanggal', $tanggal)
+        $totalShift = Transaksi::whereDate('Tanggal', $tanggal)
             ->where('Shift', $shift)
-            ->where('KodeCabang', $kodeCabang);
+            ->where('KodeCabang', $kodeCabang)
+            ->sum('TotalBayar');
 
-        // 🔥 Jika Dental Unit ada, pisahkan akumulasi berdasarkan Dental Unit
-        if ($dentalUnit) {
-            $baseQuery->where('DentalUnit', $dentalUnit);
-        }
-
-        $totalShift = (clone $baseQuery)->sum('TotalBayar');
-
-        $pasienLama = (clone $baseQuery)
+        $pasienLama = Transaksi::whereDate('Tanggal', $tanggal)
+            ->where('Shift', $shift)
+            ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Lama')
             ->count();
 
-        $pasienBaru = (clone $baseQuery)
+        $pasienBaru = Transaksi::whereDate('Tanggal', $tanggal)
+            ->where('Shift', $shift)
+            ->where('KodeCabang', $kodeCabang)
             ->where('JenisPasien', 'Baru')
             ->count();
 
@@ -91,17 +87,14 @@ class InsentifService
                 if (!$isHoliday)
                     continue;
 
-                $sudahDapatHariIniQuery = InsentifKaryawan::where('UserId', $userId)
+                $sudahDapatHariIni = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->whereDate('Tanggal', $tanggal)
-                    ->where('KodeCabang', $kodeCabang);
+                    ->where('KodeCabang', $kodeCabang)
+                    ->exists();
 
-                if ($dentalUnit) {
-                    $sudahDapatHariIniQuery->where('DentalUnit', $dentalUnit);
-                }
-
-                if ($sudahDapatHariIniQuery->exists())
+                if ($sudahDapatHariIni)
                     continue;
 
                 $isValid = true;
@@ -113,33 +106,35 @@ class InsentifService
                 if (!$userId)
                     continue;
 
-                $sudahDapatBulanIniQuery = InsentifKaryawan::where('UserId', $userId)
+                // 🔥 CEK FREKUENSI: Sudah dapat insentif bulan ini?
+                $sudahDapatBulanIni = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->whereYear('Tanggal', $tanggalCarbon->year)
                     ->whereMonth('Tanggal', $tanggalCarbon->month)
-                    ->where('KodeCabang', $kodeCabang);
+                    ->where('KodeCabang', $kodeCabang)
+                    ->exists();
 
-                if ($dentalUnit) {
-                    $sudahDapatBulanIniQuery->where('DentalUnit', $dentalUnit);
-                }
-
-                if ($sudahDapatBulanIniQuery->exists())
+                if ($sudahDapatBulanIni)
                     continue;
-
                 $kodeKlinik = MasterKlinik::where('Kode', $transaksi->KodeCabang)->value('id');
                 $targetBulanan = TargetCapaian::where('Tahun', $tanggalCarbon->year)
                     ->where('Bulan', $tanggalCarbon->month)
                     ->where('IdKlinik', $kodeKlinik)
                     ->first();
 
+                // Jika target bulan ini belum di-set di database, skip rule ini
                 if (!$targetBulanan)
                     continue;
 
+                // Threshold diambil dari tabel target, BUKAN dari $rule->Nilai
                 $threshold = $targetBulanan->BesarTarget;
+
+                // Ambil metric aktual dari context (misal: omzet_shift)
                 $metricKey = $rule->KondisiTambahan ?? 'omzet_shift';
                 $metricValue = $context[$metricKey] ?? 0;
 
+                // Evaluasi berdasarkan operator menggunakan $threshold
                 switch ($rule->Operator) {
                     case '>=':
                         $isValid = $metricValue >= $threshold;
@@ -162,6 +157,8 @@ class InsentifService
 
                 if (!$isValid)
                     continue;
+
+                // 🔥 Besar insentif tetap diambil dari rule
                 $finalNominal = $rule->Nominal;
             }
             // =================================================
@@ -192,7 +189,7 @@ class InsentifService
                         }
                     }
                 }
-                // D. Rule Kelipatan (Misal: Kelipatan 6 Juta)
+                // D. Rule Kelipatan
                 elseif ($rule->Operator == 'kelipatan') {
                     $threshold = $rule->Nilai;
                     $totalKelipatanTercapai = floor($totalShift / $threshold);
@@ -200,19 +197,14 @@ class InsentifService
                     if ($totalKelipatanTercapai >= 1) {
                         $isValid = true;
 
-                        // 🔥 Cek duplikasi kelipatan PER Dental Unit
-                        $sudahDiberikanQuery = InsentifKaryawan::where('UserId', $userId)
+                        $sudahDiberikan = InsentifKaryawan::where('UserId', $userId)
                             ->where('Role', $rule->Role)
                             ->where('JenisRule', $rule->JenisRule)
                             ->where('Shift', $shift)
-                            ->whereDate('Tanggal', $tanggal)
-                            ->where('KodeCabang', $kodeCabang);
+                            ->whereDate('Tanggal', date('Y-m-d', strtotime($tanggal)))
+                            ->where('KodeCabang', $kodeCabang)
+                            ->count();
 
-                        if ($dentalUnit) {
-                            $sudahDiberikanQuery->where('DentalUnit', $dentalUnit);
-                        }
-
-                        $sudahDiberikan = $sudahDiberikanQuery->count();
                         $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
 
                         if ($kelipatanBaru > 0) {
@@ -252,19 +244,14 @@ class InsentifService
                 $rule->JenisRule != 'target_tercapai' &&
                 $rule->JenisRule != 'insentif_hari_libur'
             ) {
-                $existsQuery = InsentifKaryawan::where('UserId', $userId)
+                $exists = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->where('Shift', $shift)
-                    ->whereDate('Tanggal', $tanggal)
-                    ->where('KodeCabang', $kodeCabang);
-
-                // 🔥 Pastikan cek duplikasi juga memisahkan berdasarkan Dental Unit
-                if ($dentalUnit) {
-                    $existsQuery->where('DentalUnit', $dentalUnit);
-                }
-
-                if ($existsQuery->exists())
+                    ->whereDate('Tanggal', date('Y-m-d', strtotime($tanggal)))
+                    ->where('KodeCabang', $kodeCabang)
+                    ->exists();
+                if ($exists)
                     continue;
             }
 
@@ -279,7 +266,6 @@ class InsentifService
                 'Keterangan' => $rule->Keterangan,
                 'Shift' => $shift,
                 'KodeCabang' => $kodeCabang,
-                'DentalUnit' => $dentalUnit, // 🔥 Simpan info Dental Unit ke riwayat insentif
                 'UserCreate' => auth()->user()->name,
             ]);
         }

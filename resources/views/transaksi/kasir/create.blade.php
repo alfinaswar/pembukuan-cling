@@ -357,11 +357,11 @@
             padding-right: 20px;
         }
         .btn-save:disabled {
-    background-color: #99f6e4 !important; /* Warna teal lebih muda */
-    border-color: #99f6e4 !important;
-    cursor: not-allowed;
-    opacity: 0.9;
-}
+            background-color: #99f6e4 !important; /* Warna teal lebih muda */
+            border-color: #99f6e4 !important;
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
     </style>
 
     <div class="container-fluid">
@@ -377,10 +377,6 @@
                         <div class="card-body">
 
                             @csrf
-                            {{-- <div class="col-12">
-                                <label class="form-label mt-3">Default Material Date Picker</label>
-                                <input type="text" class="form-control" placeholder="2024-06-04" id="mdate" />
-                            </div> --}}
                             <!-- Hari & Tanggal -->
                             <div class="col-12 mb-3">
                                 <label class="form-label mt-3" for="Tanggal">Hari &amp; Tanggal</label>
@@ -392,7 +388,6 @@
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
-
 
                             <!-- Nama Pasien -->
                             <div class="mb-2">
@@ -410,7 +405,6 @@
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
-
 
                             <!-- Jenis Pasien radio -->
                             <div class="mb-3">
@@ -431,7 +425,6 @@
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
                             </div>
-
 
                             <!-- Jenis Perawatan -->
                             <div class="mb-3">
@@ -478,8 +471,8 @@
                                                                 value="{{ isset($perawatan['Biaya']) ? $perawatan['Biaya'] : '' }}">
                                                         </td>
                                                         <td>
-                                                            <input type="text"Jenis Perawatan class="form-control"
-                                                                name="JenisPerawatan[0][Keterangan]"
+                                                            <input type="text" class="form-control"
+                                                                name="JenisPerawatan[{{ $idx }}][Keterangan]"
                                                                 placeholder="Keterangan"
                                                                 value="{{ isset($perawatan['Keterangan']) ? $perawatan['Keterangan'] : '' }}">
                                                         </td>
@@ -550,8 +543,6 @@
                                 </button>
                             </div>
 
-
-                            <!-- Biaya Admin -->
                             <!-- Biaya Admin -->
                             <div class="biaya-admin-row mb-3">
                                 <span class="biaya-admin-label">
@@ -580,7 +571,6 @@
                                     <h3 class="mb-0">Rp <span id="total-biaya">0</span></h3>
                                 </div>
                             </div>
-
 
                             <!-- Action buttons -->
                             <div class="d-flex justify-content-end gap-2 mt-3">
@@ -621,7 +611,6 @@
                                         <span class="ringkasan-stat-label">Total Pasien Lama Per Shift</span>
                                         <span class="ringkasan-stat-value">{{ $totalPasienLama }} Pasien</span>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -698,10 +687,8 @@
                                                         </td>
                                                     </tr>
                                                 @endfor
-
                                             </tbody>
                                         </table>
-
                                     </div>
                                     <button type="button" class="btn btn-outline-primary btn-sm mt-2"
                                         id="addPembayaranRow">
@@ -718,10 +705,34 @@
                             </div>
                         </div>
 
-                        <!-- Staff: Dokter / Perawat / Kasir -->
+                        <!-- Staff: Dental Unit, Dokter / Perawat / Kasir -->
                         <div class="col-12">
                             <div class="card mb-0">
                                 <div class="card-body py-3 px-4">
+
+                                    <!-- TAMBAHAN: Dental Unit (Muncul hanya jika ada data $dental) -->
+                                    @if(isset($dental) && count($dental) > 0)
+                                    <div class="mb-3">
+                                        <label for="DentalUnit" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="armchair" style="width:14px;height:14px;" class="me-1"></i>
+                                            Dental Unit
+                                        </label>
+                                        <select name="DentalUnit" id="DentalUnit"
+                                            class="form-select staff-select @error('DentalUnit') is-invalid @enderror">
+                                            <option value="">-- Pilih Dental Unit --</option>
+                                            @foreach ($dental as $d)
+                                                <option value="{{ $d->id }}"
+                                                    {{ old('DentalUnit') == $d->id ? 'selected' : '' }}>
+                                                    {{ $d->name ?? $d->nama ?? $d->Nama ?? 'Unit ' . $d->id }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('DentalUnit')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    <hr class="my-3" style="border-color:#f3f4f6;">
+                                    @endif
 
                                     <!-- Dokter -->
                                     <div class="mb-2">
@@ -735,7 +746,7 @@
                                             <option value="">-- Pilih Dokter --</option>
                                             @foreach ($dokter as $d)
                                                 <option value="{{ $d->id }}"
-                                                    {{ old('Dokter') == $d->id ? 'selected' : '' }}>{{ $d->name }}
+                                                    {{ old('Dokter') == $d->id ? 'selected' : '' }}>{{ $d->name ?? $d->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -755,7 +766,7 @@
                                             <option value="">-- Pilih Perawat --</option>
                                             @foreach ($perawat as $p)
                                                 <option value="{{ $p->id }}"
-                                                    {{ old('Perawat') == $p->id ? 'selected' : '' }}>{{ $p->name }}
+                                                    {{ old('Perawat') == $p->id ? 'selected' : '' }}>{{ $p->name ?? $p->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -776,7 +787,7 @@
                                             <option value="">-- Pilih Resepsionis --</option>
                                             @foreach ($kasir as $r)
                                                 <option value="{{ $r->id }}"
-                                                    {{ old('Kasir') == $r->id ? 'selected' : '' }}>{{ $r->name }}
+                                                    {{ old('Kasir') == $r->id ? 'selected' : '' }}>{{ $r->name ?? $r->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -794,6 +805,7 @@
         </form>
     </div>
 @endsection
+
 @push('scripts')
     <script>
         let perawatanCount = 1;
@@ -803,23 +815,7 @@
             if (!num && num !== 0) return 'Rp 0';
             return 'Rp ' + Number(num).toLocaleString('id-ID');
         }
- $('#formTransaksiKasir').on('submit', function() {
-            // 1. Cegah double submit & tampilkan loading spinner
-            let $btn = $(this).find('button[type="submit"]');
-            $btn.prop('disabled', true)
-                .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Menyimpan...');
 
-            // 2. Convert format Rupiah ke angka mentah sebelum submit
-            $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
-
-            $('.biaya-perawatan').each(function() {
-                $(this).val(parseRupiah($(this).val()));
-            });
-
-            $('.nominal-input-bayar').each(function() {
-                $(this).val(parseRupiah($(this).val()));
-            });
-        });
         function parseRupiah(str) {
             return Number((str + '').replace(/[^0-9]/g, '')) || 0;
         }
@@ -857,6 +853,12 @@
 
         // Handle submit form
         $('#formTransaksiKasir').on('submit', function() {
+            // 1. Cegah double submit & tampilkan loading spinner
+            let $btn = $(this).find('button[type="submit"]');
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Menyimpan...');
+
+            // 2. Convert format Rupiah ke angka mentah sebelum submit
             $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
 
             $('.biaya-perawatan').each(function() {
@@ -876,8 +878,7 @@
             });
 
             $('.staff-select').select2({
-                dropdownParent: $('.card-body:has(#Kasir)').length ? $('.card-body:has(#Kasir)') : $(
-                    document.body)
+                dropdownParent: $('.card-body:has(#Kasir)').length ? $('.card-body:has(#Kasir)') : $(document.body)
             });
 
             // Handle change Jenis Pasien
@@ -926,12 +927,10 @@
                     <select class="form-control perawatan-select" name="JenisPerawatan[${idx}][id]" required>
                         ${selectOpt}
                     </select>
-
                 </td>
                 <td>
                     <input type="text" class="form-control biaya-perawatan bg-light" name="JenisPerawatan[${idx}][Biaya]" placeholder="Rp 0" required>
                 </td>
-
                 <td>
                     <input type="text" class="form-control" name="JenisPerawatan[${idx}][Keterangan]" placeholder="Keterangan">
                 </td>
@@ -1016,7 +1015,7 @@
             return rupiah;
         }
 
-        function parseRupiah(str) {
+        function parseRupiahString(str) {
             return parseInt((str || '0').replace(/[^0-9]/g, ''), 10) || 0;
         }
 
@@ -1025,11 +1024,10 @@
         }
 
         function getTotalBayar() {
-            // Cek total dari field total-biaya
             let totalStr = document.getElementById('total-biaya');
             let total = 0;
             if (totalStr) {
-                total = parseRupiah(totalStr.innerText || "0");
+                total = parseRupiahString(totalStr.innerText || "0");
             }
             return total;
         }
@@ -1037,31 +1035,29 @@
         function hitungTotalBayar() {
             let total = 0;
             document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
-                let val = parseRupiah(input.value);
+                let val = parseRupiahString(input.value);
                 total += val;
             });
             document.getElementById('total-bayar').innerText = formatRupiah(total);
         }
 
         function limitNominalBayar(input) {
-            // Batas maksimum: total sisa yang boleh diisi
             let totalBayar = getTotalBayar();
             let totalLain = 0;
             let currentInput = input;
             document.querySelectorAll('.nominal-input-bayar').forEach(function(inp) {
                 if (inp !== currentInput) {
-                    totalLain += parseRupiah(inp.value);
+                    totalLain += parseRupiahString(inp.value);
                 }
             });
             let sisa = totalBayar - totalLain;
-            let nilaiInput = parseRupiah(input.value);
+            let nilaiInput = parseRupiahString(input.value);
             if (nilaiInput > sisa) {
                 input.value = formatRupiahInput(sisa.toString());
             }
         }
 
         function initPembayaranTableEvents() {
-            // Remove row
             document.querySelectorAll('#pembayaran-table .remove-row').forEach(function(btn) {
                 btn.onclick = function() {
                     let rows = document.querySelectorAll('#pembayaran-table tbody tr').length;
@@ -1072,9 +1068,7 @@
                 };
             });
 
-            // Input event for real-time formatting & check limit
             document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
-                // Prevent multiple listeners
                 input.removeEventListener('input', input._rupiahHandler || (() => {}));
                 input._rupiahHandler = function(e) {
                     let caretPos = input.selectionStart,
@@ -1083,7 +1077,6 @@
 
                     input.value = numericVal;
                     limitNominalBayar(input);
-                    // Try to preserve caret position when typing
                     let newPos = caretPos + (input.value.length - oldVal.length);
                     input.setSelectionRange(newPos, newPos);
 
@@ -1099,32 +1092,27 @@
             document.getElementById('addPembayaranRow').addEventListener('click', function() {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                                    <td>
-                                        <select name="MetodePembayaran[]" class="form-select" required>
-                                            <option value="">-- Pilih Metode --</option>
-                                            @foreach ($MetodePembayaran as $mp)
-                                                <option value="{{ $mp->id }}">{{ $mp->Nama }}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" min="0" name="NominalBayar[]" class="form-control nominal-input-bayar currency-format" placeholder="Nominal" required>
-                                    </td>
-
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-danger remove-row" title="Hapus Baris">
-                                            <i class="ti ti-trash" style="font-size:16px;"></i>
-                                        </button>
-                                    </td>
-
-                                `;
+                    <td>
+                        <select name="MetodePembayaran[]" class="form-select" required>
+                            <option value="">-- Pilih Metode --</option>
+                            @foreach ($MetodePembayaran as $mp)
+                                <option value="{{ $mp->id }}">{{ $mp->Nama }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" min="0" name="NominalBayar[]" class="form-control nominal-input-bayar currency-format" placeholder="Nominal" required>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-danger remove-row" title="Hapus Baris">
+                            <i class="ti ti-trash" style="font-size:16px;"></i>
+                        </button>
+                    </td>
+                `;
                 document.querySelector('#pembayaran-table tbody').appendChild(tr);
-
-                // Re-init events for new elements
                 initPembayaranTableEvents();
             });
 
-            // Format all nominal fields on page load & apply limit check
             document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
                 if (input.value) {
                     input.value = formatRupiahInput(input.value);
