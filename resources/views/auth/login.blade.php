@@ -54,7 +54,7 @@
                                 <form method="POST" action="{{ route('login') }}">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="userEmail" class="form-label">Alamat Emaill Kamu DEPLOY OK OK OK</label>
+                                        <label for="userEmail" class="form-label">Alamat Emaill Kamu</label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
                                             id="userEmail" name="email" value="{{ old('email') }}" required
                                             autocomplete="email" autofocus placeholder="Masukkan email Anda">
@@ -65,7 +65,7 @@
                                         @enderror
                                     </div>
                                     <div class="mb-4">
-                                        <label for="userPassword" class="form-label">Kata Sandi..</label>
+                                        <label for="userPassword" class="form-label">Kata Sandi</label>
                                         <div class="position-relative-password">
                                             <input type="password"
                                                 class="form-control @error('password') is-invalid @enderror"
@@ -97,7 +97,7 @@
                                             <input class="form-check-input primary" type="checkbox" name="remember"
                                                 id="flexCheckChecked" {{ old('remember') ? 'checked' : '' }}>
                                             <label class="form-check-label text-dark" for="flexCheckChecked">
-                                                Ingat Perangkat Ini OK
+                                                Ingat Perangkat Ini
                                             </label>
                                         </div>
                                         {{-- @if (Route::has('password.request'))

@@ -4,16 +4,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up()
     {
-        Schema::table('insentif_karyawans', function (Blueprint $table) {
-            $table->string('DentalUnit')->nullable()->after('KodeCabang');
-        });
+        if (!Schema::hasColumn('insentif_karyawans', 'DentalUnit')) {
+            Schema::table('insentif_karyawans', function (Blueprint $table) {
+                $table->string('DentalUnit')->nullable()->after('KodeCabang');
+            });
+        }
     }
 
     /**
@@ -21,8 +22,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('insentif_karyawans', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasColumn('insentif_karyawans', 'DentalUnit')) {
+            Schema::table('insentif_karyawans', function (Blueprint $table) {
+                $table->dropColumn('DentalUnit');
+            });
+        }
     }
 };

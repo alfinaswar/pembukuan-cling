@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('insentif_karyawans', function (Blueprint $table) {
-            $table->date('Tanggal')->nullable()->after('IdTransaksi');
-        });
+        if (!Schema::hasColumn('insentif_karyawans', 'Tanggal')) {
+            Schema::table('insentif_karyawans', function (Blueprint $table) {
+                $table->date('Tanggal')->nullable()->after('IdTransaksi');
+            });
+        }
     }
 
     /**
@@ -20,8 +22,10 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('insentif_karyawans', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasColumn('insentif_karyawans', 'Tanggal')) {
+            Schema::table('insentif_karyawans', function (Blueprint $table) {
+                $table->dropColumn('Tanggal');
+            });
+        }
     }
 };

@@ -10,9 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('transaksi_details', function (Blueprint $table) {
-            $table->date('Tanggal')->nullable()->after('IdTransaksi');
-        });
+        // Hanya tambahkan kolom jika belum ada
+        if (!Schema::hasColumn('transaksi_details', 'Tanggal')) {
+            Schema::table('transaksi_details', function (Blueprint $table) {
+                $table->date('Tanggal')->nullable()->after('IdTransaksi');
+            });
+        }
     }
 
     /**
@@ -20,8 +23,11 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('transaksi_details', function (Blueprint $table) {
-            //
-        });
+        // Hapus kolom hanya jika ada
+        if (Schema::hasColumn('transaksi_details', 'Tanggal')) {
+            Schema::table('transaksi_details', function (Blueprint $table) {
+                $table->dropColumn('Tanggal');
+            });
+        }
     }
 };
