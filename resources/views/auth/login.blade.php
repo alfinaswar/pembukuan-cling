@@ -54,7 +54,7 @@
                                 <form method="POST" action="{{ route('login') }}">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="userEmail" class="form-label">Alamat Emaill Kamu DEPLOY OK</label>
+                                        <label for="userEmail" class="form-label">Alamat Emaill Kamu DEPLOY OK OK</label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
                                             id="userEmail" name="email" value="{{ old('email') }}" required
                                             autocomplete="email" autofocus placeholder="Masukkan email Anda">
