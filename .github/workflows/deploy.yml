@@ -54,6 +54,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            set -e
             cd /home/clingdental/web/kasir.clingdental.com/public_html
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
