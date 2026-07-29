@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy to Production
 
 on:
   push:
@@ -8,21 +8,17 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Deploy via SSH
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Run Deploy Script
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo "=== Cek folder public_html ==="
-            ls -la /home/clingdental_kasirftp/public_html/
-
-            echo "=== Cek folder home ==="
-            ls -la /home/clingdental_kasirftp/
-
-            echo "=== Cari file deploy.sh dimanapun ==="
-            find /home/clingdental_kasirftp -iname "*deploy*"
-
+            bash /home/clingdental/web/kasir.clingdental.com/public_html/deploy.sh
