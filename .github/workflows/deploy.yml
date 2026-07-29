@@ -17,4 +17,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            bash /home/clingdental_kasirftp/public_html/deploy.sh
+            echo "=== Cek folder public_html ==="
+            ls -la /home/clingdental_kasirftp/public_html/
+
+            echo "=== Cek folder home ==="
+            ls -la /home/clingdental_kasirftp/
+
+            echo "=== Cari file deploy.sh dimanapun ==="
+            find /home/clingdental_kasirftp -iname "*deploy*"
+
