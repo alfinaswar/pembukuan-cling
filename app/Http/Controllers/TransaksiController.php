@@ -394,7 +394,7 @@ class TransaksiController extends Controller
             'Kasir' => 'required|exists:users,id',
 
             // === TAMBAHAN: Validasi Dental Unit Wajib ===
-            'DentalUnit' => 'required', // <-- Sesuaikan 'dental_units' dengan nama tabel master dental unit Anda
+            'DentalUnit' => 'nullable', // <-- Sesuaikan 'dental_units' dengan nama tabel master dental unit Anda
 
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => [
@@ -432,9 +432,6 @@ class TransaksiController extends Controller
             'Kasir.required' => 'Pilih kasir/resepsionis',
             'Kasir.exists' => 'Kasir tidak valid',
 
-            // === TAMBAHAN: Pesan Error Dental Unit ===
-            'DentalUnit.required' => 'Dental Unit wajib dipilih',
-            'DentalUnit.exists' => 'Dental Unit tidak valid',
 
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
