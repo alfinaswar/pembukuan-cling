@@ -76,19 +76,20 @@ class LoginController extends Controller
 
     protected function logout(Request $request)
     {
-        $user = Auth::user();
+        $user = User::find(Auth::id());
         if ($user) {
             $user->shift = null;
+            $user->last_login = null;
             $user->save();
             $request->session()->forget('shift');
         }
+
 
         $this->guard()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // 4. Redirect + flash message
         return redirect('/login')
-            ->with('info', 'Anda telah keluar. Shift telah direset. 👋');
+            ->with('info', 'Anda telah keluar. Shift dan Last Login telah direset. 👋');
     }
 }

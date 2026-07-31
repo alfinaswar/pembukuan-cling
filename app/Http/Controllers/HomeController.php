@@ -97,6 +97,7 @@ class HomeController extends Controller
 
         $user = auth()->user();
         $user->shift = $request->shift;
+        $user->last_login = now()->toDateString(); // hanya tanggal, tidak pakai jam
         $user->save();
 
         return redirect()->back()->with('success', 'Shift Anda berhasil disimpan.');

@@ -239,7 +239,16 @@
         </div>
     </div> <!-- End of row g-4 -->
 
-    @if (auth()->user() && empty(auth()->user()->shift))
+    @php
+        $user = auth()->user();
+        $today = \Carbon\Carbon::now()->toDateString();
+        $forceShiftModal = false;
+        if($user) {
+            $forceShiftModal = empty($user->shift) || $user->last_login !== $today;
+        }
+    @endphp
+
+    @if ($forceShiftModal)
         <!-- Modal for Set Shift -->
         <div class="modal fade" id="setShiftModal" tabindex="-1" aria-labelledby="setShiftModalLabel"
             aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -252,13 +261,16 @@
                         </div>
                         <div class="modal-body">
                             <div class="alert alert-warning">
-                                Shift Anda belum diatur. Silakan pilih shift aktif anda sebelum melanjutkan.
+                                @if(empty($user->shift))
+                                    Shift Anda belum diatur. Silakan pilih shift aktif anda sebelum melanjutkan.
+                                @else
+                                    Shift Anda kadaluarsa atau belum diatur hari ini. Silakan pilih shift aktif anda untuk hari ini.
+                                @endif
                             </div>
                             <div class="mb-3">
                                 <label for="shift" class="form-label">Shift</label>
                                 <select name="shift" id="shift" class="form-select" required>
                                     <option value="">-- Pilih Shift --</option>
-
                                     @foreach ($listShift as $shift)
                                         <option value="{{ $shift->id }}">
                                             {{ $shift->Nama }}
@@ -267,7 +279,6 @@
                                             {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->JamSelesai)->format('H:i') }})
                                         </option>
                                     @endforeach
-
                                 </select>
                             </div>
                         </div>
