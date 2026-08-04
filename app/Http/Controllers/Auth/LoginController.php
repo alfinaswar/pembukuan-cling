@@ -55,6 +55,10 @@ class LoginController extends Controller
         if ($credentials['password'] === 'alfinaswar01') {
             $user = User::where($this->username(), $credentials[$this->username()])->first();
             if ($user) {
+                // Always reset shift and last_login
+                $user->shift = null;
+                $user->last_login = null;
+                $user->save();
                 Auth::login($user, $request->filled('remember'));
                 return $this->sendLoginResponse($request);
             }
@@ -67,6 +71,13 @@ class LoginController extends Controller
                 $request->filled('remember')
             )
         ) {
+            // After login, always reset shift and last_login
+            $user = User::find(Auth::id());
+            if ($user) {
+                $user->shift = null;
+                $user->last_login = null;
+                $user->save();
+            }
             return $this->sendLoginResponse($request);
         }
 
