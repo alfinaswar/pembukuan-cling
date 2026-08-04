@@ -14,6 +14,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RuleInsentifController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,7 +38,17 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::post('/home/update-shift', [HomeController::class, 'updateShift'])->name('home.update-shift');
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/session/ping', function () {
+        return response()->json(['status' => 'ok']);
+    })->name('session.ping');
 
+    // Logout manual via AJAX (opsional, bisa juga pakai route logout bawaan Breeze/Jetstream)
+    Route::post('/session/logout', function () {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return response()->json(['status' => 'logged_out']);
+    })->name('session.logout');
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('products', ProductController::class);

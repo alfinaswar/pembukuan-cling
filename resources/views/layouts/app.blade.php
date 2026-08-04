@@ -19,6 +19,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('') }}assets/libs/daterangepicker/daterangepicker.css">
     <link rel="stylesheet" href="{{ asset('') }}assets/libs/sweetalert2/dist/sweetalert2.min.css">
+     <meta name="session-lifetime" content="{{ config('session.lifetime') * 60 }}">
     <title>Cling Dental Klinik</title>
     <style>
         /* ===== SIDEBAR DARK NAVY THEME ===== */
@@ -1106,7 +1107,7 @@
     <script src="{{ asset('') }}assets/js/forms/daterangepicker-init.js"></script>
     <script src="{{ asset('') }}assets/libs/sweetalert2/dist/sweetalert2.min.js"></script>
     <script src="{{ asset('') }}assets/js/forms/sweet-alert.init.js"></script>
-
+<script src="{{ asset('js/session-timeout.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
@@ -1256,68 +1257,7 @@
     setInterval(updateDateTimeID, 1000);
 </script>
 
-<script>
-    const SESSION_LIFETIME_MIN = {{ config('session.lifetime', 120) }};
-    const SHOW_POPUP_BEFORE_EXPIRY_SEC = 120;
-    const session_lifetime_ms = SESSION_LIFETIME_MIN * 60 * 1000;
-    const popup_trigger_ms = session_lifetime_ms - (SHOW_POPUP_BEFORE_EXPIRY_SEC * 1000);
-    const sessionStartTime = Date.now();
-    let sessionPopupShown = false;
-    let popupTimeout;
-
-    function showSessionPopup() {
-        if (sessionPopupShown) return;
-        sessionPopupShown = true;
-        Swal.fire({
-            title: 'Session Akan Habis',
-            html: `Sesi Anda hampir habis.<br>Pilih <b>Perpanjang</b> untuk memperbarui sesi Anda.<br>Atau pilih <b>Logout</b> untuk keluar sekarang.`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Perpanjang',
-            cancelButtonText: 'Logout',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            timer: SHOW_POPUP_BEFORE_EXPIRY_SEC * 1000,
-            timerProgressBar: true,
-            didOpen: () => {
-                const content = Swal.getHtmlContainer();
-                if (content) {
-                    content.style.fontSize = "16px";
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('{{ url('/keepalive') }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                }).then(() => {
-                    sessionPopupShown = false;
-                    window.location.reload();
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel || result.isDismissed) {
-                window.location.href = "{{ route('logout') }}";
-            } else {}
-        });
-        setTimeout(function() {
-            if (sessionPopupShown) {
-                window.location.href = "{{ route('logout') }}";
-            }
-        }, SHOW_POPUP_BEFORE_EXPIRY_SEC * 1000 + 1500); // buffer sedikit setelah timer
-    }
-
-    function startSessionPopupTimer() {
-        if (popupTimeout) clearTimeout(popupTimeout);
-        const timeUntilPopup = popup_trigger_ms - (Date.now() - sessionStartTime);
-        if (timeUntilPopup <= 0) {
-            showSessionPopup();
-        } else {
-            popupTimeout = setTimeout(showSessionPopup, timeUntilPopup);
-        }
-    }
-
-    startSessionPopupTimer();
-    setTimeout(function() {
-        window.location.href = "{{ route('logout') }}";
-    }, session_lifetime_ms + 2000);
-</script>
+<!-- Add this hidden logout form (Laravel expects a POST request with csrf, works with Auth scaffolding) -->
+<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+    @csrf
+</form>
