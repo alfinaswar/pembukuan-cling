@@ -7,8 +7,8 @@
             <small class="text-muted">Ciling Dental Clinic</small>
         </div>
         <div class="col-lg-6 col-md-6 col-sm-12">
-            <form method="POST" action="{{ route('laporan-umum.store') }}">
-                @csrf
+            <form method="GET" action="{{ route('laporan-umum.store') }}">
+                {{-- @csrf --}}
                 <div class="input-group mb-3">
                     @if (auth()->user() && auth()->user()->hasRole('Superadmin'))
                         <select class="form-select" name="FilterCabang" id="FilterCabang" style="max-width:200px;">

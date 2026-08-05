@@ -75,9 +75,9 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body pb-2">
-                    <form id="perawatFilterForm" class="row align-items-end g-2" method="POST"
+                    <form id="perawatFilterForm" class="row align-items-end g-2" method="GET"
                         action="{{ route('laporan-resepsionis.store') }}" style="font-size: 0.925rem;">
-                        @csrf
+                        {{-- @csrf --}}
                         @php
                             $user = Auth::user();
                             $perawat_id = old('perawat', request('perawat', $user->id ?? ''));

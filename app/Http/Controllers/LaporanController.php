@@ -273,15 +273,15 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'required|exists:transaksis,IdPerawat',
+            'perawat' => 'nullable|exists:transaksis,IdPerawat',
             'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
             'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
-            'perawat.required' => 'Perawat wajib dipilih.',
             'perawat.exists' => 'Perawat tidak bertugas di tanggal / shift tersebut.',
             'shift.exists' => 'Tidak Bertugas di Shit Tersebut.',
         ]);
+
 
         if ($validator->fails()) {
             $errorHtml = collect(['FilterTanggal', 'perawat', 'shift'])
@@ -819,18 +819,13 @@ class LaporanController extends Controller
         // =============================================
         $validator = Validator::make($request->all(), [
             'FilterTanggal' => [
-                'required',
+                'nullable', // <-- tetap nullable
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'dokter' => 'required',
+            'dokter' => 'nullable',
             'shift' => 'nullable|exists:transaksis,Shift',
-        ], [
-            'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
-            'FilterTanggal.regex' => 'Format tanggal tidak sesuai (00/00/0000 - 00/00/0000).',
-            'dokter.required' => 'Dokter wajib dipilih.',
-            'dokter.exists' => 'Dokter tidak valid.',
-            'shift.exists' => 'Tidak Bertugas di Shit Tersebut.',
+            'KodeCabang' => 'nullable',
         ]);
         if ($validator->fails()) {
             $errorHtml = collect(['FilterTanggal', 'dokter', 'shift'])
@@ -851,20 +846,26 @@ class LaporanController extends Controller
         [$startRaw, $endRaw] = explode(' - ', $request->FilterTanggal);
         $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay()->format('Y-m-d H:i:s');
         $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay()->format('Y-m-d H:i:s');
-        // dd($endDate);
         $dokterId = $request->dokter;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
-        $kodeCabang = $request->KodeCabang;
-        // dd($startDate);
+        $kodeCabang = $request->KodeCabang ?? null; // pastikan bila null
+
         // =============================================
-        // 3. BASE SCOPE — satu closure reusable
-        //    untuk semua query ke tabel Transaksi
+        // 3. BASE SCOPE — siap untuk filter "Semua Cabang"
         // =============================================
-        $scopeTransaksi = fn($q) => $q
-            ->whereBetween('Tanggal', [$startDate, $endDate])
-            ->where('KodeCabang', $kodeCabang)
-            ->where('IdDokter', $dokterId)
-            ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
+        // Jika $kodeCabang bernilai null/"" (Semua Klinik), maka tidak di-filter KodeCabang
+        $scopeTransaksi = function($q) use ($startDate, $endDate, $kodeCabang, $dokterId, $shiftFilter) {
+            $q->whereBetween('Tanggal', [$startDate, $endDate]);
+            if (!empty($kodeCabang)) {
+                $q->where('KodeCabang', $kodeCabang);
+            }
+            if (!empty($dokterId)) {
+                $q->where('IdDokter', $dokterId);
+            }
+            if (!empty($shiftFilter)) {
+                $q->where('Shift', $shiftFilter);
+            }
+        };
 
         // =============================================
         // 4. VALIDASI DATA KOSONG
@@ -909,7 +910,7 @@ class LaporanController extends Controller
             ->where($scopeTransaksi)
             ->orderByDesc('Tanggal')
             ->get();
-        // dd($dataTransaksi);
+
         // 5e. Rincian per jenis perawatan (sidebar)
         $RincianJenisPerawatan = TransaksiDetail::with('MasterJenisPerawatan')
             ->selectRaw('JenisPerawatan, COUNT(*) as jumlah, AVG(Biaya) as rata_rata_biaya')
@@ -951,7 +952,7 @@ class LaporanController extends Controller
         $kasir = User::role('Kasir / Resepsionis')->get();
         $shift = MasterShift::get();
         $klinik = MasterKlinik::get();
-        // dd(123);
+
         // =============================================
         // 7. KIRIM KE VIEW
         // =============================================

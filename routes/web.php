@@ -143,13 +143,13 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/data-umum', [LaporanController::class, 'dataDashboardUmum'])->name('laporan-umum.store');
 
         Route::get('/perawat', [LaporanController::class, 'indexPerawat'])->name('laporan-perawat.index');
-        Route::POST('/cari-data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
+        Route::get('/cari-data-perawat', [LaporanController::class, 'dataDashboardPerawat'])->name('laporan-perawat.store');
 
         Route::get('/resepsionis', [LaporanController::class, 'indexResepsionis'])->name('laporan-resepsionis.index');
-        Route::post('/cari-data-resepsionis', [LaporanController::class, 'dataDashboardResepsionis'])->name('laporan-resepsionis.store');
+        Route::get('/cari-data-resepsionis', [LaporanController::class, 'dataDashboardResepsionis'])->name('laporan-resepsionis.store');
 
         Route::get('/dokter', [LaporanController::class, 'indexDokter'])->name('laporan-dokter.index');
-        Route::post('/cari-data-dokter', [LaporanController::class, 'dataDashboardDokter'])->name('laporan-dokter.store');
+        Route::get('/cari-data-dokter', [LaporanController::class, 'dataDashboardDokter'])->name('laporan-dokter.store');
         Route::get('/dokter/export-excel', [LaporanController::class, 'downloadExcel'])->name('laporan-dokter.download-excel');
 
         Route::get('/perawat/billing-minimal', [LaporanController::class, 'billingMinimalPerawat'])->name('laporan-perawat.billing-minimal');

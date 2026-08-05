@@ -48,9 +48,9 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body pb-2">
-                    <form id="perawatFilterForm" class="row align-items-end g-2" method="POST"
+                    <form id="perawatFilterForm" class="row align-items-end g-2" method="GET"
                         action="{{ route('laporan-dokter.store') }}" style="font-size: 0.925rem;">
-                        @csrf
+                        {{-- @csrf --}}
                         @php
                             $user = Auth::user();
                             $dokter_selected = old(
