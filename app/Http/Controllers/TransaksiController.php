@@ -691,6 +691,18 @@ class TransaksiController extends Controller
                 ]);
             }
         }
+        // update log aktifitas untuk update transaksi
+        if (function_exists('activity')) {
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($transaksi)
+                ->withProperties([
+                    'attributes' => $transaksi->toArray(),
+                    'request' => $request->all(),
+                ])
+                ->log('Transaksi berhasil diupdate, Kode: ' . ($transaksi->Kode ?? '-'));
+        }
+
 
         app(InsentifService::class)->hapusSebelumProses($transaksi);
         app(InsentifService::class)->proses($transaksi);
