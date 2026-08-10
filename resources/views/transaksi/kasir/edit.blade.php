@@ -624,7 +624,7 @@
                             </div>
                         </div>
 
-                                               <!-- Metode Pembayaran -->
+                        <!-- Metode Pembayaran -->
                         <div class="col-12">
                             <div class="card mb-0">
                                 <div class="card-body py-3 px-4">
@@ -689,8 +689,8 @@
                                                             <input type="text" min="0" name="NominalBayar[]"
                                                                 class="form-control nominal-input-bayar currency-format @error('NominalBayar.' . $i) is-invalid @enderror"
                                                                 style="width: 100%; min-width: 100%; max-width: 100%;"
-                                                                {{-- Tambahan: Jika nominalVal kosong/0, biarkan input kosong agar tidak memunculkan "0,00" --}}
-                                                                value="{{ $nominalVal ? number_format($nominalVal, 2, ',', '.') : '' }}"
+                                                                {{-- TIDAK ADA DECIMAL, NOMINAL BAYAR HARUS TANPA DESIMAL! --}}
+                                                                value="{{ $nominalVal ? number_format($nominalVal, 0, ',', '.') : '' }}"
                                                                 placeholder="Nominal Bayar">
                                                             @error('NominalBayar.' . $i)
                                                                 <span
@@ -858,8 +858,10 @@
             $('.biaya-perawatan').each(function() {
                 $(this).val(parseRupiah($(this).val()));
             });
+            // Pastikan Nominal Bayar (Cara Bayar) tanpa tipe decimal
             $('.nominal-input-bayar').each(function() {
-                $(this).val(parseRupiah($(this).val()));
+                let intVal = Math.round(parseRupiah($(this).val())); // Tanpa koma/desimal
+                $(this).val(intVal);
             });
         });
 
@@ -967,7 +969,7 @@
             recalculateTotal();
         });
 
-                        $(function() {
+        $(function() {
             // ✅ Handle format decimal dari database (150000.00 -> 150000)
             $('.biaya-perawatan').each(function() {
                 let rawVal = $(this).val();
@@ -988,23 +990,29 @@
                 $('#biaya_admin').val(rupiahFormat(Math.round(adminNum)));
             }
             recalculateTotal();
+
+            // Pastikan input Nominal Bayar tidak ada decimal format di view pada awal load
+            $('.nominal-input-bayar').each(function() {
+                if ($(this).val()) {
+                    let intVal = Math.round(parseRupiah($(this).val()));
+                    $(this).val(intVal > 0 ? intVal.toLocaleString('id-ID') : '');
+                }
+            });
         });
     </script>
 
     <script>
         function formatRupiahInput(val) {
-            let number_string = val.replace(/[^,\d]/g, '').toString(),
-                split = number_string.split(','),
-                sisa = split[0].length % 3,
-                rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+            // Only allow integer style - NO decimal
+            let number_string = val.replace(/[^\d]/g, '').toString();
+            let sisa = number_string.length % 3;
+            let rupiah = number_string.substr(0, sisa);
+            let ribuan = number_string.substr(sisa).match(/\d{3}/gi);
 
             if (ribuan) {
                 let separator = sisa ? '.' : '';
                 rupiah += separator + ribuan.join('.');
             }
-
-            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
             return rupiah;
         }
 
@@ -1102,12 +1110,23 @@
                     </td>
                 `;
                 document.querySelector('#pembayaran-table tbody').appendChild(tr);
+
+                // Hapus decimal dari input baru (kalau ada paste, dll)
+                tr.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
+                    input.addEventListener('input', function(e) {
+                        let intVal = Math.round(parseRupiah(input.value));
+                        input.value = intVal > 0 ? intVal.toLocaleString('id-ID') : '';
+                    });
+                });
+
                 initPembayaranTableEvents();
             });
 
             document.querySelectorAll('.nominal-input-bayar').forEach(function(input) {
                 if (input.value) {
-                    input.value = formatRupiahInput(input.value);
+                    // Always display without decimal
+                    let intVal = Math.round(parseRupiah(input.value));
+                    input.value = intVal > 0 ? intVal.toLocaleString('id-ID') : '';
                 }
             });
 
