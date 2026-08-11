@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\DataTables;
 
 class LaporanController extends Controller
 {
@@ -1317,5 +1318,106 @@ class LaporanController extends Controller
             new JenisPerawatanExport($data, $filterInfo),
             'Laporan-Jenis-Perawatan-' . date('Y-m-d') . '.xlsx'
         );
+    }
+    public function insentifKaryawan(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = InsentifKaryawan::with(['getUser', 'getTransaksi'])
+                ->select('insentif_karyawans.*');
+
+            // 🔥 FILTER (sama seperti sebelumnya)
+            if ($request->filled('user_id'))
+                $data->where('UserId', $request->user_id);
+            if ($request->filled('start_date'))
+                $data->whereDate('Tanggal', '>=', $request->start_date);
+            if ($request->filled('end_date'))
+                $data->whereDate('Tanggal', '<=', $request->end_date);
+            if ($request->filled('shift'))
+                $data->where('Shift', $request->shift);
+            if ($request->filled('kode_cabang'))
+                $data->where('KodeCabang', $request->kode_cabang);
+
+            $data->orderBy('created_at', 'desc');
+
+            // 🔥 HITUNG TOTAL SEBELUM DI-PAGINATE (clone query builder)
+            $cloneData = clone $data;
+            $totalNominal = $cloneData->sum('Nominal');
+            $totalRecords = $cloneData->count();
+            $rataRata = $totalRecords > 0 ? $totalNominal / $totalRecords : 0;
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('Tanggal', function ($row) {
+                    $tgl = $row->getTransaksi ? $row->getTransaksi->Tanggal : $row->Tanggal;
+                    return Carbon::parse($tgl)->format('d M Y');
+                })
+                ->editColumn('Nominal', function ($row) {
+                    return 'Rp ' . number_format($row->Nominal, 0, ',', '.');
+                })
+                ->editColumn('Shift', function ($row) {
+                    return $row->getShift ? $row->getShift->Nama : '<span class="text-muted">N/A</span>';
+                })
+
+                ->editColumn('Role', function ($row) {
+                    $roles = [
+                        2 => '<span class="badge bg-primary">Dokter</span>',
+                        3 => '<span class="badge bg-info">Resepsionis</span>',
+                        4 => '<span class="badge bg-success">Perawat</span>'
+                    ];
+                    return $roles[$row->Role] ?? '<span class="badge bg-secondary">Unknown</span>';
+                })
+                ->editColumn('UserId', function ($row) {
+                    return $row->getUser ? $row->getUser->name : '<span class="text-muted">N/A</span>';
+                })
+                ->addColumn('action', function ($row) {
+                    $encryptedId = encrypt($row->id);
+                    $namaKaryawan = $row->getUser ? $row->getUser->name : 'Karyawan';
+                    return '
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-danger btn-delete"
+                                data-id="' . $encryptedId . '"
+                                data-nama="' . $namaKaryawan . '"
+                                title="Hapus">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </div>
+                ';
+                })
+                ->rawColumns(['Role', 'UserId', 'Nominal', 'action'])
+                // 🔥 Kirim total summary ke response AJAX
+                ->with('totalNominal', $totalNominal)
+                ->with('totalRecords', $totalRecords)
+                ->with('rataRata', $rataRata)
+                ->make(true);
+        }
+
+        // Data untuk dropdown filter (sama seperti sebelumnya)
+        $users = User::whereIn('id', function ($query) {
+            $query->select('UserId')->from('insentif_karyawans')->whereNotNull('UserId');
+        })->get();
+
+        $shifts = InsentifKaryawan::distinct()->pluck('Shift')->filter()->values();
+        $cabangs = InsentifKaryawan::distinct()->pluck('KodeCabang')->filter()->values();
+
+        return view('laporan.insentif-karyawan.index', compact('users', 'shifts', 'cabangs'));
+    }
+
+    public function destroyInsentifKaryawan($encryptedId)
+    {
+        try {
+            $id = decrypt($encryptedId);
+            $insentif = InsentifKaryawan::findOrFail($id);
+            $insentif->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data insentif berhasil dihapus.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

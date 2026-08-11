@@ -35,4 +35,9 @@ class InsentifKaryawan extends Model
     {
         return $this->belongsTo(User::class, 'UserId', 'id');
     }
+
+    public function getShift()
+    {
+        return $this->belongsTo(MasterShift::class, 'Shift', 'id');
+    }
 }

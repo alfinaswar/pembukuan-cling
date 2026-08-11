@@ -47,7 +47,7 @@ class InsentifService
         $pasienLama = (clone $baseQuery)
             ->where('JenisPasien', 'Lama')
             ->count();
-
+ 
         $pasienBaru = (clone $baseQuery)
             ->where('JenisPasien', 'Baru')
             ->count();

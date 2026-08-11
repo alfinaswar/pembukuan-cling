@@ -161,6 +161,9 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/jenis-perawatan', [LaporanController::class, 'indexJenisPerawatan'])->name('laporan-jenis-perawatan.index');
         Route::post('/laporan-jenis-perawatan/preview', [LaporanController::class, 'previewJenisPerawatan'])->name('laporan-jenis-perawatan.preview');
         Route::post('/laporan-jenis-perawatan/download', [LaporanController::class, 'downloadJenisPerawatan'])->name('laporan-jenis-perawatan.download');
+
+        Route::get('/insentif-karyawan', [LaporanController::class, 'insentifKaryawan'])->name('laporan-insentif.index');
+        Route::delete('/insentif-karyawan/delete/{id}', [LaporanController::class, 'destroyInsentifKaryawan'])->name('laporan-insentif.destroy');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });
