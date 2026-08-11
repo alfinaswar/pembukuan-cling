@@ -52,6 +52,10 @@ class Transaksi extends Model
     {
         return $this->hasMany(InsentifKaryawan::class, 'id', 'IdTransksi');
     }
+    public function getDentalUnit()
+    {
+        return $this->belongsTo(DentalUnit::class, 'DentalUnit', 'id');
+    }
 
     protected static function boot()
     {

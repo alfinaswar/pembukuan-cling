@@ -28,7 +28,7 @@ class TransaksiController extends Controller
             $tanggalAkhir = $request->input('tanggal_akhir');
             $shiftId = $request->input('shift');
 
-            $data = Transaksi::with('TransaksiDetail')
+            $data = Transaksi::with(['TransaksiDetail', 'getDentalUnit'])
                 ->when(!$tanggalMulai && !$tanggalAkhir, function ($query) {
                     $query->whereDate('Tanggal', today());
                 })
@@ -60,6 +60,20 @@ class TransaksiController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
+                // Tambah kolom Kode dengan penambahan "_Dental Unit" jika ada
+                ->addColumn('Kode', function ($row) {
+                    $kode = $row->Kode ?? '-';
+                    // Jika ada relasi DentalUnit dan nama/kolom relevan ada, tampilkan
+                    if ($row->DentalUnit) {
+                        $dentalUnitName = $row->getDentalUnit->Nama ?? $row->getDentalUnit->name ?? null;
+                        if ($dentalUnitName) {
+                            $kode .= ' - ' . e($dentalUnitName);
+                        } else {
+                            $kode .= ' - Dental Unit';
+                        }
+                    }
+                    return $kode;
+                })
                 ->addColumn('TotalBayar', function ($row) {
                     return 'Rp ' . number_format($row->TotalBayar, 0, ',', '.');
                 })
@@ -168,7 +182,8 @@ class TransaksiController extends Controller
 
                     return $actionButtons;
                 })
-                ->rawColumns(['action', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran'])
+                // Jangan lupa tambahkan 'Kode' ke rawColumns jika ingin menampilkan raw HTML
+                ->rawColumns(['action', 'Kode', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran'])
                 ->with(['summary' => $summary])
                 ->make(true);
         }
