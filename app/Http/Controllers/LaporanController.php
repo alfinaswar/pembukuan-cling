@@ -1370,8 +1370,11 @@ class LaporanController extends Controller
                     return $row->getUser ? $row->getUser->name : '<span class="text-muted">N/A</span>';
                 })
                 ->editColumn('Shift', function ($row) {
-                    return $row->getShift->Nama ? htmlspecialchars($row->getShift->Nama) : '-';
+                    // Jika relasi getShift null atau Nama null, tampilkan 'N/A'
+                    return optional($row->getShift)->Nama ? $row->getShift->Nama : 'N/A';
                 })
+
+
 
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
