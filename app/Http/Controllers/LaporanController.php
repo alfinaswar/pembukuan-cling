@@ -1370,9 +1370,9 @@ class LaporanController extends Controller
                     return $row->getUser ? $row->getUser->name : '<span class="text-muted">N/A</span>';
                 })
                 ->editColumn('Shift', function ($row) {
-                    // Jika relasi getShift null atau Nama null, tampilkan 'N/A'
-                    return optional($row->getShift)->Nama ? $row->getShift->Nama : 'N/A';
+                    return optional(optional($row->getShift)->Nama) ?? 'N/A';
                 })
+
 
 
 
