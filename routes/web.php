@@ -164,6 +164,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/insentif-karyawan', [LaporanController::class, 'insentifKaryawan'])->name('laporan-insentif.index');
         Route::delete('/insentif-karyawan/delete/{id}', [LaporanController::class, 'destroyInsentifKaryawan'])->name('laporan-insentif.destroy');
+        Route::put('/insentif-karyawan/{id}', [LaporanController::class, 'update'])->name('laporan-insentif.update');
     });
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });

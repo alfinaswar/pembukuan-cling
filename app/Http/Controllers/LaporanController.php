@@ -1339,7 +1339,6 @@ class LaporanController extends Controller
 
             $data->orderBy('created_at', 'desc');
 
-            // 🔥 HITUNG TOTAL SEBELUM DI-PAGINATE (clone query builder)
             $cloneData = clone $data;
             $totalNominal = $cloneData->sum('Nominal');
             $totalRecords = $cloneData->count();
@@ -1351,13 +1350,14 @@ class LaporanController extends Controller
                     $tgl = $row->getTransaksi ? $row->getTransaksi->Tanggal : $row->Tanggal;
                     return Carbon::parse($tgl)->format('d M Y');
                 })
+                // 🔥 TAMBAHAN: Kolom Kode Transaksi
+                ->editColumn('KodeTransaksi', function ($row) {
+                    // Sesuaikan 'KodeTransaksi' dengan nama kolom di tabel transaksi Anda (misal: NoTransaksi, Kode, dll)
+                    return $row->getTransaksi ? $row->getTransaksi->Kode : '-';
+                })
                 ->editColumn('Nominal', function ($row) {
                     return 'Rp ' . number_format($row->Nominal, 0, ',', '.');
                 })
-                ->editColumn('Shift', function ($row) {
-                    return $row->getShift ? $row->getShift->Nama : '<span class="text-muted">N/A</span>';
-                })
-
                 ->editColumn('Role', function ($row) {
                     $roles = [
                         2 => '<span class="badge bg-primary">Dokter</span>',
@@ -1369,11 +1369,25 @@ class LaporanController extends Controller
                 ->editColumn('UserId', function ($row) {
                     return $row->getUser ? $row->getUser->name : '<span class="text-muted">N/A</span>';
                 })
+                ->editColumn('Shift', function ($row) {
+                    return $row->getShift->Nama ? htmlspecialchars($row->getShift->Nama) : '-';
+                })
+
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     $namaKaryawan = $row->getUser ? $row->getUser->name : 'Karyawan';
+                    $keterangan = addslashes($row->Keterangan ?? ''); // Escape untuk data attribute
+
                     return '
                     <div class="btn-group">
+                        <button class="btn btn-sm btn-warning text-white btn-edit"
+                                data-id="' . $encryptedId . '"
+                                data-nominal="' . $row->Nominal . '"
+                                data-keterangan="' . $keterangan . '"
+                                data-nama="' . $namaKaryawan . '"
+                                title="Edit Data">
+                            <i class="ti ti-edit"></i>
+                        </button>
                         <button class="btn btn-sm btn-danger btn-delete"
                                 data-id="' . $encryptedId . '"
                                 data-nama="' . $namaKaryawan . '"
@@ -1384,7 +1398,6 @@ class LaporanController extends Controller
                 ';
                 })
                 ->rawColumns(['Role', 'UserId', 'Nominal', 'action'])
-                // 🔥 Kirim total summary ke response AJAX
                 ->with('totalNominal', $totalNominal)
                 ->with('totalRecords', $totalRecords)
                 ->with('rataRata', $rataRata)
@@ -1396,7 +1409,7 @@ class LaporanController extends Controller
             $query->select('UserId')->from('insentif_karyawans')->whereNotNull('UserId');
         })->get();
 
-        $shifts = InsentifKaryawan::distinct()->pluck('Shift')->filter()->values();
+        $shifts = MasterShift::get();
         $cabangs = InsentifKaryawan::distinct()->pluck('KodeCabang')->filter()->values();
 
         return view('laporan.insentif-karyawan.index', compact('users', 'shifts', 'cabangs'));
@@ -1417,6 +1430,33 @@ class LaporanController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    // Update hanya untuk Shift
+    public function update(Request $request, $encryptedId)
+    {
+        try {
+            $request->validate([
+                'shift' => 'required|exists:master_shifts,id',
+            ]);
+
+            $id = decrypt($encryptedId);
+            $insentif = InsentifKaryawan::findOrFail($id);
+
+            $insentif->update([
+                'Shift' => $request->shift,
+                'UserUpdate' => auth()->user()->name ?? 'System'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Shift insentif berhasil diperbarui.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui shift: ' . $e->getMessage()
             ], 500);
         }
     }
