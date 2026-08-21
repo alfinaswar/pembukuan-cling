@@ -569,7 +569,7 @@ class TransaksiController extends Controller
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
-
+        $dental = DentalUnit::where('KodeCabang', auth()->user()->kodeperusahaan)->get();
         // dd($transaksi);
         return view('transaksi.kasir.edit', compact(
             'transaksi',
@@ -580,7 +580,7 @@ class TransaksiController extends Controller
             'kasir',
             'totalPasienBaru',
             'totalPasienLama',
-            'shift'
+            'shift','dental'
         ));
     }
 
@@ -663,6 +663,7 @@ class TransaksiController extends Controller
             'JenisPasien' => $request->JenisPasien,
             'MetodePembayaran' => $request->MetodePembayaran,
             'BiayaAdmin' => $request->BiayaAdmin,
+            'DentalUnit' => $request->DentalUnit,
             'TotalBayar' => $request->TotalBiaya,
             'IdResepsionis' => $request->Kasir,
             'IdPerawat' => $request->Perawat,

@@ -736,6 +736,30 @@
                         <div class="col-12">
                             <div class="card mb-0">
                                 <div class="card-body py-3 px-4">
+                                @if(isset($dental) && count($dental) > 0)
+                                    <div class="mb-3">
+                                        <label for="DentalUnit" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="armchair" style="width:14px;height:14px;" class="me-1"></i>
+                                            Dental Unit <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="DentalUnit" id="DentalUnit"
+                                            class="form-select staff-select @error('DentalUnit') is-invalid @enderror"
+                                            required>
+                                            <option value="">-- Pilih Dental Unit --</option>
+                                            @foreach ($dental as $d)
+                                                <option value="{{ $d->id }}"
+                                                    {{ old('DentalUnit') == $d->id ? 'selected' : '' }}>
+                                                    {{ $d->name ?? $d->nama ?? $d->Nama ?? 'Unit ' . $d->id }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('DentalUnit')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    @endif
+
+                                    <hr class="my-3" style="border-color:#f3f4f6;">
                                     <!-- Dokter -->
                                     <div class="mb-2">
                                         <label for="Dokter" class="form-label fw-bold text-uppercase">
