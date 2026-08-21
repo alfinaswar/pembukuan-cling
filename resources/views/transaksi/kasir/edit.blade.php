@@ -748,11 +748,12 @@
                                             <option value="">-- Pilih Dental Unit --</option>
                                             @foreach ($dental as $d)
                                                 <option value="{{ $d->id }}"
-                                                    {{ old('DentalUnit') == $d->id ? 'selected' : '' }}>
-                                                    {{ $d->name ?? $d->nama ?? $d->Nama ?? 'Unit ' . $d->id }}
+                                                    {{ old('DentalUnit', $transaksi->DentalUnit ?? $transaksi->DentalUnit ?? $transaksi->DentalUnit ?? null) == $d->id ? 'selected' : '' }}>
+                                                    {{ $d->Nama ?? 'Unit ' . $d->id }}
                                                 </option>
                                             @endforeach
                                         </select>
+
                                         @error('DentalUnit')
                                             <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
