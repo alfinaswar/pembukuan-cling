@@ -734,10 +734,30 @@ class TransaksiController extends Controller
         $id = decrypt($id);
         try {
             $transaksi = Transaksi::findOrFail($id);
-            // dd($transaksi);
+            // Set UserDelete before deleting related models and transaction itself
+            $userDelete = auth()->user()->name;
+
+            // Soft delete on details with UserDelete, if applicable
+            foreach ($transaksi->TransaksiDetail as $detail) {
+                $detail->UserDelete = $userDelete;
+                $detail->save();
+            }
             $transaksi->TransaksiDetail()->delete();
+
+            foreach ($transaksi->getInsentif as $insentif) {
+                $insentif->UserDelete = $userDelete;
+                $insentif->save();
+            }
             $transaksi->getInsentif()->delete();
+
+            foreach ($transaksi->getMetodePembayaran as $metode) {
+                $metode->UserDelete = $userDelete;
+                $metode->save();
+            }
             $transaksi->getMetodePembayaran()->delete();
+
+            $transaksi->UserDelete = $userDelete;
+            $transaksi->save();
             $transaksi->delete();
 
             return response()->json([

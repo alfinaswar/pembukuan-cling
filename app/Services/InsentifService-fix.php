@@ -18,6 +18,14 @@ class InsentifService
      */
     public function hapusSebelumProses($transaksi)
     {
+        $userDelete = auth()->check() ? auth()->user()->name : null;
+        $insentifs = InsentifKaryawan::where('IdTransaksi', $transaksi->id)->get();
+        foreach ($insentifs as $insentif) {
+            $insentif->UserDelete = $userDelete;
+            $insentif->save();
+        }
+
+        // Delete insentif
         InsentifKaryawan::where('IdTransaksi', $transaksi->id)->delete();
     }
 
