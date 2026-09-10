@@ -386,6 +386,20 @@
                                 @enderror
                             </div>
 
+                            <!-- Pilihan Shift -->
+                            <div class="col-12 mb-3">
+                                <label for="Shift" class="form-label fw-semibold">Shift</label>
+                                <select name="Shift" id="Shift" class="form-select @error('Shift') is-invalid @enderror">
+                                    <option value="">-- Pilih Shift --</option>
+                                    @foreach($masterShift as $item)
+                                        <option value="{{ $item->id }}" {{ old('Shift', $transaksi->Shift) == $item->id ? 'selected' : '' }}>{{ $item->Nama }}</option>
+                                    @endforeach
+                                </select>
+                                @error('Shift')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             <!-- Nama Pasien -->
                             <div class="mb-2">
                                 <label for="nama_pasien" class="form-label fw-semibold">Nama Pasien</label>
@@ -445,7 +459,6 @@
                                             @if ($details && count($details) > 0)
                                                 @foreach ($details as $idx => $perawatan)
                                                     @php
-                                                        // Sesuaikan nama kolom foreign key (id_jenis_perawatan) jika berbeda
                                                         $pId = $oldPerawatan
                                                             ? $perawatan['id'] ?? ''
                                                             : $perawatan->id_jenis_perawatan ??
@@ -480,7 +493,6 @@
                                                                 placeholder="Rp 0" value="{{ $pBiaya }}">
                                                         </td>
                                                         <td>
-                                                            {{-- BUG FIXED: name sekarang menggunakan {{ $idx }} dan typo dihapus --}}
                                                             <input type="text" class="form-control"
                                                                 name="JenisPerawatan[{{ $idx }}][Keterangan]"
                                                                 placeholder="Keterangan" value="{{ $pKet }}">
@@ -748,7 +760,7 @@
                                             <option value="">-- Pilih Dental Unit --</option>
                                             @foreach ($dental as $d)
                                                 <option value="{{ $d->id }}"
-                                                    {{ old('DentalUnit', $transaksi->DentalUnit ?? $transaksi->DentalUnit ?? $transaksi->DentalUnit ?? null) == $d->id ? 'selected' : '' }}>
+                                                    {{ old('DentalUnit', $transaksi->DentalUnit ?? null) == $d->id ? 'selected' : '' }}>
                                                     {{ $d->Nama ?? 'Unit ' . $d->id }}
                                                 </option>
                                             @endforeach
@@ -772,7 +784,6 @@
                                             class="form-select staff-select @error('Dokter') is-invalid @enderror">
                                             <option value="">-- Pilih Dokter --</option>
                                             @foreach ($dokter as $d)
-                                                {{-- Sesuaikan $transaksi->Dokter jika nama kolom FK berbeda (misal: dokter_id) --}}
                                                 <option value="{{ $d->id }}"
                                                     {{ old('Dokter', $transaksi->IdDokter) == $d->id ? 'selected' : '' }}>
                                                     {{ $d->name }}</option>
@@ -834,6 +845,8 @@
 @endsection
 
 @push('scripts')
+    {{-- SweetAlert2 CDN (jika belum ada di layout, tambahkan di sini) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // INISIALISASI: Mulai index dari jumlah data existing agar tidak menimpa
         let perawatanCount = {{ count(old('JenisPerawatan', $transaksi->TransaksiDetail)) }};
@@ -878,16 +891,55 @@
             recalculateTotal();
         });
 
-        $('#formTransaksiKasir').on('submit', function() {
-            $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
-            $('.biaya-perawatan').each(function() {
-                $(this).val(parseRupiah($(this).val()));
+        // SweetAlert konfirmasi sebelum simpan
+        $('#formTransaksiKasir').on('submit', function(e) {
+            // If already confirmed, just let it submit
+            if ($(this).data('confirmed')) {
+                $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
+                $('.biaya-perawatan').each(function() {
+                    $(this).val(parseRupiah($(this).val()));
+                });
+                // Pastikan Nominal Bayar (Cara Bayar) tanpa tipe decimal
+                $('.nominal-input-bayar').each(function() {
+                    let intVal = Math.round(parseRupiah($(this).val())); // Tanpa koma/desimal
+                    $(this).val(intVal);
+                });
+                return true;
+            }
+
+            e.preventDefault();
+
+            // Get selected shift
+            var shiftText = $('#Shift option:selected').text().trim();
+            var shiftVal = $('#Shift').val();
+
+            if (!shiftVal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Shift',
+                    text: 'Silakan pilih shift terlebih dahulu sebelum menyimpan!',
+                    confirmButtonText: 'OK'
+                });
+                return false;
+            }
+
+            Swal.fire({
+                title: 'Konfirmasi Update Transaksi',
+                html: 'Anda yakin sudah memilih shift yang benar?<br><strong>Shift: ' + shiftText + '</strong>',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, simpan!',
+                cancelButtonText: 'Cek Lagi',
+                confirmButtonColor: '#16a085'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Set data confirmed, trigger submit again
+                    $('#formTransaksiKasir').data('confirmed', true);
+                    $('#formTransaksiKasir').submit();
+                }
             });
-            // Pastikan Nominal Bayar (Cara Bayar) tanpa tipe decimal
-            $('.nominal-input-bayar').each(function() {
-                let intVal = Math.round(parseRupiah($(this).val())); // Tanpa koma/desimal
-                $(this).val(intVal);
-            });
+
+            return false; // prevent submit for now
         });
 
         $(document).ready(function() {

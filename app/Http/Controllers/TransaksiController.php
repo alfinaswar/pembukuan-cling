@@ -427,7 +427,20 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-            'NominalBayar' => 'required|array',
+            'NominalBayar' => [
+                'required',
+                'array',
+                function ($attribute, $value, $fail) use ($request) {
+                    // Cek jika array
+                    if (is_array($value)) {
+                        $totalNominal = array_sum($value);
+                        $totalBiaya = $request->input('TotalBiaya');
+                        if ($totalNominal > $totalBiaya) {
+                            $fail('Nominal Bayar tidak boleh lebih besar dari total biaya.');
+                        }
+                    }
+                }
+            ],
             'NominalBayar.*' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
@@ -447,13 +460,13 @@ class TransaksiController extends Controller
             'Kasir.required' => 'Pilih kasir/resepsionis',
             'Kasir.exists' => 'Kasir tidak valid',
 
-
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'BiayaAdmin.numeric' => 'Biaya admin harus angka',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
             'MetodePembayaran.array' => 'Metode pembayaran harus berupa array',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
-            'TotalBiaya.numeric' => 'Total biaya harus angka'
+            'TotalBiaya.numeric' => 'Total biaya harus angka',
+            'NominalBayar.required' => 'Nominal bayar tidak boleh kosong.',
         ]);
 
         $shiftId = auth()->user()->shift;
@@ -571,6 +584,7 @@ class TransaksiController extends Controller
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
         $dental = DentalUnit::where('KodeCabang', auth()->user()->kodeperusahaan)->get();
         // dd($transaksi);
+        $masterShift = MasterShift::get();
         return view('transaksi.kasir.edit', compact(
             'transaksi',
             'Perawatan',
@@ -580,7 +594,7 @@ class TransaksiController extends Controller
             'kasir',
             'totalPasienBaru',
             'totalPasienLama',
-            'shift','dental'
+            'shift','dental','masterShift'
         ));
     }
 
@@ -619,9 +633,24 @@ class TransaksiController extends Controller
             'Kasir' => 'required|exists:users,id',
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => ['required', 'array', 'min:1'],
-            'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id',  // ensure no null values, and exists in master
+            'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id',
             'NominalBayar' => 'required|array',
-            'NominalBayar.*' => 'required|numeric|min:0',
+            'NominalBayar.*' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    // Dapatkan indeks misal NominalBayar.0
+                    $matches = [];
+                    if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
+                        $idx = $matches[1];
+                        $totalBiaya = $request->TotalBiaya;
+                        if ($value > $totalBiaya) {
+                            $fail('Nominal pembayaran tidak boleh lebih besar dari total biaya.');
+                        }
+                    }
+                }
+            ],
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
@@ -651,9 +680,11 @@ class TransaksiController extends Controller
             'NominalBayar.*.required' => 'Nominal pembayaran tidak boleh kosong atau nol',
             'NominalBayar.*.numeric' => 'Nominal pembayaran harus angka',
             'NominalBayar.*.min' => 'Nominal pembayaran harus lebih dari 0',
+            'NominalBayar.*.max_total' => 'Nominal pembayaran tidak boleh lebih besar dari total biaya',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
             'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
+
 
         // dd($metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran]);
         // 🔄 Update Header Transaksi
@@ -749,11 +780,6 @@ class TransaksiController extends Controller
                 $insentif->save();
             }
             $transaksi->getInsentif()->delete();
-
-            foreach ($transaksi->getMetodePembayaran as $metode) {
-                $metode->UserDelete = $userDelete;
-                $metode->save();
-            }
             $transaksi->getMetodePembayaran()->delete();
 
             $transaksi->UserDelete = $userDelete;

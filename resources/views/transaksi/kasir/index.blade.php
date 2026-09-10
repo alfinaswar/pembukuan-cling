@@ -14,11 +14,10 @@
                             <i class="ti ti-plus"></i> Transaksi Baru
                         </a>
                     @endif
-
                 </div>
-                <div class="card-body">
 
-                    {{-- 🔹 FILTER TANGGAL + KLINIK --}}
+                <div class="card-body">
+                    {{-- 🔹 FILTER TANGGAL + KLINIK + DENTAL UNIT --}}
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Tanggal Mulai</label>
@@ -41,9 +40,8 @@
                                 @endforeach
                             </select>
                         </div>
-                        {{-- @php
-                            dd(auth()->user()->getRoleNames()->toArray());
-                        @endphp --}}
+
+                        {{-- Filter Klinik (Hanya Superadmin) --}}
                         @if (auth()->user() && in_array('Superadmin', auth()->user()->getRoleNames()->toArray()))
                             <div class="col-md-3">
                                 <label class="form-label small text-muted">Klinik</label>
@@ -56,6 +54,14 @@
                             </div>
                         @endif
 
+                        {{-- 🔥 Filter Dental Unit (Dinamis) --}}
+                        <div class="col-md-3" id="wrapper_dental_unit" style="display: none;">
+                            <label class="form-label small text-muted">Dental Unit</label>
+                            <select id="filter_dental_unit" class="form-control form-control-sm">
+                                <option value="">Semua Dental Unit</option>
+                            </select>
+                        </div>
+
                         <div class="col-12 d-flex justify-content-end gap-2 mt-3">
                             <button id="btnFilter" class="btn btn-primary btn-sm">
                                 <i class="ti ti-filter me-1"></i> Filter
@@ -65,9 +71,9 @@
                             </button>
                         </div>
                     </div>
-
-
                     {{-- END FILTER --}}
+
+                    {{-- SUMMARY CARDS --}}
                     <div class="row mb-4">
                         <div class="col-md-3">
                             <div class="card shadow-sm border-0 h-100">
@@ -137,12 +143,11 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
+                    {{-- DATATABLE --}}
                     <div class="table-responsive">
-                        <table id="transaksiKasirTable" class="table table-striped table-bordered align-middle"
-                            style="width: 100%;">
+                        <table id="transaksiKasirTable" class="table table-striped table-bordered align-middle" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -187,30 +192,81 @@
             const today = new Date().toISOString().split('T')[0];
             $('#filter_tanggal_mulai, #filter_tanggal_akhir').val(today);
 
-            // Fungsi reload DataTable dengan parameter filter
+            // ==========================================
+            // 🔥 FUNGSI LOAD DENTAL UNIT DINAMIS
+            // ==========================================
+            function loadDentalUnits(kodeKlinik) {
+                if (!kodeKlinik) {
+                    $('#wrapper_dental_unit').hide();
+                    $('#filter_dental_unit').html('<option value="">Semua Dental Unit</option>');
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('api.dental-units') }}",
+                    method: 'GET',
+                    data: { kode_klinik: kodeKlinik },
+                    success: function(response) {
+                        if (response.data && response.data.length > 0) {
+                            let options = '<option value="">Semua Dental Unit</option>';
+                            response.data.forEach(function(unit) {
+                                options += `<option value="${unit}">${unit}</option>`;
+                            });
+                            $('#filter_dental_unit').html(options);
+                            $('#wrapper_dental_unit').show(); // Tampilkan jika ada data
+                        } else {
+                            $('#wrapper_dental_unit').hide(); // Sembunyikan jika tidak ada
+                            $('#filter_dental_unit').html('<option value="">Semua Dental Unit</option>');
+                        }
+                    },
+                    error: function() {
+                        $('#wrapper_dental_unit').hide();
+                    }
+                });
+            }
+
+            // 1. Trigger untuk Superadmin: Saat pilihan Klinik berubah
+            $('#filter_klinik').on('change', function() {
+                loadDentalUnits($(this).val());
+            });
+
+            // 2. Trigger untuk User Biasa: Load otomatis saat halaman dibuka berdasarkan kodeperusahaan
+            @if (!in_array('Superadmin', auth()->user()->getRoleNames()->toArray()))
+                $(document).ready(function() {
+                    const userKlinik = '{{ auth()->user()->kodeperusahaan ?? "" }}';
+                    if (userKlinik) {
+                        loadDentalUnits(userKlinik);
+                    }
+                });
+            @endif
+
+            // ==========================================
+            // FUNGSI RELOAD DATATABLE
+            // ==========================================
             function reloadTable() {
-                const mulai = $('#filter_tanggal_mulai').val();
-                const akhir = $('#filter_tanggal_akhir').val();
-                const shift = $('#filter_shift').val();
-                const klinik = $('#filter_klinik').val();
                 $('#transaksiKasirTable').DataTable().ajax.reload();
             }
 
-            // Event klik tombol Filter
             $('#btnFilter').on('click', function() {
                 reloadTable();
             });
 
-            // Event klik tombol Reset → kembali ke hari ini
             $('#btnReset').on('click', function() {
                 const today = new Date().toISOString().split('T')[0];
                 $('#filter_tanggal_mulai, #filter_tanggal_akhir').val(today);
-                $('#filter_shift').val(''); // Reset filter shift ke default (kosong)
-                $('#filter_klinik').val(''); // Reset filter klinik ke default (kosong)
+                $('#filter_shift').val('');
+                $('#filter_klinik').val('');
+
+                // Reset Dental Unit
+                $('#wrapper_dental_unit').hide();
+                $('#filter_dental_unit').html('<option value="">Semua Dental Unit</option>');
+
                 reloadTable();
             });
 
+            // ==========================================
             // TOMBOL DELETE
+            // ==========================================
             $('body').on('click', '.btn-delete', function() {
                 var id = $(this).data('id');
                 Swal.fire({
@@ -219,34 +275,35 @@
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal'
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#d33'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: '{{ route('Transaksi.destroy', ':id') }}'.replace(':id',
-                                id),
+                            url: '{{ route('Transaksi.destroy', ':id') }}'.replace(':id', id),
                             type: 'DELETE',
                             data: {
                                 _token: '{{ csrf_token() }}'
                             },
                             success: function(response) {
-                                if (response.status === 200) {
-                                    Swal.fire('Dihapus!', response.message, 'success');
+                                if (response.status === 200 || response.success) {
+                                    Swal.fire('Dihapus!', response.message || 'Data berhasil dihapus', 'success');
                                     $('#transaksiKasirTable').DataTable().ajax.reload();
                                 } else {
-                                    Swal.fire('Gagal!', response.message, 'error');
+                                    Swal.fire('Gagal!', response.message || 'Gagal menghapus data', 'error');
                                 }
                             },
                             error: function(xhr) {
-                                Swal.fire('Gagal!', xhr.responseJSON?.message ??
-                                    'Terjadi kesalahan saat menghapus.', 'error');
+                                Swal.fire('Gagal!', xhr.responseJSON?.message ?? 'Terjadi kesalahan saat menghapus.', 'error');
                             }
                         });
                     }
                 });
             });
 
-            // DATATABLES
+            // ==========================================
+            // DATATABLES CONFIGURATION
+            // ==========================================
             const table = $('#transaksiKasirTable').DataTable({
                 responsive: true,
                 serverSide: true,
@@ -255,11 +312,11 @@
                 ajax: {
                     url: "{{ route('Transaksi.index') }}",
                     data: function(d) {
-                        // Kirim parameter filter ke server
                         d.tanggal_mulai = $('#filter_tanggal_mulai').val();
                         d.tanggal_akhir = $('#filter_tanggal_akhir').val();
                         d.shift = $('#filter_shift').val();
                         d.klinik = $('#filter_klinik').val();
+                        d.dental_unit = $('#filter_dental_unit').val(); // 🔥 Kirim parameter dental unit
                     }
                 },
                 language: {
@@ -269,56 +326,19 @@
                         previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
                     }
                 },
-                columns: [{
-                        data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'Kode',
-                        name: 'Kode'
-                    },
-                    {
-                        data: 'Tanggal',
-                        name: 'Tanggal'
-                    },
-                    {
-                        data: 'NamaPasien',
-                        name: 'NamaPasien'
-                    },
-                    {
-                        data: 'JenisPasien',
-                        name: 'JenisPasien'
-                    },
-                    {
-                        data: 'MetodePembayaran',
-                        name: 'MetodePembayaran'
-                    },
-                    {
-                        data: 'Layanan',
-                        name: 'Layanan'
-                    },
-                    {
-                        data: 'TotalBayar',
-                        name: 'TotalBayar'
-                    },
-                    {
-                        data: 'Petugas',
-                        name: 'Petugas'
-                    },
-                    {
-                        data: 'Shift',
-                        name: 'Shift'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    }
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'Kode', name: 'Kode' },
+                    { data: 'Tanggal', name: 'Tanggal' },
+                    { data: 'NamaPasien', name: 'NamaPasien' },
+                    { data: 'JenisPasien', name: 'JenisPasien' },
+                    { data: 'MetodePembayaran', name: 'MetodePembayaran' },
+                    { data: 'Layanan', name: 'Layanan' },
+                    { data: 'TotalBayar', name: 'TotalBayar' },
+                    { data: 'Petugas', name: 'Petugas' },
+                    { data: 'Shift', name: 'Shift' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],
-                // ✅ Pastikan default load = hari ini
                 initComplete: function() {
                     reloadTable();
                 },
@@ -326,9 +346,8 @@
                     const json = settings.json;
                     if (json && json.summary) {
                         const s = json.summary;
-                        // Format rupiah
-                        const formatRp = (val) =>
-                            'Rp ' + parseInt(val).toLocaleString('id-ID');
+                        const formatRp = (val) => 'Rp ' + parseInt(val || 0).toLocaleString('id-ID');
+
                         $('#sum_omset').text(formatRp(s.total_omset));
                         $('#sum_pasien_baru').text(s.pasien_baru);
                         $('#sum_pasien_lama').text(s.pasien_lama);

@@ -577,7 +577,7 @@
                                 <a href="{{ route('MasterShift.index') }}" class="btn-cancel">
                                     <i data-lucide="x" style="width:15px;height:15px;"></i> Batal
                                 </a>
-                                <button type="submit" class="btn-save">
+                                <button type="submit" class="btn-save" id="btnKonfirmasiSimpan">
                                     <i data-lucide="save" style="width:15px;height:15px;"></i> Simpan Transaksi
                                 </button>
                             </div>
@@ -810,6 +810,8 @@
 @endsection
 
 @push('scripts')
+    <!-- Tambah SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let perawatanCount = 1;
         let adminAutoFilled = false;
@@ -854,22 +856,56 @@
             recalculateTotal(); // Langsung hitung total
         });
 
-        // Handle submit form
-        $('#formTransaksiKasir').on('submit', function() {
-            // 1. Cegah double submit & tampilkan loading spinner
-            let $btn = $(this).find('button[type="submit"]');
-            $btn.prop('disabled', true)
-                .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Menyimpan...');
+        // Sweet Alert shift confirmation on submit
+        $('#formTransaksiKasir').on('submit', function(e) {
+            e.preventDefault(); // cegah submit default sampai konfirmasi
 
-            // 2. Convert format Rupiah ke angka mentah sebelum submit
-            $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
+            // Ambil info shift dari Ringkasan
+            let pasienBaru = '{{ $totalPasienBaru }}';
+            let pasienLama = '{{ $totalPasienLama }}';
+            let tanggal = $('#mdate').val();
 
-            $('.biaya-perawatan').each(function() {
-                $(this).val(parseRupiah($(this).val()));
-            });
+            Swal.fire({
+                title: 'Konfirmasi Simpan Transaksi',
+                html:
+                  `<div style='margin-bottom:12px'>
+                      <b>Pastikan Shift, Tanggal, dan Data Benar!</b>
+                   </div>
+                   <div style='text-align:left;'>
+                      <div><strong>Tanggal:</strong> <span style='float:right;'>${tanggal}</span></div>
+                      <div><strong>Shift:</strong> <span style='float:right;'>{{ auth()->user()?->getShift?->Nama ?? '-' }}</span></div>
 
-            $('.nominal-input-bayar').each(function() {
-                $(this).val(parseRupiah($(this).val()));
+
+                   </div>
+                   <div class="alert alert-warning mt-2" style="padding:6px 8px;font-size:.95em;">
+                        <i class="bi bi-info-circle"></i> Pastikan Anda sudah memilih shift yang benar sebelum menyimpan transaksi.
+                   </div>`,
+
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, simpan dan lanjut',
+                cancelButtonText: 'Batal',
+                focusConfirm: false,
+                customClass: {
+                    popup: 'swal2-shift-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 1. Cegah double submit & tampilkan loading spinner
+                    let $btn = $('#formTransaksiKasir').find('button[type="submit"]');
+                    $btn.prop('disabled', true)
+                        .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Menyimpan...');
+                    // 2. Convert format Rupiah ke angka mentah sebelum submit
+                    $('#biaya_admin').val(parseRupiah($('#biaya_admin').val()));
+                    $('.biaya-perawatan').each(function() {
+                        $(this).val(parseRupiah($(this).val()));
+                    });
+                    $('.nominal-input-bayar').each(function() {
+                        $(this).val(parseRupiah($(this).val()));
+                    });
+                    // 3. Akhirnya submit
+                    e.target.submit();
+                }
             });
         });
 

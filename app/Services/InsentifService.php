@@ -47,7 +47,7 @@ class InsentifService
         $pasienLama = (clone $baseQuery)
             ->where('JenisPasien', 'Lama')
             ->count();
- 
+
         $pasienBaru = (clone $baseQuery)
             ->where('JenisPasien', 'Baru')
             ->count();
@@ -81,7 +81,7 @@ class InsentifService
             // 🔥 HANDLE RULE KHUSUS
             // =================================================
 
-            // A. Rule: Insentif Hari Libur (1x per HARI)
+            // A. Rule: Insentif Hari Libur (1x per SHIFT)
             if ($rule->JenisRule == 'insentif_hari_libur') {
                 $userId = $this->getUserByRole($transaksi, $rule->Role);
                 if (!$userId)
@@ -91,10 +91,12 @@ class InsentifService
                 if (!$isHoliday)
                     continue;
 
+                // Cek insentif hari libur sudah didapatkan untuk user pada SHIFT yang sama
                 $sudahDapatHariIniQuery = InsentifKaryawan::where('UserId', $userId)
                     ->where('Role', $rule->Role)
                     ->where('JenisRule', $rule->JenisRule)
                     ->whereDate('Tanggal', $tanggal)
+                    ->where('Shift', $shift)
                     ->where('KodeCabang', $kodeCabang);
 
                 if ($dentalUnit) {
