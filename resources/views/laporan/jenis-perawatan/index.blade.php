@@ -133,21 +133,21 @@
                             <!-- DataTable -->
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0" id="previewTable">
-                                    <thead class="thead-sm text-uppercase fs-xxs">
-                                        <tr>
-                                            <th style="width: 60px;" class="text-center">#</th>
-                                            <th style="width: 50%;">Nama Perawatan</th>
-                                            <th style="width: 20%;" class="text-center">Jumlah Terjual</th>
-                                            <th style="width: 30%;" class="text-end">Total Revenue</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tableBody">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">
-                                                Klik tombol Preview untuk menampilkan data
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                   <thead class="thead-sm text-uppercase fs-xxs">
+    <tr>
+        <th style="width: 60px;" class="text-center">#</th>
+        <th style="width: 50%;">Nama Perawatan</th>
+        <th style="width: 20%;" class="text-center">Jumlah Terjual</th>
+        <th style="width: 30%;" class="text-end">Total Revenue</th>
+    </tr>
+</thead>
+<tbody id="tableBody">
+    <tr>
+        <td colspan="4" class="text-center text-muted py-4">
+            Klik tombol Preview untuk menampilkan data
+        </td>
+    </tr>
+</tbody>
                                 </table>
                             </div>
                         </div>
@@ -227,72 +227,115 @@
 
 
             function previewData() {
-                const formData = getFormData();
+    const formData = getFormData();
 
-                $.ajax({
-                    url: '{{ route("laporan-jenis-perawatan.preview") }}',
-                    method: 'POST',
-                    data: formData,
-                    traditional: true, // ✅ Penting untuk mengirim array via jQuery AJAX
-                    beforeSend: function() {
-                        $('#tableBody').html('<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
-                        $('#previewSection').show();
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            let html = '';
-                            let totalTerjual = 0;
-                            let totalRevenue = 0;
+    $.ajax({
+        url: '{{ route("laporan-jenis-perawatan.preview") }}',
+        method: 'POST',
+        data: formData,
+        traditional: true,
+        beforeSend: function() {
+            $('#tableBody').html(`
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            $('#previewSection').show();
+        },
+        success: function(response) {
+            if (response.success) {
+                let html = '';
+                let totalTerjual = 0;
+                let totalRevenue = 0;
+                const totalBiayaAdmin = parseFloat(response.total_biaya_admin) || 0;
 
-                            if (response.data.length === 0) {
-                                html = '<tr><td colspan="4" class="text-center text-muted py-4">Tidak ada data untuk filter ini</td></tr>';
-                            } else {
-                                response.data.forEach((item, index) => {
-                                    totalTerjual += parseInt(item.jumlah_terjual);
-                                    totalRevenue += parseFloat(item.total_revenue);
-                                    html += `
-                                        <tr>
-                                            <td class="text-center">${index + 1}</td>
-                                            <td><span class="fw-semibold text-primary">${item.nama_perawatan}</span></td>
-                                            <td class="text-center">
-                                                <span class="badge bg-info">${item.jumlah_terjual}x</span>
-                                            </td>
-                                            <td class="text-end fw-semibold">Rp ${formatRupiah(item.total_revenue)}</td>
-                                        </tr>
-                                    `;
-                                });
+                if (response.data.length === 0) {
+                    html = '<tr><td colspan="4" class="text-center text-muted py-4">Tidak ada data untuk filter ini</td></tr>';
+                } else {
+                    // Data rows
+                    response.data.forEach((item, index) => {
+                        totalTerjual += parseInt(item.jumlah_terjual);
+                        totalRevenue += parseFloat(item.total_revenue);
+                        html += `
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td><span class="fw-semibold text-primary">${item.nama_perawatan}</span></td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">${item.jumlah_terjual}x</span>
+                                </td>
+                                <td class="text-end fw-semibold">Rp ${formatRupiah(item.total_revenue)}</td>
+                            </tr>
+                        `;
+                    });
 
-                                // Add total row
-                                html += `
-                                    <tr class="table-primary fw-bold">
-                                        <td colspan="2" class="text-end">Total:</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-primary">${totalTerjual}x</span>
-                                        </td>
-                                        <td class="text-end">Rp ${formatRupiah(totalRevenue)}</td>
-                                    </tr>
-                                `;
-                            }
+                    const grandTotal = totalRevenue + totalBiayaAdmin;
 
-                            $('#tableBody').html(html);
-                            $('#totalData').text(response.data.length + ' Jenis Perawatan');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message || 'Terjadi kesalahan'
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: xhr.responseJSON?.message || 'Terjadi kesalahan saat memuat data'
-                        });
-                    }
+                    // ✅ Baris 1: Subtotal Revenue
+                    html += `
+                        <tr class="table-light fw-semibold" style="background-color: #f8f9fa !important;">
+                            <td colspan="3" class="text-end" style="font-size: 14px;">
+                                <i class="ti ti-coin me-1 text-info"></i>Subtotal Revenue:
+                            </td>
+                            <td class="text-end fw-bold" style="color: #0d6efd;">
+                                Rp ${formatRupiah(totalRevenue)}
+                            </td>
+                        </tr>
+                    `;
+
+                    // ✅ Baris 2: Total Biaya Admin (terpisah)
+                    html += `
+                        <tr class="table-light fw-semibold" style="background-color: #fff8e1 !important;">
+                            <td colspan="3" class="text-end" style="font-size: 14px;">
+                                <i class="ti ti-settings me-1 text-warning"></i>Total Biaya Admin:
+                            </td>
+                            <td class="text-end fw-bold" style="color: #f59e0b;">
+                                Rp ${formatRupiah(totalBiayaAdmin)}
+                            </td>
+                        </tr>
+                    `;
+
+                    // ✅ Baris 3: Grand Total (Revenue + Admin)
+                    html += `
+                        <tr class="fw-bold" style="background: linear-gradient(90deg, #198754 0%, #20c997 100%); color: white;">
+                            <td colspan="3" class="text-end" style="font-size: 16px; letter-spacing: 0.5px;">
+                                <i class="ti ti-calculator me-1"></i>GRAND TOTAL:
+                            </td>
+                            <td class="text-end" style="font-size: 18px;">
+                                Rp ${formatRupiah(grandTotal)}
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                $('#tableBody').html(html);
+
+                // Update badge header
+                const grandTotal = totalRevenue + totalBiayaAdmin;
+                $('#totalData').html(`
+                    ${response.data.length} Jenis Perawatan
+                    <span class="ms-2 badge bg-success">Grand Total: Rp ${formatRupiah(grandTotal)}</span>
+                `);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'Terjadi kesalahan'
                 });
             }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message || 'Terjadi kesalahan saat memuat data'
+            });
+        }
+    });
+}
 
             function downloadData() {
                 const formData = getFormData();

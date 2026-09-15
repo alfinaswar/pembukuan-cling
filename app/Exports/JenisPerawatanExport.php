@@ -12,17 +12,19 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use Illuminate\Support\Collection;
 
 class JenisPerawatanExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents, WithTitle
 {
     protected $data;
     protected $filterInfo;
+    protected $totalBiayaAdmin;
 
-    public function __construct($data, $filterInfo = [])
+    // ✅ Tambah parameter $totalBiayaAdmin
+    public function __construct($data, $filterInfo = [], $totalBiayaAdmin = 0)
     {
         $this->data = $data;
         $this->filterInfo = $filterInfo;
+        $this->totalBiayaAdmin = $totalBiayaAdmin;
     }
 
     public function title(): string
@@ -38,13 +40,7 @@ class JenisPerawatanExport implements FromCollection, WithHeadings, WithMapping,
     public function headings(): array
     {
         return [
-            [
-                'Nama Perawatan',
-                'Jumlah Terjual',
-                'Total Revenue',
-                'Biaya Admin',      // ✅ BARU
-                'Grand Total',      // ✅ BARU
-            ],
+            ['Nama Perawatan', 'Jumlah Terjual', 'Total Revenue'],
         ];
     }
 
@@ -54,8 +50,6 @@ class JenisPerawatanExport implements FromCollection, WithHeadings, WithMapping,
             $row['nama_perawatan'] ?? '-',
             $row['jumlah_terjual'] ?? 0,
             $row['total_revenue'] ?? 0,
-            $row['total_admin'] ?? 0,     // ✅ BARU
-            $row['grand_total'] ?? 0,     // ✅ BARU
         ];
     }
 
@@ -65,210 +59,139 @@ class JenisPerawatanExport implements FromCollection, WithHeadings, WithMapping,
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // ===== 1. INSERT HEADER LAPORAN =====
+                // ===== 1. HEADER LAPORAN (4 baris) =====
                 $sheet->insertNewRowBefore(1, 4);
 
-                // Row 1: Judul
                 $sheet->setCellValue('A1', 'LAPORAN JENIS PERAWATAN');
-                $sheet->mergeCells('A1:E1'); // ✅ E1 karena sekarang 5 kolom
+                $sheet->mergeCells('A1:C1');
                 $sheet->getStyle('A1')->applyFromArray([
                     'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '1F4E79'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1F4E79']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
                 $sheet->getRowDimension(1)->setRowHeight(30);
 
-                // Row 2: Tanggal Cetak
                 $sheet->setCellValue('A2', 'Tanggal Cetak: ' . date('d/m/Y H:i') . ' WIB');
-                $sheet->mergeCells('A2:E2');
+                $sheet->mergeCells('A2:C2');
                 $sheet->getStyle('A2')->applyFromArray([
                     'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '555555']],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'E8EEF4'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8EEF4']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                // Row 3: Filter Info
-                $filterText = 'Filter: ';
+                // Filter info
                 $parts = [];
                 $parts[] = !empty($this->filterInfo['klinik']) && $this->filterInfo['klinik'] !== 'Semua'
                     ? 'Klinik [' . $this->filterInfo['klinik'] . ']'
                     : 'Klinik [Semua]';
-
                 $parts[] = !empty($this->filterInfo['jenis_perawatan']) && $this->filterInfo['jenis_perawatan'] !== 'Semua'
                     ? 'Jenis Perawatan [' . $this->filterInfo['jenis_perawatan'] . ']'
                     : 'Jenis Perawatan [Semua]';
-
                 if (!empty($this->filterInfo['tanggal_mulai']) && !empty($this->filterInfo['tanggal_akhir'])) {
                     $parts[] = 'Periode [' . \Carbon\Carbon::parse($this->filterInfo['tanggal_mulai'])->format('d/m/Y')
                         . ' - ' . \Carbon\Carbon::parse($this->filterInfo['tanggal_akhir'])->format('d/m/Y') . ']';
                 }
-                $filterText .= implode(' | ', $parts);
-
+                $filterText = 'Filter: ' . implode(' | ', $parts);
                 $sheet->setCellValue('A3', $filterText);
-                $sheet->mergeCells('A3:E3');
+                $sheet->mergeCells('A3:C3');
                 $sheet->getStyle('A3')->applyFromArray([
                     'font' => ['size' => 10, 'color' => ['rgb' => '333333']],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F5F7FA'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F5F7FA']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                // Row 4: Spacer
                 $sheet->getRowDimension(4)->setRowHeight(8);
 
-                // ===== 2. STYLE HEADER KOLOM (row 5) =====
+                // ===== 2. HEADER KOLOM (row 5) =====
                 $headerRow = 5;
-                $sheet->getStyle('A' . $headerRow . ':E' . $headerRow)->applyFromArray([
+                $sheet->getStyle('A' . $headerRow . ':C' . $headerRow)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '2E75B6'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                        'wrapText' => true,
-                    ],
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '1F4E79'],
-                        ],
-                    ],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2E75B6']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '1F4E79']]],
                 ]);
                 $sheet->getRowDimension($headerRow)->setRowHeight(30);
 
-                // ===== 3. STYLE DATA ROWS =====
+                // ===== 3. DATA ROWS =====
                 $lastDataRow = $sheet->getHighestRow();
                 $dataStartRow = $headerRow + 1;
 
                 if ($lastDataRow >= $dataStartRow) {
                     for ($r = $dataStartRow; $r <= $lastDataRow; $r++) {
                         $bgColor = ($r % 2 == 0) ? 'F2F7FB' : 'FFFFFF';
-                        $sheet->getStyle('A' . $r . ':E' . $r)->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => $bgColor],
-                            ],
-                            'borders' => [
-                                'allBorders' => [
-                                    'borderStyle' => Border::BORDER_THIN,
-                                    'color' => ['rgb' => 'D0D7DE'],
-                                ],
-                            ],
-                            'alignment' => [
-                                'vertical' => Alignment::VERTICAL_CENTER,
-                                'wrapText' => true,
-                            ],
+                        $sheet->getStyle('A' . $r . ':C' . $r)->applyFromArray([
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D0D7DE']]],
                         ]);
                     }
 
-                    // ✅ Format Rupiah untuk kolom C, D, E (revenue, admin, grand total)
-                    $sheet->getStyle('C' . $dataStartRow . ':E' . $lastDataRow)
+                    $sheet->getStyle('C' . $dataStartRow . ':C' . $lastDataRow)
                         ->getNumberFormat()
                         ->setFormatCode('"Rp"#,##0');
 
-                    // ✅ Alignment kanan untuk semua angka (B, C, D, E)
-                    $sheet->getStyle('B' . $dataStartRow . ':E' . $lastDataRow)
+                    $sheet->getStyle('B' . $dataStartRow . ':C' . $lastDataRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-                    // ✅ Warna khusus untuk kolom Biaya Admin (oranye)
-                    $sheet->getStyle('D' . $dataStartRow . ':D' . $lastDataRow)->applyFromArray([
-                        'font' => ['color' => ['rgb' => 'D97706']],
-                    ]);
-
-                    // ✅ Warna khusus untuk kolom Grand Total (hijau tebal)
-                    $sheet->getStyle('E' . $dataStartRow . ':E' . $lastDataRow)->applyFromArray([
-                        'font' => ['bold' => true, 'color' => ['rgb' => '15803D']],
-                    ]);
                 }
 
-                // ===== 4. FOOTER: TOTAL =====
-                $footerRow = $lastDataRow + 1;
-                $sheet->insertNewRowBefore($footerRow, 1);
-
+                // ===== 4. FOOTER — 3 BARIS (Subtotal, Admin, Grand Total) =====
                 $totalTerjual = 0;
                 $totalRevenue = 0;
-                $totalAdmin = 0;
-                $grandTotal = 0;
-
                 foreach ($this->data as $row) {
                     $totalTerjual += $row['jumlah_terjual'] ?? 0;
                     $totalRevenue += $row['total_revenue'] ?? 0;
-                    $totalAdmin += $row['total_admin'] ?? 0;
-                    $grandTotal += $row['grand_total'] ?? 0;
                 }
+                $grandTotal = $totalRevenue + $this->totalBiayaAdmin;
 
-                $sheet->setCellValue('A' . $footerRow, 'TOTAL');
-                $sheet->mergeCells('A' . $footerRow . ':A' . $footerRow);
-                $sheet->setCellValue('B' . $footerRow, $totalTerjual);
-                $sheet->setCellValue('C' . $footerRow, $totalRevenue);
-                $sheet->setCellValue('D' . $footerRow, $totalAdmin);
-                $sheet->setCellValue('E' . $footerRow, $grandTotal);
-
-                $sheet->getStyle('A' . $footerRow . ':E' . $footerRow)->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '1F4E79']],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'D6E4F0'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_RIGHT,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '1F4E79'],
-                        ],
-                    ],
+                // Baris Subtotal Revenue
+                $subRow = $lastDataRow + 1;
+                $sheet->setCellValue('A' . $subRow, 'Subtotal Revenue');
+                $sheet->mergeCells('A' . $subRow . ':B' . $subRow);
+                $sheet->setCellValue('C' . $subRow, $totalRevenue);
+                $sheet->getStyle('A' . $subRow . ':C' . $subRow)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0D6EFD']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E7F1FF']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '1F4E79']]],
                 ]);
+                $sheet->getStyle('A' . $subRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle('C' . $subRow)->getNumberFormat()->setFormatCode('"Rp"#,##0');
 
-                // ✅ Label TOTAL di kolom A center
-                $sheet->getStyle('A' . $footerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-                // ✅ Format Rupiah untuk kolom C, D, E di footer
-                $sheet->getStyle('C' . $footerRow . ':E' . $footerRow)
-                    ->getNumberFormat()
-                    ->setFormatCode('"Rp"#,##0');
-
-                // ✅ Grand Total footer pakai highlight
-                $sheet->getStyle('E' . $footerRow)->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 13, 'color' => ['rgb' => '15803D']],
+                // Baris Total Biaya Admin
+                $adminRow = $subRow + 1;
+                $sheet->setCellValue('A' . $adminRow, 'Total Biaya Admin');
+                $sheet->mergeCells('A' . $adminRow . ':B' . $adminRow);
+                $sheet->setCellValue('C' . $adminRow, $this->totalBiayaAdmin);
+                $sheet->getStyle('A' . $adminRow . ':C' . $adminRow)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'F59E0B']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFF8E1']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '1F4E79']]],
                 ]);
+                $sheet->getStyle('A' . $adminRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle('C' . $adminRow)->getNumberFormat()->setFormatCode('"Rp"#,##0');
 
-                // ===== 5. FREEZE PANE =====
+                // Baris Grand Total
+                $grandRow = $adminRow + 1;
+                $sheet->setCellValue('A' . $grandRow, 'GRAND TOTAL');
+                $sheet->mergeCells('A' . $grandRow . ':B' . $grandRow);
+                $sheet->setCellValue('C' . $grandRow, $grandTotal);
+                $sheet->getStyle('A' . $grandRow . ':C' . $grandRow)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 13, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '198754']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '14532D']]],
+                ]);
+                $sheet->getStyle('A' . $grandRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle('C' . $grandRow)->getNumberFormat()->setFormatCode('"Rp"#,##0');
+                $sheet->getRowDimension($grandRow)->setRowHeight(30);
+
+                // ===== 5. FREEZE & LAYOUT =====
                 $sheet->freezePane('A' . ($headerRow + 1));
-
-                // ===== 6. SET COLUMN WIDTHS =====
-                $sheet->getColumnDimension('A')->setWidth(40); // Nama Perawatan
-                $sheet->getColumnDimension('B')->setWidth(15); // Jumlah Terjual
-                $sheet->getColumnDimension('C')->setWidth(20); // Total Revenue
-                $sheet->getColumnDimension('D')->setWidth(20); // Biaya Admin
-                $sheet->getColumnDimension('E')->setWidth(22); // Grand Total
-
-                // ===== 7. PRINT SETTINGS =====
+                $sheet->getColumnDimension('A')->setWidth(40);
+                $sheet->getColumnDimension('B')->setWidth(15);
+                $sheet->getColumnDimension('C')->setWidth(22);
                 $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-                $sheet->getPageSetup()->setFitToWidth(1);
-                $sheet->getPageSetup()->setFitToHeight(0);
             },
         ];
     }

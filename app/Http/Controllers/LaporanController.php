@@ -1210,28 +1210,37 @@ class LaporanController extends Controller
             $jenisPerawatanIds = [$jenisPerawatanIds];
         }
         $jenisPerawatanIds = $jenisPerawatanIds ?: [];
+
+        // Closure untuk scope filter transaksi (reusable)
+        $scopeTransaksi = fn($q) => $q
+            ->when($klinikId, fn($qq) => $qq->where('KodeCabang', $klinikId))
+            ->when($request->tanggal_mulai, fn($qq) => $qq->whereDate('Tanggal', '>=', $request->tanggal_mulai))
+            ->when($request->tanggal_akhir, fn($qq) => $qq->whereDate('Tanggal', '<=', $request->tanggal_akhir))
+            ->when(!empty($jenisPerawatanIds), function ($qq) use ($jenisPerawatanIds) {
+                $qq->whereHas('TransaksiDetail', fn($q2) => $q2->whereIn('JenisPerawatan', $jenisPerawatanIds));
+            });
+
+        // ✅ Query 1: Data per jenis perawatan (tanpa pembagian admin)
         $query = TransaksiDetail::select(
             'transaksi_details.JenisPerawatan',
             \DB::raw('COUNT(*) as jumlah_penjualan'),
             \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
         )
             ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
-            ->when($klinikId, function ($q) use ($klinikId) {
-                $q->where('transaksis.KodeCabang', $klinikId);
-            })
-            ->when($request->tanggal_mulai, function ($q) use ($request) {
-                $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai);
-            })
-            ->when($request->tanggal_akhir, function ($q) use ($request) {
-                $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir);
-            })
-            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
-                $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
-            })
+            ->when($klinikId, fn($q) => $q->where('transaksis.KodeCabang', $klinikId))
+            ->when($request->tanggal_mulai, fn($q) => $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai))
+            ->when($request->tanggal_akhir, fn($q) => $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir))
+            ->when(!empty($jenisPerawatanIds), fn($q) => $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds))
             ->groupBy('transaksi_details.JenisPerawatan')
             ->orderByDesc('total_revenue')
             ->get();
-        $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
+
+        // ✅ Query 2: TOTAL BIAYA ADMIN (terpisah, dari tabel transaksis)
+        $totalBiayaAdmin = Transaksi::where($scopeTransaksi)->sum('BiayaAdmin');
+
+        $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))
+            ->get()
+            ->keyBy('id');
 
         return response()->json([
             'success' => true,
@@ -1243,6 +1252,7 @@ class LaporanController extends Controller
                     'total_revenue' => (float) $item->total_revenue,
                 ];
             }),
+            'total_biaya_admin' => (float) $totalBiayaAdmin, // ✅ FIELD BARU
         ]);
     }
 
@@ -1254,38 +1264,42 @@ class LaporanController extends Controller
             $klinikId = $user->kodeperusahaan;
         }
 
-        // Cast ke array (saat pilih 1 item)
         $jenisPerawatanIds = $request->jenis_perawatan;
         if (is_string($jenisPerawatanIds)) {
             $jenisPerawatanIds = [$jenisPerawatanIds];
         }
         $jenisPerawatanIds = $jenisPerawatanIds ?: [];
 
+        // ✅ Query 1: Data per jenis perawatan
         $query = TransaksiDetail::select(
             'transaksi_details.JenisPerawatan',
             \DB::raw('COUNT(*) as jumlah_penjualan'),
             \DB::raw('COALESCE(SUM(transaksi_details.Biaya), 0) as total_revenue')
         )
             ->join('transaksis', 'transaksis.id', '=', 'transaksi_details.IdTransaksi')
-            ->when($klinikId, function ($q) use ($klinikId) {
-                $q->where('transaksis.KodeCabang', $klinikId);
-            })
-            ->when($request->tanggal_mulai, function ($q) use ($request) {
-                $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai);
-            })
-            ->when($request->tanggal_akhir, function ($q) use ($request) {
-                $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir);
-            })
-            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
-                $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds);
-            })
+            ->when($klinikId, fn($q) => $q->where('transaksis.KodeCabang', $klinikId))
+            ->when($request->tanggal_mulai, fn($q) => $q->whereDate('transaksis.Tanggal', '>=', $request->tanggal_mulai))
+            ->when($request->tanggal_akhir, fn($q) => $q->whereDate('transaksis.Tanggal', '<=', $request->tanggal_akhir))
+            ->when(!empty($jenisPerawatanIds), fn($q) => $q->whereIn('transaksi_details.JenisPerawatan', $jenisPerawatanIds))
             ->groupBy('transaksi_details.JenisPerawatan')
             ->orderByDesc('total_revenue')
             ->get();
 
-        $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))->get()->keyBy('id');
+        // ✅ Query 2: Total Biaya Admin (terpisah)
+        $totalBiayaAdmin = Transaksi::query()
+            ->when($klinikId, fn($q) => $q->where('KodeCabang', $klinikId))
+            ->when($request->tanggal_mulai, fn($q) => $q->whereDate('Tanggal', '>=', $request->tanggal_mulai))
+            ->when($request->tanggal_akhir, fn($q) => $q->whereDate('Tanggal', '<=', $request->tanggal_akhir))
+            ->when(!empty($jenisPerawatanIds), function ($q) use ($jenisPerawatanIds) {
+                $q->whereHas('TransaksiDetail', fn($qq) => $qq->whereIn('JenisPerawatan', $jenisPerawatanIds));
+            })
+            ->sum('BiayaAdmin');
 
-        // Info untuk Excel header
+        $masterJenisPerawatan = MasterJenisPerawatan::whereIn('id', $query->pluck('JenisPerawatan'))
+            ->get()
+            ->keyBy('id');
+
+        // Info filter untuk header Excel
         $klinikNama = $klinikId
             ? (MasterKlinik::where('Kode', $klinikId)->value('Nama') ?? $klinikId)
             : 'Semua';
@@ -1304,7 +1318,6 @@ class LaporanController extends Controller
             'tanggal_akhir' => $request->tanggal_akhir,
         ];
 
-        // Sesuaikan structure data untuk export
         $data = $query->map(function ($item) use ($masterJenisPerawatan) {
             return [
                 'id' => $item->JenisPerawatan,
@@ -1314,8 +1327,9 @@ class LaporanController extends Controller
             ];
         });
 
+        // ✅ Kirim totalBiayaAdmin ke Export Class
         return Excel::download(
-            new JenisPerawatanExport($data, $filterInfo),
+            new JenisPerawatanExport($data, $filterInfo, (float) $totalBiayaAdmin),
             'Laporan-Jenis-Perawatan-' . date('Y-m-d') . '.xlsx'
         );
     }
