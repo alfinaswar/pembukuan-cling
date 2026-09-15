@@ -409,7 +409,7 @@ class TransaksiController extends Controller
             'Kasir' => 'required|exists:users,id',
 
             // === TAMBAHAN: Validasi Dental Unit Wajib ===
-            'DentalUnit' => 'nullable', // <-- Sesuaikan 'dental_units' dengan nama tabel master dental unit Anda
+            'DentalUnit' => 'nullable',
 
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => [
@@ -427,21 +427,25 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-            'NominalBayar' => [
+            'NominalBayar.*' => [
                 'required',
-                'array',
+                'numeric',
+                'min:0',
                 function ($attribute, $value, $fail) use ($request) {
-                    // Cek jika array
-                    if (is_array($value)) {
-                        $totalNominal = array_sum($value);
-                        $totalBiaya = $request->input('TotalBiaya');
-                        if ($totalNominal > $totalBiaya) {
-                            $fail('Nominal Bayar tidak boleh lebih besar dari total biaya.');
+                    $matches = [];
+                    if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
+                        $allNominalBayar = $request->NominalBayar;
+                        $totalBiaya = $request->TotalBiaya;
+                        $totalNominalBayar = array_sum($allNominalBayar);
+                        if ($totalNominalBayar < $totalBiaya) {
+                            $fail('Total nominal pembayaran tidak boleh kurang dari total biaya.');
+                        } elseif ($totalNominalBayar > $totalBiaya) {
+                            $fail('Total nominal pembayaran tidak boleh lebih dari total biaya.');
                         }
                     }
                 }
             ],
-            'NominalBayar.*' => 'required|numeric|min:0',
+            'NominalBayar' => 'required|numeric|min:0',
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
@@ -640,17 +644,20 @@ class TransaksiController extends Controller
                 'numeric',
                 'min:0',
                 function ($attribute, $value, $fail) use ($request) {
-                    // Dapatkan indeks misal NominalBayar.0
                     $matches = [];
                     if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
-                        $idx = $matches[1];
+                        $allNominalBayar = $request->NominalBayar;
                         $totalBiaya = $request->TotalBiaya;
-                        if ($value > $totalBiaya) {
-                            $fail('Nominal pembayaran tidak boleh lebih besar dari total biaya.');
+                        $totalNominalBayar = array_sum($allNominalBayar);
+                        if ($totalNominalBayar < $totalBiaya) {
+                            $fail('Total nominal pembayaran tidak boleh kurang dari total biaya.');
+                        } elseif ($totalNominalBayar > $totalBiaya) {
+                            $fail('Total nominal pembayaran tidak boleh lebih dari total biaya.');
                         }
                     }
                 }
             ],
+
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
