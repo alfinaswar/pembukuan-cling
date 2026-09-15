@@ -37,25 +37,26 @@
                             @csrf
                             <div class="row g-3">
                                 {{-- Klinik - Only for Superadmin/Management --}}
-                                @if(auth()->user()->hasRole('Superadmin') || auth()->user()->hasRole('Management'))
-                                <div class="col-md-3">
-                                    <label for="klinik_id" class="form-label fw-semibold">
-                                        <i class="ti ti-building me-1"></i>Klinik
-                                    </label>
-                                    <select class="form-select" id="klinik_id" name="klinik_id" style="width: 100%;">
-                                        <option value="">Semua Klinik</option>
-                                        @if(isset($klinik) && count($klinik))
-                                            @foreach($klinik as $item)
-                                                <option value="{{ $item->Kode }}">{{ $item->Nama }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
+                                @if (auth()->user()->hasRole('Superadmin') || auth()->user()->hasRole('Management'))
+                                    <div class="col-md-3">
+                                        <label for="klinik_id" class="form-label fw-semibold">
+                                            <i class="ti ti-building me-1"></i>Klinik
+                                        </label>
+                                        <select class="form-select" id="klinik_id" name="klinik_id" style="width: 100%;">
+                                            <option value="">Semua Klinik</option>
+                                            @if (isset($klinik) && count($klinik))
+                                                @foreach ($klinik as $item)
+                                                    <option value="{{ $item->Kode }}">{{ $item->Nama }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
                                 @else
-                                    @if(isset($klinik) && count($klinik))
-                                        @foreach($klinik as $item)
-                                            @if(auth()->user()->kodeperusahaan == $item->Kode)
-                                                <input type="hidden" id="klinik_id" name="klinik_id" value="{{ $item->Kode }}">
+                                    @if (isset($klinik) && count($klinik))
+                                        @foreach ($klinik as $item)
+                                            @if (auth()->user()->kodeperusahaan == $item->Kode)
+                                                <input type="hidden" id="klinik_id" name="klinik_id"
+                                                    value="{{ $item->Kode }}">
                                             @endif
                                         @endforeach
                                     @endif
@@ -67,7 +68,7 @@
                                         <i class="ti ti-calendar me-1"></i>Tanggal Mulai
                                     </label>
                                     <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai"
-                                           value="{{ date('Y-m-01') }}">
+                                        value="{{ date('Y-m-01') }}">
                                 </div>
 
                                 {{-- Tanggal Akhir --}}
@@ -76,7 +77,7 @@
                                         <i class="ti ti-calendar me-1"></i>Tanggal Akhir
                                     </label>
                                     <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir"
-                                           value="{{ date('Y-m-d') }}">
+                                        value="{{ date('Y-m-d') }}">
                                 </div>
 
                                 {{-- Buttons --}}
@@ -100,9 +101,10 @@
                                         <i class="ti ti-list-check me-1"></i>Jenis Perawatan
                                         <small class="text-muted">(Kosongkan untuk semua jenis)</small>
                                     </label>
-                                    <select class="select2 form-control" id="jenis_perawatan" name="jenis_perawatan[]" multiple>
-                                        @if(isset($jenisPerawatan) && count($jenisPerawatan))
-                                            @foreach($jenisPerawatan as $jp)
+                                    <select class="select2 form-control" id="jenis_perawatan" name="jenis_perawatan[]"
+                                        multiple>
+                                        @if (isset($jenisPerawatan) && count($jenisPerawatan))
+                                            @foreach ($jenisPerawatan as $jp)
                                                 <option value="{{ $jp->id }}">{{ $jp->Nama }}</option>
                                             @endforeach
                                         @endif
@@ -135,15 +137,17 @@
                                 <table class="table table-striped align-middle mb-0" id="previewTable">
                                     <thead class="thead-sm text-uppercase fs-xxs">
                                         <tr>
-                                            <th style="width: 60px;" class="text-center">#</th>
-                                            <th style="width: 50%;">Nama Perawatan</th>
-                                            <th style="width: 20%;" class="text-center">Jumlah Terjual</th>
-                                            <th style="width: 30%;" class="text-end">Total Revenue</th>
+                                            <th style="width: 50px;" class="text-center">#</th>
+                                            <th style="width: 35%;">Nama Perawatan</th>
+                                            <th style="width: 12%;" class="text-center">Jumlah Terjual</th>
+                                            <th style="width: 18%;" class="text-end">Total Revenue</th>
+                                            <th style="width: 17%;" class="text-end">Biaya Admin</th>
+                                            <th style="width: 18%;" class="text-end">Grand Total</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tableBody">
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">
+                                            <td colspan="6" class="text-center text-muted py-4">
                                                 Klik tombol Preview untuk menampilkan data
                                             </td>
                                         </tr>
@@ -161,12 +165,14 @@
 @push('styles')
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
     <style>
         .select2-container--bootstrap-5 .select2-selection {
             min-height: 38px;
             padding: 4px 8px;
         }
+
         .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
             background-color: #0d6efd;
             border: none;
@@ -175,10 +181,12 @@
             border-radius: 4px;
             font-size: 13px;
         }
+
         .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
             color: #fff;
             margin-right: 4px;
         }
+
         .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover {
             color: #ffc107;
         }
@@ -227,72 +235,105 @@
 
 
             function previewData() {
-                const formData = getFormData();
+    const formData = getFormData();
 
-                $.ajax({
-                    url: '{{ route("laporan-jenis-perawatan.preview") }}',
-                    method: 'POST',
-                    data: formData,
-                    traditional: true, // ✅ Penting untuk mengirim array via jQuery AJAX
-                    beforeSend: function() {
-                        $('#tableBody').html('<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
-                        $('#previewSection').show();
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            let html = '';
-                            let totalTerjual = 0;
-                            let totalRevenue = 0;
+    $.ajax({
+        url: '{{ route("laporan-jenis-perawatan.preview") }}',
+        method: 'POST',
+        data: formData,
+        traditional: true,
+        beforeSend: function() {
+            $('#tableBody').html(`
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            $('#previewSection').show();
+        },
+        success: function(response) {
+            if (response.success) {
+                let html = '';
+                let totalTerjual = 0;
+                let totalRevenue = 0;
+                let totalAdmin = 0;
+                let grandTotal = 0;
 
-                            if (response.data.length === 0) {
-                                html = '<tr><td colspan="4" class="text-center text-muted py-4">Tidak ada data untuk filter ini</td></tr>';
-                            } else {
-                                response.data.forEach((item, index) => {
-                                    totalTerjual += parseInt(item.jumlah_terjual);
-                                    totalRevenue += parseFloat(item.total_revenue);
-                                    html += `
-                                        <tr>
-                                            <td class="text-center">${index + 1}</td>
-                                            <td><span class="fw-semibold text-primary">${item.nama_perawatan}</span></td>
-                                            <td class="text-center">
-                                                <span class="badge bg-info">${item.jumlah_terjual}x</span>
-                                            </td>
-                                            <td class="text-end fw-semibold">Rp ${formatRupiah(item.total_revenue)}</td>
-                                        </tr>
-                                    `;
-                                });
+                if (response.data.length === 0) {
+                    html = '<tr><td colspan="6" class="text-center text-muted py-4">Tidak ada data untuk filter ini</td></tr>';
+                } else {
+                    response.data.forEach((item, index) => {
+                        totalTerjual += parseInt(item.jumlah_terjual);
+                        totalRevenue += parseFloat(item.total_revenue);
+                        totalAdmin   += parseFloat(item.total_admin);
+                        grandTotal   += parseFloat(item.grand_total);
 
-                                // Add total row
-                                html += `
-                                    <tr class="table-primary fw-bold">
-                                        <td colspan="2" class="text-end">Total:</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-primary">${totalTerjual}x</span>
-                                        </td>
-                                        <td class="text-end">Rp ${formatRupiah(totalRevenue)}</td>
-                                    </tr>
-                                `;
-                            }
+                        html += `
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td><span class="fw-semibold text-primary">${item.nama_perawatan}</span></td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">${item.jumlah_terjual}x</span>
+                                </td>
+                                <td class="text-end">Rp ${formatRupiah(item.total_revenue)}</td>
+                                <td class="text-end text-warning">Rp ${formatRupiah(item.total_admin)}</td>
+                                <td class="text-end fw-bold text-success">Rp ${formatRupiah(item.grand_total)}</td>
+                            </tr>
+                        `;
+                    });
 
-                            $('#tableBody').html(html);
-                            $('#totalData').text(response.data.length + ' Jenis Perawatan');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message || 'Terjadi kesalahan'
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: xhr.responseJSON?.message || 'Terjadi kesalahan saat memuat data'
-                        });
-                    }
+                    // ✅ Baris Total dengan Grand Total
+                    html += `
+                        <tr class="table-primary fw-bold" style="background: linear-gradient(90deg, #e8f0ff 0%, #f0f8ff 100%);">
+                            <td colspan="2" class="text-end" style="font-size: 15px;">
+                                <i class="ti ti-calculator me-1"></i>TOTAL KESELURUHAN:
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary fs-6 px-3 py-2">${totalTerjual}x</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="fw-semibold">Rp ${formatRupiah(totalRevenue)}</div>
+                            </td>
+                            <td class="text-end text-warning">
+                                <div class="fw-semibold">Rp ${formatRupiah(totalAdmin)}</div>
+                            </td>
+                            <td class="text-end" style="font-size: 16px;">
+                                <div class="fw-bold text-success">
+                                    Rp ${formatRupiah(grandTotal)}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                $('#tableBody').html(html);
+                $('#totalData').text(response.data.length + ' Jenis Perawatan');
+
+                // ✅ Update summary di header card
+                $('#totalData').html(`
+                    ${response.data.length} Jenis Perawatan
+                    <span class="ms-2 badge bg-success">Grand Total: Rp ${formatRupiah(grandTotal)}</span>
+                `);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'Terjadi kesalahan'
                 });
             }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message || 'Terjadi kesalahan saat memuat data'
+            });
+        }
+    });
+}
 
             function downloadData() {
                 const formData = getFormData();
@@ -300,7 +341,7 @@
                 let loadingSwal;
 
                 $.ajax({
-                    url: '{{ route("laporan-jenis-perawatan.download") }}',
+                    url: '{{ route('laporan-jenis-perawatan.download') }}',
                     method: 'POST',
                     data: formData,
                     traditional: true, // ✅ Penting untuk mengirim array
@@ -323,7 +364,8 @@
                         const disposition = xhr.getResponseHeader('Content-Disposition');
                         let filename = 'laporan-jenis-perawatan.xlsx';
                         if (disposition && disposition.indexOf('attachment') !== -1) {
-                            const filenameRegex = /filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?;?/i;
+                            const filenameRegex =
+                                /filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?;?/i;
                             const matches = filenameRegex.exec(disposition);
                             if (matches && matches[1]) {
                                 filename = decodeURIComponent(matches[1]);
