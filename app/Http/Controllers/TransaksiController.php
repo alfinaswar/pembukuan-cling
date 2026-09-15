@@ -428,11 +428,26 @@ class TransaksiController extends Controller
                 }
             ],
             'NominalBayar.*' => [
-                'nullable',
+                'required',
                 'numeric',
                 'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    $matches = [];
+                    if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
+                        $allNominalBayar = $request->NominalBayar;
+                        $totalBiaya = $request->TotalBiaya;
+                        $totalNominalBayar = array_sum($allNominalBayar);
+
+                        if ($totalNominalBayar > $totalBiaya) {
+                            $fail('Akumulasi nominal bayar tidak boleh lebih dari total biaya.');
+                        } elseif ($totalNominalBayar < $totalBiaya) {
+                            $fail('Akumulasi nominal bayar tidak boleh kurang dari total biaya.');
+                        }
+                    }
+                }
             ],
-            'NominalBayar' => 'nullable|numeric|min:0',
+
+
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
@@ -627,11 +642,24 @@ class TransaksiController extends Controller
             'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id',
             'NominalBayar' => 'required|array',
             'NominalBayar.*' => [
-                'nullable',
+                'required',
                 'numeric',
                 'min:0',
-            ],
+                function ($attribute, $value, $fail) use ($request) {
+                    $matches = [];
+                    if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
+                        $allNominalBayar = $request->NominalBayar;
+                        $totalBiaya = $request->TotalBiaya;
+                        $totalNominalBayar = array_sum($allNominalBayar);
 
+                        if ($totalNominalBayar > $totalBiaya) {
+                            $fail('Akumulasi nominal bayar tidak boleh lebih dari total biaya.');
+                        } elseif ($totalNominalBayar < $totalBiaya) {
+                            $fail('Akumulasi nominal bayar tidak boleh kurang dari total biaya.');
+                        }
+                    }
+                }
+            ],
 
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
