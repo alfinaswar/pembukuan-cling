@@ -19,7 +19,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('') }}assets/libs/daterangepicker/daterangepicker.css">
     <link rel="stylesheet" href="{{ asset('') }}assets/libs/sweetalert2/dist/sweetalert2.min.css">
-     <meta name="session-lifetime" content="{{ config('session.lifetime') * 60 }}">
+    <meta name="session-lifetime" content="{{ config('session.lifetime') * 60 }}">
     <title>Cling Dental Klinik</title>
     <style>
         /* ===== SIDEBAR DARK NAVY THEME ===== */
@@ -367,6 +367,39 @@
                                             </a>
                                         </li>
                                     @endcan
+                                    {{-- @can('laporan-transaksi') --}}
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('laporan-transaksi.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-notebook"></i>
+                                            </div>
+                                            <span class="hide-menu">Laporan Transaksi</span>
+                                        </a>
+                                    </li>
+                                    {{-- @endcan --}}
+                                    {{-- @can('laporan-jenis-perawatan') --}}
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('laporan-jenis-perawatan.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-notebook"></i>
+                                            </div>
+                                            <span class="hide-menu">Laporan Perawatan</span>
+                                        </a>
+                                    </li>
+                                    {{-- @endcan --}}
+ @can('laporan-insentif')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-insentif.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Insentif</span>
+                                                </a>
+                                            </li>
+                                        @endcan
                                 </ul>
                             </li>
                         @endcan
@@ -641,30 +674,43 @@
                                                     </li>
                                                 @endcan
 
-                                                    {{-- @can('laporan-transaksi') --}}
-                                                    <li class="sidebar-item">
-                                                        <a href="{{ route('laporan-transaksi.index') }}"
-                                                            class="sidebar-link">
-                                                            <div
-                                                                class="round-16 d-flex align-items-center justify-content-center">
-                                                                <i class="ti ti-notebook"></i>
-                                                            </div>
-                                                            <span class="hide-menu">Laporan Transaksi</span>
-                                                        </a>
-                                                    </li>
-                                                    {{-- @endcan --}}
-                                                    {{-- @can('laporan-jenis-perawatan') --}}
-                                                    <li class="sidebar-item">
-                                                        <a href="{{ route('laporan-jenis-perawatan.index') }}" class="sidebar-link">
-                                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                                <i class="ti ti-notebook"></i>
-                                                            </div>
-                                                            <span class="hide-menu">Laporan Jenis Perawatan</span>
-                                                        </a>
-                                                    </li>
-                                                    {{-- @endcan --}}
-
-
+                                                {{-- @can('laporan-transaksi') --}}
+                                                <li class="sidebar-item">
+                                                    <a href="{{ route('laporan-transaksi.index') }}"
+                                                        class="sidebar-link">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <i class="ti ti-notebook"></i>
+                                                        </div>
+                                                        <span class="hide-menu">Laporan Transaksi</span>
+                                                    </a>
+                                                </li>
+                                                {{-- @endcan --}}
+                                                {{-- @can('laporan-jenis-perawatan') --}}
+                                                <li class="sidebar-item">
+                                                    <a href="{{ route('laporan-jenis-perawatan.index') }}"
+                                                        class="sidebar-link">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <i class="ti ti-notebook"></i>
+                                                        </div>
+                                                        <span class="hide-menu">Laporan Perawatan</span>
+                                                    </a>
+                                                </li>
+                                                {{-- @endcan --}}
+                                                 @can('laporan-insentif')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-insentif.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Insentif</span>
+                                                </a>
+                                            </li>
+                                        @endcan
                                             </ul>
                                         </li>
                                     @endcan
@@ -715,7 +761,8 @@
                                                 @can('master-dentalunit')
                                                     <li class="sidebar-item">
                                                         <a href="{{ route('DentalUnit.index') }}" class="sidebar-link">
-                                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
                                                                 <i class="ti ti-device-heart-monitor"></i>
                                                             </div>
                                                             <span class="hide-menu">Dental Unit</span>
@@ -733,7 +780,7 @@
                                                         </a>
                                                     </li>
                                                 @endcan
-                                                 @can('master-kategori-barang')
+                                                @can('master-kategori-barang')
                                                     <li class="sidebar-item">
                                                         <a href="{{ route('KategoriBarang.index') }}" class="sidebar-link">
                                                             <div
@@ -752,7 +799,6 @@
                                                             <span class="hide-menu">Barang</span>
                                                         </a>
                                                     </li>
-
                                                 @endcan
 
                                             </ul>
@@ -920,28 +966,42 @@
                                                 </a>
                                             </li>
                                         @endcan
-                                          <li class="sidebar-item">
-                                              <a href="{{ route('laporan-transaksi.index') }}"
-                                                  class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'transaksi' ? 'active' : '' }}">
-                                                  <div class="round-16 d-flex justify-content-center align-items-center"
-                                                      style="height: 32px; width: 32px;">
-                                                      <span
-                                                          style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                  </div>
-                                                  <span class="hide-menu">Laporan Transaksi</span>
-                                              </a>
-                                          </li>
-                                          <li class="sidebar-item">
-                                              <a href="{{ route('laporan-jenis-perawatan.index') }}"
-                                                  class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
-                                                  <div class="round-16 d-flex justify-content-center align-items-center"
-                                                      style="height: 32px; width: 32px;">
-                                                      <span
-                                                          style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                  </div>
-                                                  <span class="hide-menu">Laporan Perawatan</span>
-                                              </a>
-                                          </li>
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-transaksi.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'transaksi' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex justify-content-center align-items-center"
+                                                    style="height: 32px; width: 32px;">
+                                                    <span
+                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                </div>
+                                                <span class="hide-menu">Laporan Transaksi</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-jenis-perawatan.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex justify-content-center align-items-center"
+                                                    style="height: 32px; width: 32px;">
+                                                    <span
+                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                </div>
+                                                <span class="hide-menu">Laporan Perawatan</span>
+                                            </a>
+                                        </li>
+                                        @can('laporan-insentif')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-insentif.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Insentif</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+
 
 
                                     </ul>
@@ -1036,25 +1096,24 @@
 
                                         {{-- @endcan --}}
                                         @can('master-kategori-barang')
-                                        <li class="sidebar-item">
-                                            <a href="{{ route('KategoriBarang.index') }}"
-                                                class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'kategori-barang' ? 'active' : '' }}">
-                                                <div class="round-16 d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-categories"></i>
-                                                </div>
-                                                <span class="hide-menu">Kategori Barang</span>
-                                            </a>
-                                        </li>
-                                         <li class="sidebar-item">
-                                            <a href="{{ route('Barang.index') }}"
-                                                class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'barang' ? 'active' : '' }}">
-                                                <div class="round-16 d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-package"></i>
-                                                </div>
-                                                <span class="hide-menu">Barang</span>
-                                            </a>
-                                        </li>
-
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('KategoriBarang.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'kategori-barang' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-categories"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Kategori Barang</span>
+                                                </a>
+                                            </li>
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('Barang.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'barang' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-package"></i>
+                                                    </div>
+                                                    <span class="hide-menu">Barang</span>
+                                                </a>
+                                            </li>
                                         @endcan
 
                                     </ul>
@@ -1151,7 +1210,7 @@
     <script src="{{ asset('') }}assets/js/forms/daterangepicker-init.js"></script>
     <script src="{{ asset('') }}assets/libs/sweetalert2/dist/sweetalert2.min.js"></script>
     <script src="{{ asset('') }}assets/js/forms/sweet-alert.init.js"></script>
-<script src="{{ asset('js/session-timeout.js') }}"></script>
+    <script src="{{ asset('js/session-timeout.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
