@@ -733,7 +733,7 @@
                                                         </a>
                                                     </li>
                                                 @endcan
-                                                 {{-- @can('master-kategori-barang') --}}
+                                                 @can('master-kategori-barang')
                                                     <li class="sidebar-item">
                                                         <a href="{{ route('KategoriBarang.index') }}" class="sidebar-link">
                                                             <div
@@ -753,7 +753,7 @@
                                                         </a>
                                                     </li>
 
-                                                {{-- @endcan --}}
+                                                @endcan
 
                                             </ul>
                                         </li>
@@ -1035,7 +1035,7 @@
                                         </li>
 
                                         {{-- @endcan --}}
-                                        {{-- @can('master-kategori-barang') --}}
+                                        @can('master-kategori-barang')
                                         <li class="sidebar-item">
                                             <a href="{{ route('KategoriBarang.index') }}"
                                                 class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'kategori-barang' ? 'active' : '' }}">
@@ -1055,7 +1055,7 @@
                                             </a>
                                         </li>
 
-                                        {{-- @endcan --}}
+                                        @endcan
 
                                     </ul>
                                 </li>
