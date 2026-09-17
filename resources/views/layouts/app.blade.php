@@ -733,6 +733,28 @@
                                                         </a>
                                                     </li>
                                                 @endcan
+                                                 {{-- @can('master-kategori-barang') --}}
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('KategoriBarang.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-package"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Kategori Barang</span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('Barang.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-package"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Barang</span>
+                                                        </a>
+                                                    </li>
+
+                                                {{-- @endcan --}}
+
                                             </ul>
                                         </li>
                                     @endcan
@@ -1013,6 +1035,28 @@
                                         </li>
 
                                         {{-- @endcan --}}
+                                        {{-- @can('master-kategori-barang') --}}
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('KategoriBarang.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'kategori-barang' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-categories"></i>
+                                                </div>
+                                                <span class="hide-menu">Kategori Barang</span>
+                                            </a>
+                                        </li>
+                                         <li class="sidebar-item">
+                                            <a href="{{ route('Barang.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'barang' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-package"></i>
+                                                </div>
+                                                <span class="hide-menu">Barang</span>
+                                            </a>
+                                        </li>
+
+                                        {{-- @endcan --}}
+
                                     </ul>
                                 </li>
                             @endcan

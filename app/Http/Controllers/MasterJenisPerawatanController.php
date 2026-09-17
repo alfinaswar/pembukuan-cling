@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barang;
 use App\Models\MasterJenisPerawatan;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -41,7 +42,8 @@ class MasterJenisPerawatanController extends Controller
      */
     public function create()
     {
-        return view('master.jenis-perawatan.create');
+        $barang = Barang::get();
+        return view('master.jenis-perawatan.create',compact('barang'));
     }
 
     /**
@@ -82,8 +84,9 @@ class MasterJenisPerawatanController extends Controller
     public function edit($id)
     {
         $id = decrypt($id);
+        $barang = Barang::get();
         $JenisPerawatan = MasterJenisPerawatan::findOrFail($id);
-        return view('master.jenis-perawatan.edit', compact('JenisPerawatan'));
+        return view('master.jenis-perawatan.edit', compact('JenisPerawatan','barang'));
     }
 
     /**
@@ -102,6 +105,7 @@ class MasterJenisPerawatanController extends Controller
 
         $masterJenisPerawatan->update([
             'Nama' => $request->Nama,
+            'Barang' => $request->Barang,
             'Tarif' => str_replace(['Rp ', '.'], '', $request->Tarif),
             'UserUpdate' => auth()->user()->name,
         ]);

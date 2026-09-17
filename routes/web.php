@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DentalUnitController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KategoriBarangController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MasterHariLiburController;
 use App\Http\Controllers\MasterJenisPerawatanController;
@@ -90,6 +92,24 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [MasterMetodePembayaranController::class, 'update'])->name('MetodePembayaran.update');
         Route::get('/show/{id}', [MasterMetodePembayaranController::class, 'show'])->name('MetodePembayaran.show');
         Route::delete('/delete/{id}', [MasterMetodePembayaranController::class, 'destroy'])->name('MetodePembayaran.destroy');
+    });
+    Route::prefix('master/kategori-barang')->group(function () {
+        Route::get('/', [KategoriBarangController::class, 'index'])->name('KategoriBarang.index');
+        Route::get('/create', [KategoriBarangController::class, 'create'])->name('KategoriBarang.create');
+        Route::post('/store', [KategoriBarangController::class, 'store'])->name('KategoriBarang.store');
+        Route::get('/edit/{id}', [KategoriBarangController::class, 'edit'])->name('KategoriBarang.edit');
+        Route::put('/update/{id}', [KategoriBarangController::class, 'update'])->name('KategoriBarang.update');
+        Route::get('/show/{id}', [KategoriBarangController::class, 'show'])->name('KategoriBarang.show');
+        Route::delete('/delete/{id}', [KategoriBarangController::class, 'destroy'])->name('KategoriBarang.destroy');
+    });
+    Route::prefix('master/barang')->group(function () {
+        Route::get('/', [BarangController::class, 'index'])->name('Barang.index');
+        Route::get('/create', [BarangController::class, 'create'])->name('Barang.create');
+        Route::post('/store', [BarangController::class, 'store'])->name('Barang.store');
+        Route::get('/edit/{id}', [BarangController::class, 'edit'])->name('Barang.edit');
+        Route::put('/update/{id}', [BarangController::class, 'update'])->name('Barang.update');
+        Route::get('/show/{id}', [BarangController::class, 'show'])->name('Barang.show');
+        Route::delete('/delete/{id}', [BarangController::class, 'destroy'])->name('Barang.destroy');
     });
     Route::prefix('master/shift')->group(function () {
         Route::get('/', [MasterShiftController::class, 'index'])->name('MasterShift.index');

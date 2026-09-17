@@ -47,7 +47,6 @@
                                     diisi.</small>
                             </div>
 
-
                             <!-- Nama Perawatan -->
                             <div class="mb-4">
                                 <label for="Nama" class="form-label fw-semibold mb-2">
@@ -93,6 +92,31 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Barang -->
+                            <div class="mb-4">
+                                <label for="Barang" class="form-label fw-semibold mb-2">
+                                    Barang
+                                </label>
+                                <select id="Barang" name="Barang[]" class="form-select select2 @error('Barang') is-invalid @enderror" multiple>
+                                    @if(isset($barang) && count($barang) > 0)
+                                        @foreach($barang as $item)
+                                            <option value="{{ $item->id }}" {{ (collect(old('Barang'))->contains($item->id)) ? 'selected' : '' }}>
+                                                {{ $item->NamaBarang ?? $item->nama ?? $item->nama_barang ?? 'Barang #' . $item->id }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="ti ti-help me-1"></i>Pilih satu atau lebih barang jika diperlukan
+                                </small>
+                                @error('Barang')
+                                    <div class="invalid-feedback d-block mt-1">
+                                        <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+                            <!-- End Barang -->
 
                             <!-- Divider -->
                             <hr class="my-4 text-muted opacity-25">

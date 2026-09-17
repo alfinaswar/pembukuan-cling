@@ -44,9 +44,10 @@
                             <!-- Info Box -->
                             <div class="alert alert-light border mb-4 d-flex align-items-center gap-2">
                                 <i class="ti ti-info-circle text-primary"></i>
-                                <small class="mb-0">Kolom dengan tanda <span class="text-danger">*</span> wajib
+                                <small class="mb-0 text-dark">Kolom dengan tanda <span class="text-danger">*</span> wajib
                                     diisi.</small>
                             </div>
+
 
                             <!-- Nama Perawatan -->
                             <div class="mb-4">
@@ -95,6 +96,35 @@
                                     </div>
                                 @enderror
                             </div>
+
+                            <!-- Barang -->
+                            <div class="mb-4">
+                                <label for="Barang" class="form-label fw-semibold mb-2">
+                                    Barang
+                                </label>
+                                @php
+                                    // Ambil value lama jika validasi gagal, atau dari database (decode JSON jadi array)
+                                    $selectedBarang = old('Barang', json_decode($JenisPerawatan->Barang ?? '[]', true) ?? []);
+                                @endphp
+                                <select id="Barang" name="Barang[]" class="form-select select2 @error('Barang') is-invalid @enderror" multiple>
+                                    @if(isset($barang) && count($barang) > 0)
+                                        @foreach($barang as $item)
+                                            <option value="{{ $item->id }}" {{ in_array($item->id, $selectedBarang) ? 'selected' : '' }}>
+                                                {{ $item->NamaBarang ?? $item->nama ?? $item->nama_barang ?? 'Barang #' . $item->id }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="ti ti-help me-1"></i>Pilih satu atau lebih barang jika diperlukan
+                                </small>
+                                @error('Barang')
+                                    <div class="invalid-feedback d-block mt-1">
+                                        <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
 
                             <!-- Divider -->
                             <hr class="my-4 text-muted opacity-25">
