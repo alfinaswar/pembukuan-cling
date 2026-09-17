@@ -43,7 +43,7 @@
 
                         {{-- Filter Klinik (Hanya Superadmin) --}}
                         @if (auth()->user() && in_array('Superadmin', auth()->user()->getRoleNames()->toArray()))
-                            <div class="col-md-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label small text-muted">Klinik</label>
                                 <select id="filter_klinik" class="form-control form-control-sm">
                                     <option value="">Semua Klinik</option>
@@ -186,7 +186,7 @@
         </script>
     @endif
 
-    <script>
+        <script>
         $(function() {
             // Set default value input date = hari ini
             const today = new Date().toISOString().split('T')[0];
@@ -209,8 +209,9 @@
                     success: function(response) {
                         if (response.data && response.data.length > 0) {
                             let options = '<option value="">Semua Dental Unit</option>';
+                            // 🔥 PERBAIKAN: Baca unit.id dan unit.Nama dari object JSON
                             response.data.forEach(function(unit) {
-                                options += `<option value="${unit}">${unit}</option>`;
+                                options += `<option value="${unit.id}">${unit.Nama}</option>`;
                             });
                             $('#filter_dental_unit').html(options);
                             $('#wrapper_dental_unit').show(); // Tampilkan jika ada data
@@ -282,9 +283,7 @@
                         $.ajax({
                             url: '{{ route('Transaksi.destroy', ':id') }}'.replace(':id', id),
                             type: 'DELETE',
-                            data: {
-                                _token: '{{ csrf_token() }}'
-                            },
+                            data: { _token: '{{ csrf_token() }}' },
                             success: function(response) {
                                 if (response.status === 200 || response.success) {
                                     Swal.fire('Dihapus!', response.message || 'Data berhasil dihapus', 'success');
@@ -357,4 +356,5 @@
             });
         });
     </script>
+
 @endpush

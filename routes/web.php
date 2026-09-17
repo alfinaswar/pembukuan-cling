@@ -187,24 +187,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::delete('/insentif-karyawan/delete/{id}', [LaporanController::class, 'destroyInsentifKaryawan'])->name('laporan-insentif.destroy');
         Route::put('/insentif-karyawan/{id}', [LaporanController::class, 'update'])->name('laporan-insentif.update');
 
-
-        Route::get('/api/dental-units', function (\Illuminate\Http\Request $request) {
-            $kodeKlinik = $request->get('kode_klinik');
-
-            if (!$kodeKlinik) {
-                return response()->json(['data' => []]);
-            }
-
-            // Ambil daftar Dental Unit unik dari tabel Transaksi untuk klinik tersebut
-            // (Ganti 'Transaksi' dengan model Anda jika namanya berbeda)
-            $dentalUnits = TransaksiDetail::where('KodeCabang', $kodeKlinik)
-                ->whereNotNull('DentalUnit')
-                ->where('DentalUnit', '!=', '')
-                ->distinct()
-                ->pluck('DentalUnit');
-
-            return response()->json(['data' => $dentalUnits->toArray()]);
-        })->name('api.dental-units')->middleware('auth');
     });
+    Route::get('/api/dental-units', [TransaksiController::class, 'getDentalUnits'])->name('api.dental-units');
     Route::get('/dashboard/kirim-pencarian', [DashboardController::class, 'kirimPencarian'])->name('dashboard.kirim-pencarian');
 });

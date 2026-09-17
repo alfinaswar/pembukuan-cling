@@ -27,6 +27,7 @@ class TransaksiController extends Controller
             $tanggalMulai = $request->input('tanggal_mulai');
             $tanggalAkhir = $request->input('tanggal_akhir');
             $shiftId = $request->input('shift');
+            $dentalUnitId = $request->input('dental_unit'); // 🔥 Ambil parameter dental unit
 
             $data = Transaksi::with(['TransaksiDetail', 'getDentalUnit'])
                 ->when(!$tanggalMulai && !$tanggalAkhir, function ($query) {
@@ -41,8 +42,11 @@ class TransaksiController extends Controller
                 ->when($shiftId, function ($query) use ($shiftId) {
                     $query->where('Shift', $shiftId);
                 })
+                // 🔥 FILTER DENTAL UNIT
+                ->when($dentalUnitId, function ($query) use ($dentalUnitId) {
+                    $query->where('DentalUnit', $dentalUnitId);
+                })
                 ->when($user->hasRole('Superadmin'), function ($query) use ($request) {
-                    // Jika Superadmin, boleh filter kode cabang dari input klinik (dropdown)
                     if ($request->filled('klinik') && $request->input('klinik') != '') {
                         $query->where('KodeCabang', $request->input('klinik'));
                     }
@@ -60,11 +64,9 @@ class TransaksiController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                // Tambah kolom Kode dengan penambahan "_Dental Unit" jika ada
                 ->addColumn('Kode', function ($row) {
                     $kode = $row->Kode ?? '-';
-                    // Jika ada relasi DentalUnit dan nama/kolom relevan ada, tampilkan
-                    if ($row->DentalUnit) {
+                    if ($row->getDentalUnit) {
                         $dentalUnitName = $row->getDentalUnit->Nama ?? $row->getDentalUnit->name ?? null;
                         if ($dentalUnitName) {
                             $kode .= ' - ' . e($dentalUnitName);
@@ -78,9 +80,7 @@ class TransaksiController extends Controller
                     return 'Rp ' . number_format($row->TotalBayar, 0, ',', '.');
                 })
                 ->addColumn('MetodePembayaran', function ($row) {
-                    if (!$row->getMetodePembayaran || $row->getMetodePembayaran->isEmpty()) {
-                        return '-';
-                    }
+                    if (!$row->getMetodePembayaran || $row->getMetodePembayaran->isEmpty()) return '-';
                     $html = '<dl class="mb-0">';
                     foreach ($row->getMetodePembayaran as $pembayaran) {
                         $nama = e($pembayaran->getMetodeBayar->Nama ?? '-');
@@ -92,8 +92,7 @@ class TransaksiController extends Controller
                     return $html;
                 })
                 ->addColumn('Shift', function ($row) {
-                    if (!$row->getShift)
-                        return '-';
+                    if (!$row->getShift) return '-';
                     $nama = strtolower($row->getShift->Nama);
                     if ($nama === 'pagi' || $row->getShift->id == 1) {
                         return '<span class="badge bg-warning text-dark"><i class="fa fa-sun me-1"></i>Pagi</span>';
@@ -104,15 +103,12 @@ class TransaksiController extends Controller
                 })
                 ->addColumn('JenisPasien', function ($row) {
                     $jenis = $row->JenisPasien ?? '-';
-                    if ($jenis === 'Baru')
-                        return '<span class="badge bg-success"><i class="fa fa-user-plus me-1"></i>Baru</span>';
-                    if ($jenis === 'Lama')
-                        return '<span class="badge bg-info"><i class="fa fa-user-check me-1"></i>Lama</span>';
+                    if ($jenis === 'Baru') return '<span class="badge bg-success"><i class="fa fa-user-plus me-1"></i>Baru</span>';
+                    if ($jenis === 'Lama') return '<span class="badge bg-info"><i class="fa fa-user-check me-1"></i>Lama</span>';
                     return '-';
                 })
                 ->addColumn('Layanan', function ($row) {
-                    if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0)
-                        return '-';
+                    if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0) return '-';
                     $rekap = [];
                     foreach ($row->TransaksiDetail as $detail) {
                         $nama = optional($detail->MasterJenisPerawatan)->Nama;
@@ -120,12 +116,7 @@ class TransaksiController extends Controller
                         $keterangan = $detail->Keterangan ?? null;
                         if ($nama) {
                             if (!isset($rekap[$nama])) {
-                                $rekap[$nama] = [
-                                    'nama' => $nama,
-                                    'harga' => 0,
-                                    'count' => 0,
-                                    'keterangan' => []
-                                ];
+                                $rekap[$nama] = ['nama' => $nama, 'harga' => 0, 'count' => 0, 'keterangan' => []];
                             }
                             $rekap[$nama]['harga'] += $biaya;
                             $rekap[$nama]['count'] += 1;
@@ -134,8 +125,7 @@ class TransaksiController extends Controller
                             }
                         }
                     }
-                    if (empty($rekap))
-                        return '-';
+                    if (empty($rekap)) return '-';
                     $html = '<dl class="mb-0">';
                     foreach ($rekap as $item) {
                         $namaStr = e($item['nama']) . ($item['count'] > 1 ? ' x' . $item['count'] : '');
@@ -168,21 +158,12 @@ class TransaksiController extends Controller
                     $isAdmin = method_exists($user, 'hasRole') && $user->hasRole('Superadmin');
 
                     $actionButtons = '';
-
-                    // Hanya tampilkan tombol edit dan hapus jika user adalah kasir atau admin
                     if ($isKasir || $isAdmin) {
-                        $actionButtons .= '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
-                            <i class="fa fa-edit"></i>
-                        </a>';
-                        $actionButtons .= '
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
-                            <i class="fa fa-trash"></i>
-                        </button>';
+                        $actionButtons .= '<a href="' . route('Transaksi.edit', $encryptedId) . '" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>';
+                        $actionButtons .= '<button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '"><i class="fa fa-trash"></i></button>';
                     }
-
                     return $actionButtons;
                 })
-                // Jangan lupa tambahkan 'Kode' ke rawColumns jika ingin menampilkan raw HTML
                 ->rawColumns(['action', 'Kode', 'TotalBayar', 'Layanan', 'Petugas', 'JenisPasien', 'Shift', 'MetodePembayaran'])
                 ->with(['summary' => $summary])
                 ->make(true);
@@ -817,5 +798,18 @@ class TransaksiController extends Controller
             ->first();
 
         return $shift ? $shift->id : null;
+    }
+     public function getDentalUnits(Request $request)
+    {
+        $kodeKlinik = $request->input('kode_klinik');
+
+        if (!$kodeKlinik) {
+            return response()->json(['data' => []]);
+        }
+        $units = DentalUnit::where('KodeCabang', $kodeKlinik)
+            ->orderBy('Nama', 'asc')
+            ->get(['id', 'Nama']);
+
+        return response()->json(['data' => $units]);
     }
 }
