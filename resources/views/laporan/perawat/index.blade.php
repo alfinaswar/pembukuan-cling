@@ -333,8 +333,8 @@
                             </thead>
                             <tbody>
                                 {{-- Data dummy untuk tabel --}}
-                                @if (isset($data['Shift8PasienLama']) && count($data['Shift8PasienLama']) > 0)
-                                    @foreach ($data['Shift8PasienLama'] as $row)
+                                @if (isset($data['Shift8PasienLama']) && $data['Shift8PasienLama']->count() > 0)
+                                    @foreach ($data['Shift8PasienLama']->take(5) as $row)
                                         <tr>
                                             <td style="color: #166534;">
                                                 {{ \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') }}
@@ -350,12 +350,22 @@
                                             minimal 8 pasien lama.</td>
                                     </tr>
                                 @endif
+
+
                             </tbody>
                         </table>
-
+   @if (($data['Shift8PasienLama'] ?? collect())->count() > 5)
+                        <div class="mt-3 mb-3 text-end">
+                            <a href="{{ route('laporan-perawat.pasien-lama', request()->all()) }}"
+                                style="color: #162878; font-size: 14px; text-decoration: underline;" target="_blank"
+                                rel="noopener">
+                                Lihat semua data &raquo;
+                            </a>
+                        </div>
+                    @endif
                     </div>
                     @php
-                        // Akumulasi total shift dan total insentif dari data Shift8PasienLama
+
                         $totalShiftTercapai =
                             isset($data['Shift8PasienLama']) && is_iterable($data['Shift8PasienLama'])
                                 ? count($data['Shift8PasienLama'])
@@ -454,7 +464,7 @@
 
                     {{-- Link to show all data if there are more than 5 --}}
                     @if (($data['pasienBillingMinimal'] ?? collect())->count() > 5)
-                        <div class="mt-3 text-end">
+                        <div class="mt-3 mb-3 text-end">
                             <a href="{{ route('laporan-perawat.billing-minimal', request()->all()) }}"
                                 style="color: #162878; font-size: 14px; text-decoration: underline;" target="_blank"
                                 rel="noopener">
@@ -620,7 +630,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color:#FF2AA0;">Tanggal</th>
-                                    <th class="fw-semibold" style="color:#FF2AA0;">Jumlah</th>
+                                    {{-- <th class="fw-semibold" style="color:#FF2AA0;">Jumlah</th> --}}
                                     <th class="fw-semibold" style="color:#FF2AA0;">Perawat</th>
                                     <th class="fw-semibold" style="color:#FF2AA0;">Insentif</th>
                                 </tr>
@@ -635,7 +645,7 @@
 
                                             </td>
 
-                                            <td style="color:#FF2AA0;">{{ $pasien['jumlah'] ?? '-' }}</td>
+                                            {{-- <td style="color:#FF2AA0;">{{ $pasien['jumlah'] ?? '-' }}</td> --}}
                                             <td style="color:#FF2AA0;">{{ $pasien['perawat'] ?? '-' }}</td>
                                             <td style="color:#FF2AA0;">
                                                 {{ isset($pasien['insentif']) ? 'Rp ' . number_format($pasien['insentif'], 0, ',', '.') : '-' }}
@@ -652,6 +662,15 @@
 
                             </tbody>
                         </table>
+                           @if (($data['PasienBaru'] ?? collect())->count() > 5)
+                        <div class="mt-3 mb-3 text-end">
+                            <a href="{{ route('laporan-perawat.pasien-baru', request()->all()) }}"
+                                style="color: #162878; font-size: 14px; text-decoration: underline;" target="_blank"
+                                rel="noopener">
+                                Lihat semua data &raquo;
+                            </a>
+                        </div>
+                    @endif
                     </div>
                     @php
                         // Mengakumulasikan total pasien baru dari array PasienBaru

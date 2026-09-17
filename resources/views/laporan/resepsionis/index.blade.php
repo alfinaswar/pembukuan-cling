@@ -323,7 +323,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color: #166534;">Tanggal</th>
-                                    <th class="fw-semibold" style="color: #166534;">Jumlah Pasien Lama</th>
+                                    {{-- <th class="fw-semibold" style="color: #166534;">Jumlah Pasien Lama</th> --}}
                                     <th class="fw-semibold" style="color: #166534;">Perawat</th>
                                     <th class="fw-semibold" style="color: #166534;">Insentif</th>
                                 </tr>
@@ -331,13 +331,14 @@
                             <tbody>
                                 {{-- Data dummy untuk tabel --}}
                                 @if (isset($data['Shift8PasienLama']) && count($data['Shift8PasienLama']) > 0)
-                                    @foreach ($data['Shift8PasienLama'] as $row)
+                                    @foreach (collect($data['Shift8PasienLama'])->take(5) as $row)
+
                                         <tr>
                                             <td style="color: #166534;">
                                                 {{ \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') }}
                                             </td>
 
-                                            <td style="color: #166534;">{{ $row['jumlah_pasien_lama'] }} Pasien</td>
+                                            {{-- <td style="color: #166534;">{{ $row['jumlah_pasien_lama'] }} Pasien</td> --}}
                                             <td style="color: #166534;">{{ $row['perawat_nama'] }}</td>
                                             <td class="fw-semibold" style="color: #166534;">Rp 30.000</td>
                                         </tr>
@@ -351,6 +352,15 @@
                                 @endif
                             </tbody>
                         </table>
+                           @if (($data['Shift8PasienLama'] ?? collect())->count() > 5)
+                        <div class="mt-3 mb-3 text-end">
+                            <a href="{{ route('laporan-perawat.pasien-lama', request()->all()) }}"
+                                style="color: #162878; font-size: 14px; text-decoration: underline;" target="_blank"
+                                rel="noopener">
+                                Lihat semua data &raquo;
+                            </a>
+                        </div>
+                    @endif
                     </div>
                     @php
                         // Akumulasi total shift dan total insentif dari data Shift8PasienLama

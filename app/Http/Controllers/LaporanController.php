@@ -1038,7 +1038,87 @@ class LaporanController extends Controller
             'shift' => $billingByPerawat->first()?->Shift ?? null,
         ]);
     }
+    public function pasienLamaPerawat(Request $request)
+    {
+        // dd($request->perawat);
+        $validated = $request->validate([
+            'FilterTanggal' => 'required|string',
+            'perawat' => 'nullable|integer',
+            'shift' => 'nullable|integer',
+        ]);
+        // Pisahkan FilterTanggal menjadi $startRaw dan $endRaw, lalu parsing ke Carbon
+        [$startRaw, $endRaw] = explode(' - ', $validated['FilterTanggal']);
+        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
+        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
 
+        $perawatId = $validated['perawat'] ?? null;
+        $shift = $validated['shift'] ?? null;
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $perawatUser = User::find($perawatId);
+            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
+
+        // Query billing minimal per perawat, disimpan di $billingByPerawat
+        $billingByPerawat = InsentifKaryawan::with('getTransaksi')
+            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->where('JenisRule', 'pasien_lama')
+            ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
+            ->when($perawatId, fn($q) => $q->where('UserId', $perawatId))
+            ->when($shift, fn($q) => $q->where('Shift', $shift))
+            ->whereHas('getTransaksi', fn($q) => $q->where('JenisPasien', '=', 'Lama'))
+            ->orderByDesc('Tanggal')
+            ->get();
+        // dd($billingByPerawat);
+
+        return view('laporan.perawat.pasien_lama', [
+            'billingByPerawat' => $billingByPerawat,
+            'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
+            'shift' => $billingByPerawat->first()?->Shift ?? null,
+        ]);
+    }
+    public function pasienBaruPerawat(Request $request)
+    {
+        $validated = $request->validate([
+            'FilterTanggal' => 'required|string',
+            'perawat' => 'nullable|integer',
+            'shift' => 'nullable|integer',
+        ]);
+        // Pisahkan FilterTanggal menjadi $startRaw dan $endRaw, lalu parsing ke Carbon
+        [$startRaw, $endRaw] = explode(' - ', $validated['FilterTanggal']);
+        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
+        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
+
+        $perawatId = $validated['perawat'] ?? null;
+        $shift = $validated['shift'] ?? null;
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $perawatUser = User::find($perawatId);
+            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
+
+        // Query billing minimal per perawat, disimpan di $billingByPerawat
+        $billingByPerawat = InsentifKaryawan::with('getTransaksi')
+            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->where('JenisRule', 'pasien_baru')
+            ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
+            ->when($perawatId, fn($q) => $q->where('UserId', $perawatId))
+            ->when($shift, fn($q) => $q->where('Shift', $shift))
+            ->whereHas('getTransaksi', fn($q) => $q->where('JenisPasien', '=', 'Baru'))
+            ->orderByDesc('Tanggal')
+            ->get();
+        // dd($billingByPerawat);
+
+        return view('laporan.perawat.pasien_baru', [
+            'billingByPerawat' => $billingByPerawat,
+            'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
+            'shift' => $billingByPerawat->first()?->Shift ?? null,
+        ]);
+    }
     public function indexTransaksi(Request $request)
     {
         $klinik = MasterKlinik::get();

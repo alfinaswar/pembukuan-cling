@@ -174,6 +174,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/dokter/export-excel', [LaporanController::class, 'downloadExcel'])->name('laporan-dokter.download-excel');
 
         Route::get('/perawat/billing-minimal', [LaporanController::class, 'billingMinimalPerawat'])->name('laporan-perawat.billing-minimal');
+        Route::get('/perawat/pasien-lama', [LaporanController::class, 'pasienLamaPerawat'])->name('laporan-perawat.pasien-lama');
+        Route::get('/perawat/pasien-baru', [LaporanController::class, 'pasienBaruPerawat'])->name('laporan-perawat.pasien-baru');
 
         Route::get('/transaksi', [LaporanController::class, 'indexTransaksi'])->name('laporan-transaksi.index');
         Route::post('/laporan-transaksi/preview', [LaporanController::class, 'preview'])->name('laporan-transaksi.preview');
