@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardPencapaianController;
 use App\Http\Controllers\DentalUnitController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriBarangController;
@@ -40,6 +41,14 @@ Auth::routes();
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::post('/home/update-shift', [HomeController::class, 'updateShift'])->name('home.update-shift');
 
+Route::middleware(['auth', 'role:Superadmin|Management'])->group(function () {
+    Route::get('/dashboard/pencapaian', [HomeController::class, 'pencapaian'])
+        ->name('dashboard.pencapaian');
+});
+Route::middleware(['auth', 'role:Perawat|Kasir / Resepsionis'])->group(function () {
+    Route::get('/dashboard-monitor', [HomeController::class, 'monitor'])
+        ->name('dashboard.monitor');
+});
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/session/ping', function () {
         return response()->json(['status' => 'ok']);
