@@ -15,6 +15,7 @@ use App\Http\Controllers\MasterShiftController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RuleInsentifController;
+use App\Http\Controllers\StokController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
 use App\Models\TransaksiDetail;
@@ -146,6 +147,12 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/update/{id}', [DentalUnitController::class, 'update'])->name('DentalUnit.update');
         Route::get('/show/{id}', [DentalUnitController::class, 'show'])->name('DentalUnit.show');
         Route::delete('/delete/{id}', [DentalUnitController::class, 'destroy'])->name('DentalUnit.destroy');
+    });
+    Route::prefix('inventori/stok')->group(function () {
+        Route::get('/', [StokController::class, 'index'])->name('Stok.index');
+        Route::get('/create', [StokController::class, 'create'])->name('Stok.create');
+        Route::post('/store', [StokController::class, 'store'])->name('Stok.store');
+        Route::get('/riwayat', [StokController::class, 'riwayat'])->name('Stok.riwayat');
     });
     Route::prefix('transaksi/kasir')->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('Transaksi.index');

@@ -403,6 +403,17 @@
                                 </ul>
                             </li>
                         @endcan
+                        @can('inventori')
+                            <li class="sidebar-item">
+                                <a href="{{ route('Stok.index') }}" class="sidebar-link">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-box"></i>
+                                    </div>
+                                    <span class="hide-menu">Stok</span>
+                                </a>
+                            </li>
+                        @endcan
+
                         @can('masterdata')
                             <li class="sidebar-item">
                                 <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
@@ -714,6 +725,18 @@
                                             </ul>
                                         </li>
                                     @endcan
+                                    @can('inventori')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('Stok.index') }}" class="sidebar-link">
+                                                <div
+                                                    class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-package"></i>
+                                                </div>
+                                                <span class="hide-menu">Stok</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+
 
                                     @can('masterdata')
                                         <li class="sidebar-item">
@@ -1007,6 +1030,17 @@
                                     </ul>
                                 </li>
                             @endcan
+                            {{-- @can('inventori') --}}
+                                <li class="sidebar-item">
+                                    <a href="{{ route('Stok.index') }}"
+                                        class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'stok' ? 'active' : '' }}">
+                                        <div class="round-16 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-box"></i>
+                                        </div>
+                                        <span class="hide-menu">Stok</span>
+                                    </a>
+                                </li>
+                            {{-- @endcan --}}
                             @can('masterdata')
                                 <li class="sidebar-item">
                                     <a class="sidebar-link has-arrow {{ request()->segment(1) === 'master' ? 'active' : '' }}"
