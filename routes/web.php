@@ -50,6 +50,10 @@ Route::middleware(['auth', 'role:Perawat|Kasir / Resepsionis'])->group(function 
     Route::get('/dashboard-monitor', [HomeController::class, 'monitor'])
         ->name('dashboard.monitor');
 });
+Route::middleware(['auth', 'role:Superadmin'])->group(function () {
+    Route::get('/dashboard/stok', [DashboardController::class, 'Stok'])->name('dashboard.stok');
+});
+
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/session/ping', function () {
         return response()->json(['status' => 'ok']);

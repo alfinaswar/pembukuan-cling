@@ -291,6 +291,18 @@
                                 <span class="hide-menu">Dashboard</span>
                             </a>
                         </li>
+                        @role('Superadmin')
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route('dashboard.stok') }}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-stack"></i>
+                                </span>
+                                <span class="hide-menu">Dashboard Stok</span>
+                            </a>
+                        </li>
+                        @endrole
+
+
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="#" aria-expanded="false">
                                 <span>
@@ -403,7 +415,7 @@
                                 </ul>
                             </li>
                         @endcan
-                        @can('inventori')
+                         @can('dashboard-stok')
                             <li class="sidebar-item">
                                 <a href="{{ route('Stok.index') }}" class="sidebar-link">
                                     <div class="round-16 d-flex align-items-center justify-content-center">
@@ -606,6 +618,17 @@
                                             <span class="hide-menu">Dashboard</span>
                                         </a>
                                     </li>
+
+                                    @can('Superadmin')
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="{{ route('dashboard.stok') }}" aria-expanded="false">
+                                            <span>
+                                                <i class="ti ti-stack"></i>
+                                            </span>
+                                            <span class="hide-menu">Dashboard Stok</span>
+                                        </a>
+                                    </li>
+                                    @endcan
 
 
                                     @can('pembayaran-index')
@@ -904,6 +927,19 @@
                                     <span class="hide-menu">Dashboard</span>
                                 </a>
                             </li>
+                            {{-- @can('dashboard-stok') --}}
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link {{ Request::is('stok*') ? 'active' : '' }}"
+                                        href="{{ route('dashboard.stok') }}" aria-expanded="false">
+                                        <span>
+                                            <i class="ti ti-box"></i>
+                                        </span>
+                                        <span class="hide-menu">Dashboard Stok</span>
+                                    </a>
+                                </li>
+                            {{-- @endcan --}}
+
+
                             @can('pembayaran-index')
                                 <li class="sidebar-item">
                                     <a class="sidebar-link {{ Request::is('transaksi/kasir') ? 'active' : '' }}"
@@ -1030,7 +1066,7 @@
                                     </ul>
                                 </li>
                             @endcan
-                            {{-- @can('inventori') --}}
+                            @can('dashboard-stok')
                                 <li class="sidebar-item">
                                     <a href="{{ route('Stok.index') }}"
                                         class="sidebar-link {{ request()->segment(1) === 'master' && request()->segment(2) === 'stok' ? 'active' : '' }}">
@@ -1040,7 +1076,7 @@
                                         <span class="hide-menu">Stok</span>
                                     </a>
                                 </li>
-                            {{-- @endcan --}}
+                            @endcan
                             @can('masterdata')
                                 <li class="sidebar-item">
                                     <a class="sidebar-link has-arrow {{ request()->segment(1) === 'master' ? 'active' : '' }}"
