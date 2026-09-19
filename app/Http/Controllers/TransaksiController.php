@@ -7,13 +7,15 @@ use App\Models\MasterJenisPerawatan;
 use App\Models\MasterKlinik;
 use App\Models\MasterMetodePembayaran;
 use App\Models\MasterShift;
+use App\Models\Stok;
+use App\Models\StokMutasi;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\InsentifService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Yajra\DataTables\DataTables;
-
+use DB;
 class TransaksiController extends Controller
 {
     /**
@@ -366,16 +368,13 @@ class TransaksiController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
+        // 1. VALIDASI DATA
         $validatedData = $request->validate([
             'Tanggal' => [
                 'required',
                 'date',
                 function ($attribute, $value, $fail) {
-                    $inputDate = strtotime($value);
-                    $today = strtotime(date('Y-m-d'));
-                    // Mengizinkan backdate, cukup validasi tidak bisa ke depan (future date)
-                    if ($inputDate > $today) {
+                    if (strtotime($value) > strtotime(date('Y-m-d'))) {
                         $fail('Tidak boleh memilih tanggal ke depan (future date).');
                     }
                 }
@@ -388,10 +387,7 @@ class TransaksiController extends Controller
             'Dokter' => 'required|exists:users,id',
             'Perawat' => 'required|exists:users,id',
             'Kasir' => 'required|exists:users,id',
-
-            // === TAMBAHAN: Validasi Dental Unit Wajib ===
             'DentalUnit' => 'nullable',
-
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => [
                 'required',
@@ -415,9 +411,8 @@ class TransaksiController extends Controller
                 function ($attribute, $value, $fail) use ($request) {
                     $matches = [];
                     if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
-                        $allNominalBayar = $request->NominalBayar;
+                        $totalNominalBayar = array_sum($request->NominalBayar);
                         $totalBiaya = $request->TotalBiaya;
-                        $totalNominalBayar = array_sum($allNominalBayar);
 
                         if ($totalNominalBayar > $totalBiaya) {
                             $fail('Akumulasi nominal bayar tidak boleh lebih dari total biaya.');
@@ -427,106 +422,166 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-
-
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
-            'Tanggal.date' => 'Format tanggal tidak valid',
             'NamaPasien.required' => 'Nama pasien wajib diisi',
             'JenisPasien.required' => 'Jenis pasien wajib dipilih',
             'JenisPerawatan.required' => 'Minimal 1 perawatan harus dipilih',
-            'JenisPerawatan.*.id.required' => 'Silakan pilih jenis perawatan',
-            'JenisPerawatan.*.id.exists' => 'Perawatan tidak valid',
-            'JenisPerawatan.*.Biaya.required' => 'Biaya perawatan wajib diisi',
-            'JenisPerawatan.*.Biaya.numeric' => 'Biaya perawatan harus angka',
             'Dokter.required' => 'Pilih dokter',
-            'Dokter.exists' => 'Dokter tidak valid',
             'Perawat.required' => 'Pilih perawat',
-            'Perawat.exists' => 'Perawat tidak valid',
             'Kasir.required' => 'Pilih kasir/resepsionis',
-            'Kasir.exists' => 'Kasir tidak valid',
-
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
-            'BiayaAdmin.numeric' => 'Biaya admin harus angka',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
-            'MetodePembayaran.array' => 'Metode pembayaran harus berupa array',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
-            'TotalBiaya.numeric' => 'Total biaya harus angka',
-            'NominalBayar.required' => 'Nominal bayar tidak boleh kosong.',
         ]);
 
         $shiftId = auth()->user()->shift;
-        $transaksi = Transaksi::create([
-            'Tanggal' => $request->Tanggal,
-            'NamaPasien' => $request->NamaPasien,
-            'JenisPasien' => $request->JenisPasien,
-            'BiayaAdmin' => $request->BiayaAdmin,
-            'TotalBayar' => $request->TotalBiaya,
-            'IdResepsionis' => $request->Kasir,
-            'IdPerawat' => $request->Perawat,
-            'IdDokter' => $request->Dokter,
-            'DentalUnit' => $request->DentalUnit,
-            'Shift' => $shiftId,
-            'UserCreate' => auth()->user()->name,
-            'UserUpdate' => null,
-            'UserDelete' => null,
-            'KodeCabang' => auth()->user()->kodeperusahaan,
-        ]);
+        $kodeCabang = auth()->user()->kodeperusahaan;
+        $userName = auth()->user()->name;
 
-        // Simpan Detail Perawatan
-        if ($request->has('JenisPerawatan') && is_array($request->JenisPerawatan)) {
+        // 🔥 2. MULAI DATABASE TRANSACTION
+        DB::beginTransaction();
+
+        try {
+            // 3. SIMPAN TRANSAKSI UTAMA
+            $transaksi = Transaksi::create([
+                'Tanggal' => $request->Tanggal,
+                'NamaPasien' => $request->NamaPasien,
+                'JenisPasien' => $request->JenisPasien,
+                'BiayaAdmin' => $request->BiayaAdmin,
+                'TotalBayar' => $request->TotalBiaya,
+                'IdResepsionis' => $request->Kasir,
+                'IdPerawat' => $request->Perawat,
+                'IdDokter' => $request->Dokter,
+                'DentalUnit' => $request->DentalUnit,
+                'Shift' => $shiftId,
+                'UserCreate' => $userName,
+                'UserUpdate' => null,
+                'UserDelete' => null,
+                'KodeCabang' => $kodeCabang,
+            ]);
+
+            // 4. SIMPAN DETAIL PERAWATAN
+            if ($request->has('JenisPerawatan') && is_array($request->JenisPerawatan)) {
+                foreach ($request->JenisPerawatan as $perawatan) {
+                    if (isset($perawatan['id'], $perawatan['Biaya']) && $perawatan['id'] !== null && $perawatan['Biaya'] !== null) {
+                        $transaksi->TransaksiDetail()->create([
+                            'IdTransaksi' => $transaksi->id,
+                            'Tanggal' => $transaksi->Tanggal,
+                            'JenisPerawatan' => $perawatan['id'],
+                            'Keterangan' => $perawatan['Keterangan'] ?? null,
+                            'Biaya' => $perawatan['Biaya'],
+                            'UserCreate' => $userName,
+                            'UserUpdate' => null,
+                            'UserDelete' => null,
+                        ]);
+                    }
+                }
+            }
+
+            // 5. SIMPAN METODE PEMBAYARAN
+            if ($request->has('MetodePembayaran') && is_array($request->MetodePembayaran)) {
+                foreach ($request->MetodePembayaran as $key => $metode) {
+                    if ($metode !== null) {
+                        $transaksi->getMetodePembayaran()->create([
+                            'IdTransaksi' => $transaksi->id,
+                            'MetodePembayaran' => $metode,
+                            'Nominal' => $request->NominalBayar[$key] ?? 0,
+                        ]);
+                    }
+                }
+            }
+
+            // 🔥 6. LOGIKA PENGURANGAN STOK OTOMATIS (BERDASARKAN KOLOM 'Barang')
+            // Gabungkan jumlah kebutuhan barang jika ada jenis perawatan yang sama lebih dari sekali
+            $barangKebutuhan = [];
+
             foreach ($request->JenisPerawatan as $perawatan) {
-                if (
-                    isset($perawatan['id'], $perawatan['Biaya']) &&
-                    $perawatan['id'] !== null &&
-                    $perawatan['Biaya'] !== null
-                ) {
-                    $transaksi->TransaksiDetail()->create([
-                        'IdTransaksi' => $transaksi->id,
-                        'Tanggal' => $transaksi->Tanggal,
-                        'JenisPerawatan' => $perawatan['id'],
-                        'Keterangan' => $perawatan['Keterangan'] ?? null,
-                        'Biaya' => $perawatan['Biaya'],
-                        'UserCreate' => auth()->user()->name,
-                        'UserUpdate' => null,
-                        'UserDelete' => null,
-                    ]);
+                $jenisPerawatanId = $perawatan['id'];
+                $masterJp = MasterJenisPerawatan::find($jenisPerawatanId);
+
+                if ($masterJp && !empty($masterJp->Barang)) {
+                    $barangIds = json_decode($masterJp->Barang, true);
+
+                    if (is_array($barangIds)) {
+                        foreach ($barangIds as $barangId) {
+                            // Gabungkan kebutuhan setiap barang
+                            if (!isset($barangKebutuhan[$barangId])) {
+                                $barangKebutuhan[$barangId] = 1;
+                            } else {
+                                $barangKebutuhan[$barangId] += 1;
+                            }
+                        }
+                    }
                 }
             }
-        }
 
-        // Simpan Metode Pembayaran
-        if ($request->has('MetodePembayaran') && is_array($request->MetodePembayaran)) {
-            foreach ($request->MetodePembayaran as $key => $metode) {
-                if ($metode !== null) {
-                    $transaksi->getMetodePembayaran()->create([
-                        'IdTransaksi' => $transaksi->id,
-                        'MetodePembayaran' => $metode,
-                        'Nominal' => isset($request->NominalBayar[$key]) ? $request->NominalBayar[$key] : 0,
-                    ]);
+            // Proses pengurangan stok sekaligus mutasi stok dengan jumlah yang memang dibutuhkan (bisa > 1)
+            foreach ($barangKebutuhan as $barangId => $qtyDibutuhkan) {
+                // 🔒 LOCK FOR UPDATE: Mencegah race condition
+                $stok = Stok::where('BarangId', $barangId)
+                    ->where('KodeKlinik', $kodeCabang)
+                    ->lockForUpdate()
+                    ->first();
+
+                $stokTersedia = $stok ? $stok->StokAkhir : 0;
+
+                // Cek apakah stok cukup
+                if (!$stok || $stokTersedia < $qtyDibutuhkan) {
+                    $namaBarang = ($stok && $stok->barang) ? $stok->barang->NamaBarang : 'ID Barang: ' . $barangId;
+                    throw new \Exception("Stok tidak mencukupi untuk barang: <strong>{$namaBarang}</strong>.<br>Stok tersedia: {$stokTersedia}, Dibutuhkan: {$qtyDibutuhkan}.");
                 }
+
+                // Hitung stok baru
+                $stokSebelum = $stok->StokAkhir;
+                $stokSesudah = $stokSebelum - $qtyDibutuhkan;
+
+                // Update tabel stok
+                $stok->update([
+                    'StokAkhir' => $stokSesudah,
+                    'UserUpdate' => $userName
+                ]);
+                // Catat ke tabel mutasi stok, jumlah disesuaikan
+                StokMutasi::create([
+                    'KodeKlinik' => $kodeCabang,
+                    'BarangId' => $barangId,
+                    'JenisMutasi' => 'pemakaian',
+                    'Jumlah' => -$qtyDibutuhkan, // Negatif karena berkurang
+                    'StokSebelum' => $stokSebelum,
+                    'StokSesudah' => $stokSesudah,
+                    'Keterangan' => 'Pemakaian untuk Transaksi #' . ($transaksi->Kode ?? $transaksi->id),
+                    'UserCreate' => $userName,
+                ]);
             }
+
+            // 7. ACTIVITY LOG
+            if (function_exists('activity')) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($transaksi)
+                    ->withProperties([
+                        'attributes' => $transaksi->toArray(),
+                        'request' => $request->all(),
+                    ])
+                    ->log('Transaksi berhasil dibuat');
+            }
+
+            // 8. PROSES INSENTIF
+            app(InsentifService::class)->proses($transaksi);
+
+            // 🔥 9. COMMIT TRANSACTION
+            DB::commit();
+
+            return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil disimpan dan stok telah diperbarui.');
+
+        } catch (\Exception $e) {
+            // 🔥 10. ROLLBACK TRANSACTION JIKA ADA ERROR
+            DB::rollBack();
+
+            return back()->withErrors(['global' => $e->getMessage()])->withInput();
         }
-
-        // Activity Log
-        if (function_exists('activity')) {
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($transaksi)
-                ->withProperties([
-                    'attributes' => $transaksi->toArray(),
-                    'request' => $request->all(),
-                ])
-                ->log('Transaksi berhasil dibuat');
-        }
-
-        // Proses Insentif
-        app(InsentifService::class)->proses($transaksi);
-
-        return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil disimpan.');
     }
-
     /**
      * Display the specified resource.
      */
@@ -590,22 +645,22 @@ class TransaksiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         try {
             $decodedId = decrypt($id);
         } catch (\Exception $e) {
             return redirect()->route('Transaksi.index')->with('error', 'ID Transaksi tidak valid.');
         }
 
+        // Ambil data transaksi LAMA beserta detailnya SEBELUM diupdate
         $transaksi = Transaksi::with('TransaksiDetail', 'getMetodePembayaran')->findOrFail($decodedId);
+        $oldDetails = $transaksi->TransaksiDetail()->get();
+
         $validatedData = $request->validate([
             'Tanggal' => [
                 'required',
                 'date',
                 function ($attribute, $value, $fail) {
-                    $inputDate = strtotime($value);
-                    $today = strtotime(date('Y-m-d'));
-                    if ($inputDate > $today) {
+                    if (strtotime($value) > strtotime(date('Y-m-d'))) {
                         $fail('Tidak boleh memilih tanggal ke depan (future date).');
                     }
                 }
@@ -629,9 +684,8 @@ class TransaksiController extends Controller
                 function ($attribute, $value, $fail) use ($request) {
                     $matches = [];
                     if (preg_match('/^NominalBayar\.(\d+)$/', $attribute, $matches)) {
-                        $allNominalBayar = $request->NominalBayar;
+                        $totalNominalBayar = array_sum($request->NominalBayar);
                         $totalBiaya = $request->TotalBiaya;
-                        $totalNominalBayar = array_sum($allNominalBayar);
 
                         if ($totalNominalBayar > $totalBiaya) {
                             $fail('Akumulasi nominal bayar tidak boleh lebih dari total biaya.');
@@ -641,111 +695,204 @@ class TransaksiController extends Controller
                     }
                 }
             ],
-
             'TotalBiaya' => 'required|numeric|min:0',
         ], [
             'Tanggal.required' => 'Tanggal wajib diisi',
-            'Tanggal.date' => 'Format tanggal tidak valid',
             'NamaPasien.required' => 'Nama pasien wajib diisi',
             'JenisPasien.required' => 'Jenis pasien wajib dipilih',
             'JenisPerawatan.required' => 'Minimal 1 perawatan harus dipilih',
-            'JenisPerawatan.*.id.required' => 'Silakan pilih jenis perawatan',
-            'JenisPerawatan.*.id.exists' => 'Perawatan tidak valid',
-            'JenisPerawatan.*.Biaya.required' => 'Biaya perawatan wajib diisi',
-            'JenisPerawatan.*.Biaya.numeric' => 'Biaya perawatan harus angka',
             'Dokter.required' => 'Pilih dokter',
-            'Dokter.exists' => 'Dokter tidak valid',
             'Perawat.required' => 'Pilih perawat',
-            'Perawat.exists' => 'Perawat tidak valid',
             'Kasir.required' => 'Pilih kasir/resepsionis',
-            'Kasir.exists' => 'Kasir tidak valid',
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
-            'BiayaAdmin.numeric' => 'Biaya admin harus angka',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
-            'MetodePembayaran.array' => 'Metode pembayaran harus berupa array',
-            'MetodePembayaran.*.required' => 'Metode pembayaran tidak boleh kosong',
-            'MetodePembayaran.*.integer' => 'Metode pembayaran tidak boleh kosong',
-            'MetodePembayaran.*.exists' => 'Metode pembayaran tidak valid',
-            'NominalBayar.required' => 'Minimal satu nominal pembayaran harus diisi',
-            'NominalBayar.array' => 'Nominal pembayaran harus berupa array',
-            'NominalBayar.*.required' => 'Nominal pembayaran tidak boleh kosong atau nol',
-            'NominalBayar.*.numeric' => 'Nominal pembayaran harus angka',
-            'NominalBayar.*.min' => 'Nominal pembayaran harus lebih dari 0',
-            'NominalBayar.*.max_total' => 'Nominal pembayaran tidak boleh lebih besar dari total biaya',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
-            'TotalBiaya.numeric' => 'Total biaya harus angka'
         ]);
 
+        $kodeCabang = auth()->user()->kodeperusahaan;
+        $userName = auth()->user()->name;
 
-        // dd($metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran]);
-        // 🔄 Update Header Transaksi
-        $transaksi->update([
-            'Tanggal' => $request->Tanggal,
-            'NamaPasien' => $request->NamaPasien,
-            'JenisPasien' => $request->JenisPasien,
-            'MetodePembayaran' => $request->MetodePembayaran,
-            'BiayaAdmin' => $request->BiayaAdmin,
-            'DentalUnit' => $request->DentalUnit,
-            'TotalBayar' => $request->TotalBiaya,
-            'IdResepsionis' => $request->Kasir,
-            'IdPerawat' => $request->Perawat,
-            'IdDokter' => $request->Dokter,
-            'UserUpdate' => auth()->user()->name,
-        ]);
-        $transaksi->TransaksiDetail()->delete();
+        // 🔥 1. MULAI DATABASE TRANSACTION
+        DB::beginTransaction();
 
-        if ($request->has('JenisPerawatan') && is_array($request->JenisPerawatan)) {
-            foreach ($request->JenisPerawatan as $perawatan) {
-                if (
-                    isset($perawatan['id'], $perawatan['Biaya']) &&
-                    $perawatan['id'] !== null &&
-                    $perawatan['Biaya'] !== null
-                ) {
-                    $transaksi->TransaksiDetail()->create([
-                        'IdTransaksi' => $transaksi->id,
-                        'JenisPerawatan' => $perawatan['id'],
-                        'Biaya' => $perawatan['Biaya'],
-                        'Keterangan' => $perawatan['Keterangan'],
-                        'UserCreate' => auth()->user()->name,
-                        'UserUpdate' => null,
-                        'UserDelete' => null,
+        try {
+            // 🔥 2. REVERSAL STOK (KEMBALIKAN STOK DARI DATA LAMA, JUMLAH disesuaikan jika ada perawatan sama berkali-kali)
+            // Hitung jumlah setiap perawatan pada $oldDetails
+            $reversalBarangCount = []; // [barangId => jumlah]
+
+            foreach ($oldDetails as $oldDetail) {
+                $masterJp = MasterJenisPerawatan::find($oldDetail->JenisPerawatan);
+                if ($masterJp && !empty($masterJp->Barang)) {
+                    $barangIds = json_decode($masterJp->Barang, true);
+
+                    if (is_array($barangIds)) {
+                        foreach ($barangIds as $barangId) {
+                            if (!isset($reversalBarangCount[$barangId])) {
+                                $reversalBarangCount[$barangId] = 0;
+                            }
+                            $reversalBarangCount[$barangId]++;
+                        }
+                    }
+                }
+            }
+
+            // Balikkan stok sesuai jumlah yang dibutuhkan per barang
+            foreach ($reversalBarangCount as $barangId => $jumlah) {
+                $stok = Stok::where('BarangId', $barangId)
+                    ->where('KodeKlinik', $kodeCabang)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($stok) {
+                    $stokSebelum = $stok->StokAkhir;
+                    $stokSesudah = $stokSebelum + $jumlah;
+
+                    $stok->update([
+                        'StokAkhir' => $stokSesudah,
+                        'UserUpdate' => $userName
+                    ]);
+
+                    StokMutasi::create([
+                        'KodeKlinik' => $kodeCabang,
+                        'BarangId' => $barangId,
+                        'JenisMutasi' => 'pembatalan_update',
+                        'Jumlah' => $jumlah, // Positif karena stok kembali, sesuai jumlah mutasi per barang
+                        'StokSebelum' => $stokSebelum,
+                        'StokSesudah' => $stokSesudah,
+                        'Keterangan' => 'Reversal stok karena update Transaksi #' . ($transaksi->Kode ?? $transaksi->id),
+                        'UserCreate' => $userName,
                     ]);
                 }
             }
-        }
-        if ($transaksi->getMetodePembayaran) {
-            $transaksi->getMetodePembayaran()->delete();
-        }
-        if ($request->has('MetodePembayaran') && !empty($request->MetodePembayaran)) {
-            $metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran];
-            foreach ($metodes as $key => $metode) {
-                $transaksi->getMetodePembayaran()->create([
-                    'IdTransaksi' => $transaksi->id,
-                    'MetodePembayaran' => $metode,
-                    'Nominal' => isset($request->NominalBayar[$key]) ? $request->NominalBayar[$key] : 0,
-                    'UserCreate' => auth()->user()->name,
-                    'UserUpdate' => null,
-                    'UserDelete' => null,
+
+            // 3. UPDATE HEADER TRANSAKSI
+            $transaksi->update([
+                'Tanggal' => $request->Tanggal,
+                'NamaPasien' => $request->NamaPasien,
+                'JenisPasien' => $request->JenisPasien,
+                'BiayaAdmin' => $request->BiayaAdmin,
+                'DentalUnit' => $request->DentalUnit,
+                'TotalBayar' => $request->TotalBiaya,
+                'IdResepsionis' => $request->Kasir,
+                'IdPerawat' => $request->Perawat,
+                'IdDokter' => $request->Dokter,
+                'UserUpdate' => $userName,
+            ]);
+
+            // 4. HAPUS DETAIL & PEMBAYARAN LAMA
+            $transaksi->TransaksiDetail()->delete();
+            if ($transaksi->getMetodePembayaran) {
+                $transaksi->getMetodePembayaran()->delete();
+            }
+
+            // 5. BUAT DETAIL BARU & KURANGI STOK BARU
+            // Hitung kebutuhan barang berdasarkan perawatan baru (jika sama bisa lebih dari sekali)
+            $pemakaianBarangCount = []; // [barangId => jumlah]
+
+            if ($request->has('JenisPerawatan') && is_array($request->JenisPerawatan)) {
+                foreach ($request->JenisPerawatan as $perawatan) {
+                    if (isset($perawatan['id'], $perawatan['Biaya']) && $perawatan['id'] !== null && $perawatan['Biaya'] !== null) {
+
+                        // A. Buat Detail Baru
+                        $transaksi->TransaksiDetail()->create([
+                            'IdTransaksi' => $transaksi->id,
+                            'JenisPerawatan' => $perawatan['id'],
+                            'Biaya' => $perawatan['Biaya'],
+                            'Keterangan' => $perawatan['Keterangan'] ?? null,
+                            'UserCreate' => $userName,
+                        ]);
+
+                        // B. Hitung kebutuhan barang untuk dikurangi nanti
+                        $masterJp = MasterJenisPerawatan::find($perawatan['id']);
+
+                        if ($masterJp && !empty($masterJp->Barang)) {
+                            $barangIds = json_decode($masterJp->Barang, true);
+
+                            if (is_array($barangIds)) {
+                                foreach ($barangIds as $barangId) {
+                                    if (!isset($pemakaianBarangCount[$barangId])) {
+                                        $pemakaianBarangCount[$barangId] = 0;
+                                    }
+                                    $pemakaianBarangCount[$barangId]++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Lakukan pengurangan stok sekaligus pencatatan mutasi berdasarkan kebutuhan barang
+            foreach ($pemakaianBarangCount as $barangId => $jumlah) {
+                $stok = Stok::where('BarangId', $barangId)
+                    ->where('KodeKlinik', $kodeCabang)
+                    ->lockForUpdate()
+                    ->first();
+
+                $stokTersedia = $stok ? $stok->StokAkhir : 0;
+                if (!$stok || $stokTersedia < $jumlah) {
+                    $namaBarang = ($stok && $stok->barang) ? $stok->barang->NamaBarang : 'ID Barang: ' . $barangId;
+                    throw new \Exception("Gagal Update: Stok tidak mencukupi untuk barang <strong>{$namaBarang}</strong>.<br>Stok tersedia: {$stokTersedia}, Dibutuhkan: {$jumlah}.");
+                }
+
+                $stokSebelum = $stok->StokAkhir;
+                $stokSesudah = $stokSebelum - $jumlah;
+
+                $stok->update([
+                    'StokAkhir' => $stokSesudah,
+                    'UserUpdate' => $userName
+                ]);
+
+                StokMutasi::create([
+                    'KodeKlinik' => $kodeCabang,
+                    'BarangId' => $barangId,
+                    'JenisMutasi' => 'pemakaian',
+                    'Jumlah' => -$jumlah, // Negatif sesuai kebutuhan barang
+                    'StokSebelum' => $stokSebelum,
+                    'StokSesudah' => $stokSesudah,
+                    'Keterangan' => 'Pemakaian untuk Update Transaksi #' . ($transaksi->Kode ?? $transaksi->id),
+                    'UserCreate' => $userName,
                 ]);
             }
+
+            // 6. BUAT METODE PEMBAYARAN BARU
+            if ($request->has('MetodePembayaran') && !empty($request->MetodePembayaran)) {
+                $metodes = is_array($request->MetodePembayaran) ? $request->MetodePembayaran : [$request->MetodePembayaran];
+                foreach ($metodes as $key => $metode) {
+                    $transaksi->getMetodePembayaran()->create([
+                        'IdTransaksi' => $transaksi->id,
+                        'MetodePembayaran' => $metode,
+                        'Nominal' => $request->NominalBayar[$key] ?? 0,
+                        'UserCreate' => $userName,
+                    ]);
+                }
+            }
+
+            // 7. ACTIVITY LOG
+            if (function_exists('activity')) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($transaksi)
+                    ->withProperties([
+                        'attributes' => $transaksi->toArray(),
+                        'request' => $request->all(),
+                    ])
+                    ->log('Transaksi berhasil diupdate, Kode: ' . ($transaksi->Kode ?? '-'));
+            }
+
+            // 8. PROSES INSENTIF
+            app(InsentifService::class)->hapusSebelumProses($transaksi);
+            app(InsentifService::class)->proses($transaksi);
+
+            // 🔥 9. COMMIT TRANSACTION
+            DB::commit();
+
+            return redirect()->route('Transaksi.index')->with('success', 'Transaksi dan data stok berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->withErrors(['global' => $e->getMessage()])->withInput();
         }
-        // update log aktifitas untuk update transaksi
-        if (function_exists('activity')) {
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($transaksi)
-                ->withProperties([
-                    'attributes' => $transaksi->toArray(),
-                    'request' => $request->all(),
-                ])
-                ->log('Transaksi berhasil diupdate, Kode: ' . ($transaksi->Kode ?? '-'));
-        }
-
-
-        app(InsentifService::class)->hapusSebelumProses($transaksi);
-        app(InsentifService::class)->proses($transaksi);
-
-        return redirect()->route('Transaksi.index')->with('success', 'Transaksi berhasil diperbarui.');
     }
 
     /**
@@ -753,35 +900,114 @@ class TransaksiController extends Controller
      */
     public function destroy($id)
     {
-        $id = decrypt($id);
         try {
-            $transaksi = Transaksi::findOrFail($id);
-            // Set UserDelete before deleting related models and transaction itself
-            $userDelete = auth()->user()->name;
+            $decodedId = decrypt($id);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'ID Transaksi tidak valid.'
+            ], 400);
+        }
 
-            // Soft delete on details with UserDelete, if applicable
+        // 2. Mulai Database Transaction
+        DB::beginTransaction();
+
+        try {
+            // Ambil transaksi BESERTA detailnya SEBELUM dihapus (PENTING untuk reversal stok)
+            $transaksi = Transaksi::with('TransaksiDetail')->findOrFail($decodedId);
+
+            $userDelete = auth()->user()->name;
+            $kodeCabang = $transaksi->KodeCabang;
+
+            // 🔥 3. REVERSAL STOK (Perhatikan jumlah sesuai pengurangan, bukan sekadar +1)
+            $barangKembali = [];
+
+            // Hitung jumlah barang per BarangId
+            foreach ($transaksi->TransaksiDetail as $detail) {
+                $masterJp = MasterJenisPerawatan::find($detail->JenisPerawatan);
+
+                if ($masterJp && !empty($masterJp->Barang)) {
+                    $barangIds = json_decode($masterJp->Barang, true);
+
+                    if (is_array($barangIds)) {
+                        foreach ($barangIds as $barangId) {
+                            if (!isset($barangKembali[$barangId])) {
+                                $barangKembali[$barangId] = 0;
+                            }
+                            $barangKembali[$barangId] += 1;
+                            // Jika satu detail/pilihan bisa mengurangi lebih dari satu stok, ubah per detail logika di sini
+                        }
+                    }
+                }
+            }
+
+            // Eksekusi pengembalian stok sesuai jumlah kemunculannya (bisa lebih dari 1)
+            foreach ($barangKembali as $barangId => $jumlahKembali) {
+                $stok = Stok::where('BarangId', $barangId)
+                    ->where('KodeKlinik', $kodeCabang)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($stok) {
+                    $stokSebelum = $stok->StokAkhir;
+                    $stokSesudah = $stokSebelum + $jumlahKembali;
+
+                    $stok->update([
+                        'StokAkhir' => $stokSesudah,
+                        'UserUpdate' => $userDelete
+                    ]);
+
+                    // Catat di mutasi stok
+                    StokMutasi::create([
+                        'KodeKlinik' => $kodeCabang,
+                        'BarangId' => $barangId,
+                        'JenisMutasi' => 'pembatalan_hapus',
+                        'Jumlah' => $jumlahKembali, // Positif karena stok kembali
+                        'StokSebelum' => $stokSebelum,
+                        'StokSesudah' => $stokSesudah,
+                        'Keterangan' => 'Reversal stok karena penghapusan Transaksi #' . ($transaksi->Kode ?? $transaksi->id),
+                        'UserCreate' => $userDelete,
+                    ]);
+                }
+            }
+
+            // 4. SOFT DELETE RELATED MODELS (Logika asli kamu yang dirapikan)
+
+            // a. Transaksi Detail
             foreach ($transaksi->TransaksiDetail as $detail) {
                 $detail->UserDelete = $userDelete;
                 $detail->save();
             }
             $transaksi->TransaksiDetail()->delete();
 
-            foreach ($transaksi->getInsentif as $insentif) {
-                $insentif->UserDelete = $userDelete;
-                $insentif->save();
+            // b. Insentif (Jika ada)
+            if ($transaksi->getInsentif) {
+                foreach ($transaksi->getInsentif as $insentif) {
+                    $insentif->UserDelete = $userDelete;
+                    $insentif->save();
+                }
+                $transaksi->getInsentif()->delete();
             }
-            $transaksi->getInsentif()->delete();
+
+            // c. Metode Pembayaran
             $transaksi->getMetodePembayaran()->delete();
 
+            // 5. SOFT DELETE TRANSAKSI UTAMA
             $transaksi->UserDelete = $userDelete;
             $transaksi->save();
             $transaksi->delete();
 
+            // 6. Commit Transaction
+           DB::commit();
+
             return response()->json([
                 'status' => 200,
-                'message' => 'Transaksi berhasil dihapus.'
+                'message' => 'Transaksi berhasil dihapus dan stok telah dikembalikan.'
             ]);
+
         } catch (\Exception $e) {
+           DB::rollBack();
+
             return response()->json([
                 'status' => 500,
                 'message' => 'Gagal menghapus transaksi: ' . $e->getMessage()

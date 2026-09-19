@@ -28,6 +28,10 @@ class MasterKlinik extends Model
     {
         return $this->hasMany(TargetCapaian::class, 'IdKlinik', 'id');
     }
+    public function getDentalUnit()
+    {
+        return $this->hasMany(DentalUnit::class, 'KodeCabang', 'Kode');
+    }
 
     protected static function boot()
     {
