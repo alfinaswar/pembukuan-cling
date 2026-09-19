@@ -577,17 +577,6 @@
                 </tbody>
             </table>
         </div>
-
-        @if($transactions->hasPages())
-        <div class="table-footer">
-            <div>
-                Menampilkan <strong>{{ $transactions->firstItem() }}</strong> - <strong>{{ $transactions->lastItem() }}</strong> dari <strong>{{ $transactions->total() }}</strong> transaksi
-            </div>
-            <div>
-                {{ $transactions->links() }}
-            </div>
-        </div>
-        @endif
     </div>
 </div>
 @endsection
