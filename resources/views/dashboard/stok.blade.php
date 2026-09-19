@@ -531,7 +531,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="data-table">
+            <table class="data-table datatable">
                 <thead>
                     <tr>
                         <th>Tanggal Transaksi</th>
