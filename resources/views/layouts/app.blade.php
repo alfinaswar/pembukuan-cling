@@ -927,7 +927,7 @@
                                     <span class="hide-menu">Dashboard</span>
                                 </a>
                             </li>
-                            {{-- @can('dashboard-stok') --}}
+                            @can('dashboard-stok')
                                 <li class="sidebar-item">
                                     <a class="sidebar-link {{ Request::is('stok*') ? 'active' : '' }}"
                                         href="{{ route('dashboard.stok') }}" aria-expanded="false">
@@ -937,7 +937,7 @@
                                         <span class="hide-menu">Dashboard Stok</span>
                                     </a>
                                 </li>
-                            {{-- @endcan --}}
+                            @endcan
 
 
                             @can('pembayaran-index')
