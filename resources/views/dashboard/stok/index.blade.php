@@ -559,14 +559,7 @@
             <h1 class="page-title">STOCK OPNAME BEHEL</h1>
             <p class="page-subtitle">Monitor ketersediaan stock behel dan transaksi inersi secara real-time</p>
         </div>
-        <div class="d-flex gap-2">
-            <select class="filter-select" id="filterTanggal">
-                <option value="today">Hari Ini</option>
-                <option value="week" selected>Minggu Ini</option>
-                <option value="month">Bulan Ini</option>
-                <option value="custom">Custom Range</option>
-            </select>
-        </div>
+
     </div>
 
     {{-- INFO BANNER --}}
@@ -728,6 +721,10 @@
                     @endphp
                     {{ $initials }}
                 </div>
+
+
+
+
                 <div class="behel-stock-label">Sisa Stock</div>
                 <div class="behel-stock-value {{ $item['isNegative'] ? 'negative' : '' }}">
                     {{ $item['stok'] }}
@@ -758,81 +755,81 @@
         </div>
 
         <div class="table-responsive">
-            <table id="datatable-transaksi" class="table custom-data-table" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th class="text-center">No</th>
-                        <th>Tanggal Transaksi</th>
-                        <th>Jenis Perawatan</th>
-                        <th>Nama Pasien</th>
-                        <th>Behel Dipakai</th>
-                        <th>Dokter</th>
-                        <th>Perawat</th>
-                        <th>Resepsionis</th>
-                        <th class="text-center">Shift</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($transactions as $trx)
-                        @php
-                            $loopNumber =
-                                ($transactions->currentPage() - 1) * $transactions->perPage() + $loop->iteration;
-                            $detail = $trx->TransaksiDetail->first();
-                            $jenisPerawatan = $detail->masterJenisPerawatan->Nama ?? '-';
-                            $barangNames = $detail->masterJenisPerawatan->barangNames ?? [];
-                            $barangDisplay = implode(', ', $barangNames) ?: 'Behel';
-
-                            $shiftClass = match (strtolower($trx->Shift ?? '')) {
-                                'pagi', '1' => 'badge-pagi',
-                                'siang', '2' => 'badge-siang',
-                                'malam', '3' => 'badge-malam',
-                                default => 'bg-secondary text-white',
-                            };
-
-                            $shiftText = match ($trx->Shift ?? '') {
-                                '1', 1 => 'Pagi',
-                                '2', 2 => 'Siang',
-                                '3', 3 => 'Malam',
-                                default => ucfirst($trx->Shift ?? '-'),
-                            };
-                        @endphp
+            @if ($transactions->count() == 0)
+                <div class="w-100 text-center py-5 text-muted" style="font-size: 16px;">
+                    <i class="ti ti-inbox mb-2" style="font-size: 48px; opacity: 0.3;"></i>
+                    <p class="mt-3 mb-0">Tidak ada data transaksi pada periode ini</p>
+                </div>
+            @else
+                <table id="datatable-transaksi" class="table custom-data-table" style="width: 100%;">
+                    <thead>
                         <tr>
-                            <td class="text-center fw-semibold text-muted">{{ $loopNumber }}</td>
-                            <td class="text-nowrap">{{ \Carbon\Carbon::parse($trx->Tanggal)->format('d F Y') }}</td>
-                            <td>{{ $jenisPerawatan }}</td>
-                            <td><strong>{{ $trx->NamaPasien }}</strong></td>
-                            <td>
-                                @if (!empty($barangNames))
-                                    @foreach ($barangNames as $barang)
-                                        <span class="badge bg-indigo-50 border border-indigo-100 me-1 mb-1"
-                                            style="font-size: 11px; font-weight: 600; color: #000;">
-                                            {{ $barang }}
-                                        </span>
-                                    @endforeach
-                                @else
-                                    <span style="color: #000;">-</span>
-                                @endif
-                            </td>
+                            <th class="text-center">No</th>
+                            <th>Tanggal Transaksi</th>
+                            <th>Jenis Perawatan</th>
+                            <th>Nama Pasien</th>
+                            <th>Behel Dipakai</th>
+                            <th>Dokter</th>
+                            <th>Perawat</th>
+                            <th>Resepsionis</th>
+                            <th class="text-center">Shift</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($transactions as $trx)
+                            @php
+                                $loopNumber =
+                                    ($transactions->currentPage() - 1) * $transactions->perPage() + $loop->iteration;
+                                $detail = $trx->TransaksiDetail->first();
+                                $jenisPerawatan = $detail->masterJenisPerawatan->Nama ?? '-';
+                                $barangNames = $detail->masterJenisPerawatan->barangNames ?? [];
+                                $barangDisplay = implode(', ', $barangNames) ?: 'Behel';
 
-                            <td>{{ $trx->getDokter->name ?? '-' }}</td>
-                            <td>{{ $trx->getPerawat->name ?? '-' }}</td>
-                            <td>{{ $trx->getResepsionis->name ?? '-' }}</td>
-                            <td class="text-center">
-                                <span class="badge-shift {{ $shiftClass }}">
-                                    {{ $shiftText }}
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="ti ti-inbox" style="font-size: 32px; opacity: 0.3;"></i>
-                                <p class="mt-3 mb-0">Tidak ada data transaksi pada periode ini</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                $shiftClass = match (strtolower($trx->Shift ?? '')) {
+                                    'pagi', '1' => 'badge-pagi',
+                                    'siang', '2' => 'badge-siang',
+                                    'malam', '3' => 'badge-malam',
+                                    default => 'bg-secondary text-white',
+                                };
+
+                                $shiftText = match ($trx->Shift ?? '') {
+                                    '1', 1 => 'Pagi',
+                                    '2', 2 => 'Siang',
+                                    '3', 3 => 'Malam',
+                                    default => ucfirst($trx->Shift ?? '-'),
+                                };
+                            @endphp
+                            <tr>
+                                <td class="text-center fw-semibold text-muted">{{ $loopNumber }}</td>
+                                <td class="text-nowrap">{{ \Carbon\Carbon::parse($trx->Tanggal)->format('d F Y') }}</td>
+                                <td>{{ $jenisPerawatan }}</td>
+                                <td><strong>{{ $trx->NamaPasien }}</strong></td>
+                                <td>
+                                    @if (!empty($barangNames))
+                                        @foreach ($barangNames as $barang)
+                                            <span class="badge bg-indigo-50 border border-indigo-100 me-1 mb-1"
+                                                style="font-size: 11px; font-weight: 600; color: #000;">
+                                                {{ $barang }}
+                                            </span>
+                                        @endforeach
+                                    @else
+                                        <span style="color: #000;">-</span>
+                                    @endif
+                                </td>
+
+                                <td>{{ $trx->getDokter->name ?? '-' }}</td>
+                                <td>{{ $trx->getPerawat->name ?? '-' }}</td>
+                                <td>{{ $trx->getResepsionis->name ?? '-' }}</td>
+                                <td class="text-center">
+                                    <span class="badge-shift {{ $shiftClass }}">
+                                        {{ $shiftText }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
     </div>
     {{-- </div> --}}
