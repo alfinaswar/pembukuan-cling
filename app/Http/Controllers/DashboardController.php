@@ -33,7 +33,7 @@ class DashboardController extends Controller
             ->count('Shift');
 
         // Total pendapatan minimal per shift (sum semua billing)
-        $totalPendapatan = $baseQuery()->sum('TotalBiaya'); // sesuaikan nama kolom
+        $totalPendapatan = $baseQuery()->sum('TotalBiaya');  // sesuaikan nama kolom
 
         // ── 2. Total Pasien Lama dalam filter ─────────────────────────────────
         //    Pasien lama = pasien yang sudah pernah bertransaksi sebelum tanggal ini
@@ -47,7 +47,7 @@ class DashboardController extends Controller
 
         // ── 3. Total Pasien dengan Billing >= Rp 1.000.000 ────────────────────
         $totalPasienBillingBesar = $baseQuery()
-            ->where('TotalBiaya', '>=', 1000000) // sesuaikan nama kolom
+            ->where('TotalBiaya', '>=', 1000000)  // sesuaikan nama kolom
             ->count();
 
         // ── 4. Total Pasien Baru ───────────────────────────────────────────────
@@ -63,7 +63,7 @@ class DashboardController extends Controller
         // ── 5. Total Pasien Operasi OD ────────────────────────────────────────
         //    Sesuaikan kondisi dengan field yang menandai operasi OD di sistem kamu
         $totalOperasiOD = $baseQuery()
-            ->where('JenisPerawatan', 'like', '%OD%') // sesuaikan kolom / relasi
+            ->where('JenisPerawatan', 'like', '%OD%')  // sesuaikan kolom / relasi
             ->count();
 
         // ── Data pendukung (resepsionis & perawat bertugas) ───────────────────
@@ -71,11 +71,11 @@ class DashboardController extends Controller
         $resepsionisIds = $baseQuery()->distinct()->pluck('IdResepsionis');
         $perawatIds = $baseQuery()->distinct()->pluck('IdPerawat');
 
-        $resepsionisAktif =User::whereIn('id', $resepsionisIds)->get(['id', 'name']);
-        $perawatAktif =User::whereIn('id', $perawatIds)->get(['id', 'name']);
+        $resepsionisAktif = User::whereIn('id', $resepsionisIds)->get(['id', 'name']);
+        $perawatAktif = User::whereIn('id', $perawatIds)->get(['id', 'name']);
 
         // Shift aktif detail
-        $shiftAktif =MasterShift::whereIn(
+        $shiftAktif = MasterShift::whereIn(
             'id',
             Transaksi::whereDate('Tanggal', $tanggal)
                 ->when($request->shift, fn($q) => $q->where('Shift', $request->shift))
@@ -88,88 +88,115 @@ class DashboardController extends Controller
             // Card 1
             'jumlahShift' => $jumlahShift,
             'totalPendapatan' => $totalPendapatan,
-
             // Card 2
             'totalPasienLama' => $totalPasienLama,
-
             // Card 3
             'totalPasienBillingBesar' => $totalPasienBillingBesar,
-
             // Card 4
             'totalPasienBaru' => $totalPasienBaru,
-
             // Card 5
             'totalOperasiOD' => $totalOperasiOD,
-
             // Pendukung
             'resepsionisAktif' => $resepsionisAktif,
             'perawatAktif' => $perawatAktif,
             'shiftAktif' => $shiftAktif,
-
             // Meta
             'tanggal' => $tanggal,
             'updatedAt' => now()->format('d M Y H:i'),
         ]);
     }
+
     public function Stok(Request $request)
     {
         // 1. Handle Filters
         $tanggalMulai = $request->input('tanggal_mulai', now()->startOfMonth()->format('Y-m-d'));
         $tanggalAkhir = $request->input('tanggal_akhir', now()->format('Y-m-d'));
 
-        // Default ke cabang user, tapi bisa di-override oleh filter
-        $kodeKlinik = $request->input('klinik', auth()->user()->kodeperusahaan ?? '');
+        // Jika kosong (Superadmin pilih "Semua"), biarkan null. Jika user biasa, paksa pakai cabang user.
+        $isSuperadmin = auth()->user()->hasRole('Superadmin');  // Sesuaikan dengan nama role kamu
+        $kodeKlinik = $request->input('klinik');
 
-        // Asumsi: Ada Kategori Barang dengan nama mengandung 'Behel'
-        $kategoriBehel = KategoriBarang::where('Nama', 'LIKE', '%Behel%')->first();
+        if (!$isSuperadmin || empty($kodeKlinik)) {
+            $kodeKlinik = auth()->user()->kodeperusahaan ?? '';
+        }
+
+        // 2. Ambil ID Kategori Behel
+        $kategoriBehel = KategoriBarang::where('id', '1')->first();
         $kategoriBehelId = $kategoriBehel ? $kategoriBehel->id : null;
-
-        // 2. Ambil Daftar Jenis Behel (Barang)
+        // 3. Ambil Daftar Jenis Behel (Barang)
         $behelTypesQuery = Barang::query();
         if ($kategoriBehelId) {
             $behelTypesQuery->where('KategoriBarangId', $kategoriBehelId);
         }
         $behelTypes = $behelTypesQuery->orderBy('NamaBarang', 'asc')->get();
         $behelIds = $behelTypes->pluck('id');
+        // dd($behelTypes);
 
-        // 3. Hitung Summary Cards
-        $totalStock = Stok::where('KodeKlinik', $kodeKlinik)
-            ->whereIn('BarangId', $behelIds)
-            ->sum('StokAkhir');
-
-        $totalTerpakai = Transaksi::where('KodeCabang', $kodeKlinik)
-            ->whereBetween('Tanggal', [$tanggalMulai, $tanggalAkhir])
-            ->whereHas('TransaksiDetail', function ($q) use ($behelIds) {
-                $q->whereNotNull('JenisPerawatan');
-            })
-            ->count();
-
+        // ==========================================
+        // REUSABLE FILTER: Agar Summary & Table Konsisten
+        // ==========================================
+        $filterBehelTransaction = function ($query) use ($kategoriBehelId) {
+            if ($kategoriBehelId) {
+                // PRIORITAS: Filter berdasarkan Kategori Behel
+                $query
+                    ->whereNotNull('Barang')
+                    ->where('Barang', '!=', '[]')
+                    ->where('Barang', '!=', 'null');
+            } else {
+                // FALLBACK: Jika kategori tidak ditemukan, cek kolom Barang tidak kosong
+                $query
+                    ->whereNotNull('Barang')
+                    ->where('Barang', '!=', '[]')
+                    ->where('Barang', '!=', 'null');
+            }
+        };
+        // dd($query);
+        // 4. Hitung Summary Cards (Menggunakan Filter yang Sama)
+        $stokQuery = Stok::whereIn('BarangId', $behelIds);
+        if (!empty($kodeKlinik)) {
+            $stokQuery->where('KodeKlinik', $kodeKlinik);
+        }
+        $totalStock = $stokQuery->sum('StokAkhir');
         $sisaStock = $totalStock;
 
-        $transaksiHariIni = Transaksi::where('KodeCabang', $kodeKlinik)
-            ->whereDate('Tanggal', today())
+        $trxBaseQuery = Transaksi::query();
+        if (!empty($kodeKlinik)) {
+            $trxBaseQuery->where('KodeCabang', $kodeKlinik);
+        }
+
+        $totalTerpakai = (clone $trxBaseQuery)
+            ->whereBetween('Tanggal', [$tanggalMulai, $tanggalAkhir])
+            ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
             ->count();
 
-        $lastTransaksiTime = Transaksi::where('KodeCabang', $kodeKlinik)
+        $transaksiHariIni = (clone $trxBaseQuery)
             ->whereDate('Tanggal', today())
+            ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
+            ->count();
+
+        $lastTransaksiTime = (clone $trxBaseQuery)
+            ->whereDate('Tanggal', today())
+            ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
             ->latest()
             ->value('created_at');
 
-        // 🔥 INI YANG TADI KURANG: Hitung Total Transaksi Bulan Ini
-        $totalTransaksiBulanIni = Transaksi::where('KodeCabang', $kodeKlinik)
+        $totalTransaksiBulanIni = (clone $trxBaseQuery)
             ->whereMonth('Tanggal', now()->month)
             ->whereYear('Tanggal', now()->year)
+            ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
             ->count();
 
-        // 4. Hitung Stok Per Jenis Behel
+        // 5. Hitung Stok Per Jenis Behel
         $stockPerType = [];
-        $maxStockBase = 50; // Angka dasar untuk persentase
+        $maxStockBase = 50;  // Angka dasar untuk persentase
 
         foreach ($behelTypes as $type) {
-            $stok = Stok::where('BarangId', $type->id)
-                ->where('KodeKlinik', $kodeKlinik)
-                ->sum('StokAkhir');
+            $q = Stok::where('BarangId', $type->id);
+            if (!empty($kodeKlinik)) {
+                $q->where('KodeKlinik', $kodeKlinik);
+            }
 
+            $stok = $q->sum('StokAkhir');
             $percentage = $maxStockBase > 0 ? min(100, max(0, ($stok / $maxStockBase) * 100)) : 0;
 
             $stockPerType[] = [
@@ -180,31 +207,41 @@ class DashboardController extends Controller
             ];
         }
 
-        // 5. Ambil Data Transaksi
-        $transactions = Transaksi::with(['getDokter', 'getPerawat', 'getResepsionis', 'TransaksiDetail.masterJenisPerawatan'])
-            ->where('KodeCabang', $kodeKlinik)
+        // 6. 🔥 AMBIL DATA TRANSAKSI (DISESUAIKAN & DIRAPIKAN)
+        $transactions = Transaksi::with([
+            'getDokter',
+            'getPerawat',
+            'getResepsionis',
+            'TransaksiDetail.MasterJenisPerawatan'
+        ])
+            ->when(!empty($kodeKlinik), function ($q) use ($kodeKlinik) {
+                $q->where('KodeCabang', $kodeKlinik);
+            })
             ->whereBetween('Tanggal', [$tanggalMulai, $tanggalAkhir])
+            // Gunakan closure yang sama agar data tabel match dengan summary cards
+            ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
             ->latest('Tanggal')
             ->paginate(10);
 
-        // Data untuk Filter Dropdown
+        // 7. Data untuk Filter Dropdown
         $kliniks = MasterKlinik::orderBy('Nama', 'asc')->get();
 
-        // 🔥 PASTIKAN SEMUA VARIABEL DI-COMPACT
-        return view('dashboard.stok', compact(
+        // 8. Return View
+        return view('dashboard.stok.index', compact(
             'totalStock',
             'totalTerpakai',
             'sisaStock',
             'transaksiHariIni',
             'lastTransaksiTime',
-            'totalTransaksiBulanIni', // <-- Tambahkan ini!
+            'totalTransaksiBulanIni',
             'stockPerType',
             'transactions',
             'kliniks',
             'tanggalMulai',
             'tanggalAkhir',
             'kodeKlinik',
-            'behelTypes'
+            'behelTypes',
+            'isSuperadmin'  // Kirim ini ke view untuk handle opsi "Semua Cabang"
         ));
     }
 }
