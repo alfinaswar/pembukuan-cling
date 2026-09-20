@@ -156,8 +156,6 @@ class DashboardController extends Controller
         if (!empty($kodeKlinik)) {
             $stokQuery->where('KodeKlinik', $kodeKlinik);
         }
-        $totalStock = $stokQuery->sum('StokAkhir');
-        $sisaStock = $totalStock;
 
         $trxBaseQuery = Transaksi::query();
         if (!empty($kodeKlinik)) {
@@ -185,7 +183,8 @@ class DashboardController extends Controller
             ->whereYear('Tanggal', now()->year)
             ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
             ->count();
-
+        $totalStock = $stokQuery->sum('StokAkhir') + $totalTerpakai;
+        $sisaStock = $totalStock - $totalTerpakai;
         // 5. Hitung Stok Per Jenis Behel
         $stockPerType = [];
         $maxStockBase = 50;  // Angka dasar untuk persentase
