@@ -697,9 +697,41 @@
         @forelse($stockPerType as $item)
             <div class="behel-card" data-behel-id="{{ $item['barang']->id }}">
                 <div class="behel-name">{{ $item['barang']->NamaBarang }}</div>
-                <div class="behel-image">
-                    <i class="ti ti-braces" style="color: var(--primary);"></i>
+                <div class="behel-image"
+                    style="background: #f1f6fe; border-radius: 8px; font-weight: bold; font-size: 22px; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; height: 40px; width: 40px; margin: 0 auto 6px auto; box-shadow: 0 2px 6px 0 rgba(28,73,171,0.06);">
+                    @php
+                        $words = explode(' ', $item['barang']->NamaBarang);
+                        $initials = collect($words)
+                            ->filter(function ($w) {
+                                return mb_strlen($1w) > 0;
+                            })
+                            ->map(function ($w) {
+                                // Ambil huruf pertama yang merupakan huruf
+                                $firstLetter = '';
+                                for ($i = 0; $i < mb_strlen($w); $i++) {
+                                    $char = mb_substr($w, $i, 1);
+                                    if (preg_match('/[a-zA-Z]/u', $char)) {
+                                        $firstLetter = $char;
+                                        break;
+                                    }
+                                }
+                                return $firstLetter;
+                            })
+                            ->filter(function ($ch) {
+                                return $ch !== '';
+                            })
+                            ->join('');
+                        // Fallback ke 2 huruf random jika tidak ada huruf
+                        if (!$initials) {
+                            $initials = strtoupper(Str::random(2));
+                        }
+                    @endphp
+                    {{ $initials }}
                 </div>
+
+
+
+
                 <div class="behel-stock-label">Sisa Stock</div>
                 <div class="behel-stock-value {{ $item['isNegative'] ? 'negative' : '' }}">
                     {{ $item['stok'] }}
