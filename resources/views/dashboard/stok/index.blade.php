@@ -703,7 +703,7 @@
                         $words = explode(' ', $item['barang']->NamaBarang);
                         $initials = collect($words)
                             ->filter(function ($w) {
-                                return mb_strlen($1w) > 0;
+                                return mb_strlen($w) > 0;
                             })
                             ->map(function ($w) {
                                 // Ambil huruf pertama yang merupakan huruf
@@ -728,10 +728,6 @@
                     @endphp
                     {{ $initials }}
                 </div>
-
-
-
-
                 <div class="behel-stock-label">Sisa Stock</div>
                 <div class="behel-stock-value {{ $item['isNegative'] ? 'negative' : '' }}">
                     {{ $item['stok'] }}
