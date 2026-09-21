@@ -934,7 +934,19 @@ class TransaksiController extends Controller
                 $masterJp = MasterJenisPerawatan::find($detail->JenisPerawatan);
 
                 if ($masterJp && !empty($masterJp->Barang)) {
-                    $barangIds = json_decode($masterJp->Barang, true);
+                    $rawBarang = $masterJp->Barang;
+
+                    // Only decode if it's a string
+                    $barangIds = [];
+                    if (is_string($rawBarang)) {
+                        $decoded = json_decode($rawBarang, true);
+                        if (is_array($decoded)) {
+                            $barangIds = $decoded;
+                        }
+                    } elseif (is_array($rawBarang)) {
+                        // Defensive: Already array (not expected), use as-is
+                        $barangIds = $rawBarang;
+                    }
 
                     if (is_array($barangIds)) {
                         foreach ($barangIds as $barangId) {
@@ -1005,7 +1017,7 @@ class TransaksiController extends Controller
             $transaksi->delete();
 
             // 6. Commit Transaction
-           DB::commit();
+            DB::commit();
 
             return response()->json([
                 'status' => 200,
@@ -1013,7 +1025,7 @@ class TransaksiController extends Controller
             ]);
 
         } catch (\Exception $e) {
-           DB::rollBack();
+            DB::rollBack();
 
             return response()->json([
                 'status' => 500,
