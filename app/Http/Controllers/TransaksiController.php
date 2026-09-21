@@ -729,7 +729,7 @@ class TransaksiController extends Controller
 
             foreach ($oldDetails as $oldDetail) {
                 $masterJp = MasterJenisPerawatan::find($oldDetail->JenisPerawatan);
-                if ($masterJp && !empty($masterJp->Barang)) {
+                if ($masterJp && !empty($masterJp->Barang) && is_string($masterJp->Barang)) {
                     $barangIds = json_decode($masterJp->Barang, true);
 
                     if (is_array($barangIds)) {
@@ -812,7 +812,7 @@ class TransaksiController extends Controller
                         // B. Hitung kebutuhan barang untuk dikurangi nanti
                         $masterJp = MasterJenisPerawatan::find($perawatan['id']);
 
-                        if ($masterJp && !empty($masterJp->Barang)) {
+                        if ($masterJp && !empty($masterJp->Barang) && is_string($masterJp->Barang)) {
                             $barangIds = json_decode($masterJp->Barang, true);
 
                             if (is_array($barangIds)) {
