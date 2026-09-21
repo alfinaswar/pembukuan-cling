@@ -104,7 +104,14 @@
                                 </label>
                                 @php
                                     // Ambil value lama jika validasi gagal, atau dari database (decode JSON jadi array)
-                                    $selectedBarang = old('Barang', json_decode($JenisPerawatan->Barang ?? '[]', true) ?? []);
+                                    $barangFromDb = $JenisPerawatan->Barang ?? '[]';
+                                    if (is_array($barangFromDb)) {
+                                        // Jika sudah array, pakai langsung
+                                        $selectedBarang = old('Barang', $barangFromDb);
+                                    } else {
+                                        // Decode string JSON
+                                        $selectedBarang = old('Barang', json_decode($barangFromDb ?: '[]', true) ?? []);
+                                    }
                                 @endphp
                                 <select id="Barang" name="Barang[]" class="form-select select2 @error('Barang') is-invalid @enderror" multiple>
                                     @if(isset($barang) && count($barang) > 0)
@@ -115,6 +122,7 @@
                                         @endforeach
                                     @endif
                                 </select>
+
                                 <small class="text-muted d-block mt-1">
                                     <i class="ti ti-help me-1"></i>Pilih satu atau lebih barang jika diperlukan
                                 </small>
