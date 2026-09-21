@@ -502,7 +502,14 @@ class TransaksiController extends Controller
                 $masterJp = MasterJenisPerawatan::find($jenisPerawatanId);
 
                 if ($masterJp && !empty($masterJp->Barang)) {
-                    $barangIds = json_decode($masterJp->Barang, true);
+                    // Fix: Pastikan hanya menjalankan json_decode jika benar tipe datanya string
+                    if (is_string($masterJp->Barang)) {
+                        $barangIds = json_decode($masterJp->Barang, true);
+                    } elseif (is_array($masterJp->Barang)) {
+                        $barangIds = $masterJp->Barang; // Sudah array, langsung pakai
+                    } else {
+                        $barangIds = [];
+                    }
 
                     if (is_array($barangIds)) {
                         foreach ($barangIds as $barangId) {

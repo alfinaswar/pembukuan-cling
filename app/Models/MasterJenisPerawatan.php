@@ -14,9 +14,9 @@ class MasterJenisPerawatan extends Model
 
     protected $guarded = ['id'];
 
-    // protected $casts = [
-    //     'Barang' => 'array',
-    // ];
+    protected $casts = [
+        'Barang' => 'array',
+    ];
 
     public function getJumlahTransaksi()
     {
