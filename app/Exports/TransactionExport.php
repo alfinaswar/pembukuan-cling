@@ -22,13 +22,6 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
     protected $filterData;
     protected $exportData = [];
     protected $totalRows = 0;
-    // mergeInstructions format:
-    // [
-    //   ['column'=>'E', 'row_start'=>3, 'row_end'=>4],
-    //   ['column'=>'D', 'row_start'=>3, 'row_end'=>4],
-    //   ['column'=>'A', 'row_start'=>3, 'row_end'=>4]
-    //   ...
-    // ]
     protected $mergeInstructions = [];
 
     public function __construct($filterData)
@@ -105,13 +98,16 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
             }
 
             // === Tambahkan BiayaAdmin jika JenisPasien == 'Baru' ===
-            // Dianggap: field JenisPasien ada di model Transaksi, BiayaAdmin juga
+            // Catatan: Tidak menambahkan BiayaAdmin ke revenue, hanya mengisi di kolom biaya_admin
 
-            // Logic: hanya pada detailIndex === 0, dan jika JenisPasien == 'Baru', tambahkan BiayaAdmin pada revenue dari treatment pertama
             foreach ($details as $detailIndex => $detail) {
                 $biaya = $detail->Biaya ?? 0;
+                // Hitung BiayaAdmin
+                $biayaAdmin = 0;
                 if ($detailIndex === 0 && (strtolower($transaksi->JenisPasien ?? '') === 'baru')) {
-                    $biaya += ($transaksi->BiayaAdmin ?? 0);
+                    $biayaAdmin = $transaksi->BiayaAdmin ?? 0;
+                    // Jangan tambahkan biaya admin ke revenue!
+                    // $biaya += $biayaAdmin; <-- HAPUS
                 }
                 $exportData[] = [
                     'day' => $detailIndex === 0 ? $dayName : '',
@@ -120,8 +116,9 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     'no' => $detailIndex === 0 ? $transactionIndex : '',
                     'patient_name' => $detailIndex === 0 ? $transaksi->NamaPasien : '',
                     'treatment' => $detail->MasterJenisPerawatan->Nama ?? '',
-                    'keterangan' => $detail->Keterangan ?? '', // Add this field
-                    'revenue' => $biaya,
+                    'keterangan' => $detail->Keterangan ?? '',
+                    'biaya_admin' => $biayaAdmin, // Tampilkan BiayaAdmin-nya sebelum Revenue
+                    'revenue' => $biaya, // Revenue tidak ditambah biaya admin
                 ];
                 $rowNumber++;
             }
@@ -177,11 +174,13 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function headings(): array
     {
-        return ['DAY', 'DATE', 'BRANCH', 'NO.', 'PATIENT NAME', 'TREATMENT(S)', 'REVENUE'];
+        // Tambahkan kolom Biaya Admin sebelum Revenue
+        return ['DAY', 'DATE', 'BRANCH', 'NO.', 'PATIENT NAME', 'TREATMENT(S)', 'ADMIN FEE', 'REVENUE'];
     }
 
     public function map($row): array
     {
+        // Masukkan 'biaya_admin' sebelum revenue
         return [
             $row['day'],
             $row['date'],
@@ -189,7 +188,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
             $row['no'] !== '' ? $row['no'] : '',
             $row['patient_name'],
             $row['treatment'],
-            // Kembalikan sebagai angka, BUKAN string
+            (float) $row['biaya_admin'],
             (float) $row['revenue'],
         ];
     }
@@ -209,17 +208,18 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
+                // Perubahan: total kolom sekarang H (bukan G); totalRow harus menghitung kolom H
                 $lastDataRow = 2 + $this->totalRows;  // row 2 = header, data mulai row 3
                 $totalRow = $lastDataRow + 1; // Row for total
 
                 // ═══════════════════════════════════════════════
                 // ROW 1 — Judul "Januari 2026"
                 // ═══════════════════════════════════════════════
-                $sheet->mergeCells('A1:G1');
+                $sheet->mergeCells('A1:H1');
                 $sheet->setCellValue('A1', $this->buildTitle());
                 $sheet->getRowDimension(1)->setRowHeight(36);
 
-                $sheet->getStyle('A1:G1')->applyFromArray([
+                $sheet->getStyle('A1:H1')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 26,
@@ -241,7 +241,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                 // ROW 2 — Header tabel
                 // ═══════════════════════════════════════════════
                 $sheet->getRowDimension(2)->setRowHeight(20);
-                $sheet->getStyle('A2:G2')->applyFromArray([
+                $sheet->getStyle('A2:H2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 10,
@@ -263,12 +263,12 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     ],
                 ]);
                 // Add TOTAL row
-                $sheet->mergeCells("A{$totalRow}:F{$totalRow}");
+                $sheet->mergeCells("A{$totalRow}:G{$totalRow}");
                 $sheet->setCellValue("A{$totalRow}", 'TOTAL REVENUE');
-                $sheet->setCellValue("G{$totalRow}", "=SUM(G3:G{$lastDataRow})");
+                $sheet->setCellValue("H{$totalRow}", "=SUM(H3:H{$lastDataRow})");
 
                 $sheet->getRowDimension($totalRow)->setRowHeight(20);
-                $sheet->getStyle("A{$totalRow}:G{$totalRow}")->applyFromArray([
+                $sheet->getStyle("A{$totalRow}:H{$totalRow}")->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 11,
@@ -294,7 +294,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                 // ROWS DATA — border tipis, background putih
                 // ═══════════════════════════════════════════════
                 if ($this->totalRows > 0) {
-                    $dataRange = "A3:G{$lastDataRow}";
+                    $dataRange = "A3:H{$lastDataRow}";
 
                     $sheet->getStyle($dataRange)->applyFromArray([
                         'font' => [
@@ -324,14 +324,13 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                     $sheet->getStyle("E3:E{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle("F3:F{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
                     $sheet->getStyle("G3:G{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                    $sheet->getStyle("G{$totalRow}")->getNumberFormat()
-                        ->setFormatCode('#,##0');
-                    // $sheet->getStyle("G3:G{$lastDataRow}")->getNumberFormat()
-                    //     ->setFormatCode('#,##0');
-                    $sheet->getStyle("G3:G{$lastDataRow}")->getNumberFormat()
-                        ->setFormatCode('#,##0');
-                    // Atau kalau mau dengan format Rupiah lengkap:
-// ->setFormatCode('_("Rp"* #,##0_);_("Rp"* \-#,##0;_("Rp"* "-"??_);_(@_)');
+                    $sheet->getStyle("H3:H{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+                    // Formatting ADMIN FEE (G) and REVENUE (H)
+                    $sheet->getStyle("G3:G{$lastDataRow}")->getNumberFormat()->setFormatCode('#,##0');
+                    $sheet->getStyle("H3:H{$lastDataRow}")->getNumberFormat()->setFormatCode('#,##0');
+                    $sheet->getStyle("H{$totalRow}")->getNumberFormat()->setFormatCode('#,##0');
+
                     // Merge kolom2 (A, B, C, D, E) sesuai instruksi
                     foreach ($this->mergeInstructions as $merge) {
                         if ($merge['row_start'] !== $merge['row_end']) {
@@ -352,7 +351,8 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
                 $sheet->getColumnDimension('D')->setAutoSize(false)->setWidth(5);  // NO.
                 $sheet->getColumnDimension('E')->setAutoSize(false)->setWidth(22);  // PATIENT NAME
                 $sheet->getColumnDimension('F')->setAutoSize(true);  // TREATMENT(S) — auto
-                $sheet->getColumnDimension('G')->setAutoSize(false)->setWidth(13);  // REVENUE
+                $sheet->getColumnDimension('G')->setAutoSize(false)->setWidth(11);  // ADMIN FEE
+                $sheet->getColumnDimension('H')->setAutoSize(false)->setWidth(13);  // REVENUE
 
                 // Freeze di bawah header
                 $sheet->freezePane('A3');
