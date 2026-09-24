@@ -174,7 +174,7 @@ class TransactionExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function headings(): array
     {
         // Tambahkan kolom KETERANGAN setelah Treatment, dan kolom Biaya Admin sebelum Revenue
-        return ['DAY', 'DATE', 'BRANCH', 'NO.', 'PATIENT NAME', 'TREATMENT(S)', 'NOTES', 'ADMIN FEE', 'REVENUE'];
+        return ['DAY', 'DATE', 'BRANCH', 'NO.', 'PATIENT NAME', 'TREATMENT(S)', 'NOTE', 'ADMIN FEE', 'REVENUE'];
     }
 
     public function map($row): array
