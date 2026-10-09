@@ -468,6 +468,7 @@ class LaporanController extends Controller
 
         // Ambil sum per JenisRule sekali query termasuk insentif_hari_libur
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
+            ->whereHas('getTransaksi') // Hanya insentif yang punya transaksi terkait
             ->selectRaw('JenisRule, SUM(Nominal) as total_insentif, COUNT(*) as total_data')
             ->groupBy('JenisRule')
             ->get()
@@ -484,6 +485,7 @@ class LaporanController extends Controller
                 'total_data' => $db->total_data ?? 0,
             ];
         })->values();
+
 
         // =============================================
         // 6. DROPDOWN (untuk form filter)
@@ -668,10 +670,12 @@ class LaporanController extends Controller
         ];
 
         $ringkasanDb = InsentifKaryawan::where($scopeInsentif)
+            ->whereHas('getTransaksi')
             ->selectRaw('JenisRule, SUM(Nominal) as total_insentif, COUNT(*) as total_data')
             ->groupBy('JenisRule')
             ->get()
             ->keyBy('JenisRule');
+
 
         $Ringkasan = collect($jenisRuleInfo)->map(function ($info, $key) use ($ringkasanDb) {
             $db = $ringkasanDb->get($key);
