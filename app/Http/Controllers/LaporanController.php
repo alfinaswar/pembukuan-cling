@@ -374,13 +374,13 @@ class LaporanController extends Controller
             ->where('JenisRule', 'omzet_shift')
             ->get();
 
-        // 5e. 8 pasien lama per shift (rule: pasien_lama)
-        // Dihitung group per tanggal+shift, struktur data konsisten dengan tabel di view (tanggal, jumlah, perawat, insentif)
+        // 5e. 8 pasien lama per shift (rule: pasien_lama
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
 
         $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
+            ->whereHas('getTransaksi')
             ->get()
             ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
@@ -393,6 +393,7 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
+
 
         // 5f. Billing minimal 1jt (rule: transaksi, TotalBayar >= 1jt)
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
@@ -412,6 +413,7 @@ class LaporanController extends Controller
         $PasienBaru = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_baru')
+            ->whereHas('getTransaksi')
             ->get()
             ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) {
@@ -424,6 +426,7 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
+
 
         // 5h. Pasien lama (rule: pasien_lama) — grouped per tanggal+shift
         $countpasienlama = Transaksi::where('JenisPasien', 'Lama')->count();
@@ -635,6 +638,7 @@ class LaporanController extends Controller
         $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
+            ->whereHas('getTransaksi')
             ->get()
             ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
@@ -648,6 +652,7 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
+
 
         // 5f. Insentif Hari Libur (rule: hari_libur)
         $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
@@ -855,7 +860,7 @@ class LaporanController extends Controller
         // 3. BASE SCOPE — siap untuk filter "Semua Cabang"
         // =============================================
         // Jika $kodeCabang bernilai null/"" (Semua Klinik), maka tidak di-filter KodeCabang
-        $scopeTransaksi = function($q) use ($startDate, $endDate, $kodeCabang, $dokterId, $shiftFilter) {
+        $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $dokterId, $shiftFilter) {
             $q->whereBetween('Tanggal', [$startDate, $endDate]);
             if (!empty($kodeCabang)) {
                 $q->where('KodeCabang', $kodeCabang);
@@ -1206,11 +1211,11 @@ class LaporanController extends Controller
                     'total_bayar' => $item->total ?? $item->TotalBayar ?? 0,
                     // Pakai 'dd' (Dokter) atau 'dt' (Perawat) sebagai petugas
                     'petugas' =>
-                        // Tampilkan dokter, perawat, dan resepsionis dengan label dan <br>
+                            // Tampilkan dokter, perawat, dan resepsionis dengan label dan <br>
                         (isset($item->getDokter) && $item->getDokter ? 'Dokter: ' . $item->getDokter->name . '<br>' : '')
                         . (isset($item->getPerawat) && $item->getPerawat ? 'Perawat: ' . $item->getPerawat->name . '<br>' : '')
                         . (isset($item->getResepsionis) && $item->getResepsionis ? 'Resepsionis: ' . $item->getResepsionis->name : '')
-                            ?: '-',
+                        ?: '-',
                     'shift' => $item->getShift?->Nama ?? '-',
                     'aksi' => null
                 ];
@@ -1417,7 +1422,8 @@ class LaporanController extends Controller
     {
         if ($request->ajax()) {
             $data = InsentifKaryawan::with(['getUser', 'getTransaksi'])
-                ->select('insentif_karyawans.*');
+                ->select('insentif_karyawans.*')
+                ->whereHas('getTransaksi');
 
             // 🔥 FILTER (sama seperti sebelumnya)
             if ($request->filled('user_id'))
@@ -1468,11 +1474,6 @@ class LaporanController extends Controller
                         ? $row->getShift->Nama
                         : '<span class="text-muted">N/A</span>';
                 })
-
-
-
-
-
                 ->addColumn('action', function ($row) {
                     $encryptedId = encrypt($row->id);
                     $namaKaryawan = $row->getUser ? $row->getUser->name : 'Karyawan';

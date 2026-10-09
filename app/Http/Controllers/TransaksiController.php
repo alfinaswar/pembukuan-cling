@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DentalUnit;
+use App\Models\InsentifKaryawan;
 use App\Models\MasterJenisPerawatan;
 use App\Models\MasterKlinik;
 use App\Models\MasterMetodePembayaran;
@@ -82,7 +83,8 @@ class TransaksiController extends Controller
                     return 'Rp ' . number_format($row->TotalBayar, 0, ',', '.');
                 })
                 ->addColumn('MetodePembayaran', function ($row) {
-                    if (!$row->getMetodePembayaran || $row->getMetodePembayaran->isEmpty()) return '-';
+                    if (!$row->getMetodePembayaran || $row->getMetodePembayaran->isEmpty())
+                        return '-';
                     $html = '<dl class="mb-0">';
                     foreach ($row->getMetodePembayaran as $pembayaran) {
                         $nama = e($pembayaran->getMetodeBayar->Nama ?? '-');
@@ -94,7 +96,8 @@ class TransaksiController extends Controller
                     return $html;
                 })
                 ->addColumn('Shift', function ($row) {
-                    if (!$row->getShift) return '-';
+                    if (!$row->getShift)
+                        return '-';
                     $nama = strtolower($row->getShift->Nama);
                     if ($nama === 'pagi' || $row->getShift->id == 1) {
                         return '<span class="badge bg-warning text-dark"><i class="fa fa-sun me-1"></i>Pagi</span>';
@@ -105,12 +108,15 @@ class TransaksiController extends Controller
                 })
                 ->addColumn('JenisPasien', function ($row) {
                     $jenis = $row->JenisPasien ?? '-';
-                    if ($jenis === 'Baru') return '<span class="badge bg-success"><i class="fa fa-user-plus me-1"></i>Baru</span>';
-                    if ($jenis === 'Lama') return '<span class="badge bg-info"><i class="fa fa-user-check me-1"></i>Lama</span>';
+                    if ($jenis === 'Baru')
+                        return '<span class="badge bg-success"><i class="fa fa-user-plus me-1"></i>Baru</span>';
+                    if ($jenis === 'Lama')
+                        return '<span class="badge bg-info"><i class="fa fa-user-check me-1"></i>Lama</span>';
                     return '-';
                 })
                 ->addColumn('Layanan', function ($row) {
-                    if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0) return '-';
+                    if (!$row->TransaksiDetail || count($row->TransaksiDetail) === 0)
+                        return '-';
                     $rekap = [];
                     foreach ($row->TransaksiDetail as $detail) {
                         $nama = optional($detail->MasterJenisPerawatan)->Nama;
@@ -127,7 +133,8 @@ class TransaksiController extends Controller
                             }
                         }
                     }
-                    if (empty($rekap)) return '-';
+                    if (empty($rekap))
+                        return '-';
                     $html = '<dl class="mb-0">';
                     foreach ($rekap as $item) {
                         $namaStr = e($item['nama']) . ($item['count'] > 1 ? ' x' . $item['count'] : '');
@@ -359,8 +366,8 @@ class TransaksiController extends Controller
         $dokter = User::role('Dokter')->get();
         $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
         $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
-        $dental = DentalUnit::where('KodeCabang',auth()->user()->kodeperusahaan)->get();
-        return view('transaksi.kasir.create', compact('dental','Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
+        $dental = DentalUnit::where('KodeCabang', auth()->user()->kodeperusahaan)->get();
+        return view('transaksi.kasir.create', compact('dental', 'Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
     }
 
     /**
@@ -643,7 +650,9 @@ class TransaksiController extends Controller
             'kasir',
             'totalPasienBaru',
             'totalPasienLama',
-            'shift','dental','masterShift'
+            'shift',
+            'dental',
+            'masterShift'
         ));
     }
 
@@ -915,28 +924,18 @@ class TransaksiController extends Controller
                 'message' => 'ID Transaksi tidak valid.'
             ], 400);
         }
-
-        // 2. Mulai Database Transaction
         DB::beginTransaction();
 
         try {
-            // Ambil transaksi BESERTA detailnya SEBELUM dihapus (PENTING untuk reversal stok)
-            $transaksi = Transaksi::with('TransaksiDetail')->findOrFail($decodedId);
+            $transaksi = Transaksi::with('TransaksiDetail', 'getInsentif')->find($decodedId);
 
             $userDelete = auth()->user()->name;
             $kodeCabang = $transaksi->KodeCabang;
-
-            // 🔥 3. REVERSAL STOK (Perhatikan jumlah sesuai pengurangan, bukan sekadar +1)
             $barangKembali = [];
-
-            // Hitung jumlah barang per BarangId
             foreach ($transaksi->TransaksiDetail as $detail) {
                 $masterJp = MasterJenisPerawatan::find($detail->JenisPerawatan);
-
                 if ($masterJp && !empty($masterJp->Barang)) {
                     $rawBarang = $masterJp->Barang;
-
-                    // Only decode if it's a string
                     $barangIds = [];
                     if (is_string($rawBarang)) {
                         $decoded = json_decode($rawBarang, true);
@@ -944,23 +943,18 @@ class TransaksiController extends Controller
                             $barangIds = $decoded;
                         }
                     } elseif (is_array($rawBarang)) {
-                        // Defensive: Already array (not expected), use as-is
                         $barangIds = $rawBarang;
                     }
-
                     if (is_array($barangIds)) {
                         foreach ($barangIds as $barangId) {
                             if (!isset($barangKembali[$barangId])) {
                                 $barangKembali[$barangId] = 0;
                             }
                             $barangKembali[$barangId] += 1;
-                            // Jika satu detail/pilihan bisa mengurangi lebih dari satu stok, ubah per detail logika di sini
                         }
                     }
                 }
             }
-
-            // Eksekusi pengembalian stok sesuai jumlah kemunculannya (bisa lebih dari 1)
             foreach ($barangKembali as $barangId => $jumlahKembali) {
                 $stok = Stok::where('BarangId', $barangId)
                     ->where('KodeKlinik', $kodeCabang)
@@ -975,8 +969,6 @@ class TransaksiController extends Controller
                         'StokAkhir' => $stokSesudah,
                         'UserUpdate' => $userDelete
                     ]);
-
-                    // Catat di mutasi stok
                     StokMutasi::create([
                         'KodeKlinik' => $kodeCabang,
                         'BarangId' => $barangId,
@@ -989,17 +981,12 @@ class TransaksiController extends Controller
                     ]);
                 }
             }
-
-            // 4. SOFT DELETE RELATED MODELS (Logika asli kamu yang dirapikan)
-
-            // a. Transaksi Detail
             foreach ($transaksi->TransaksiDetail as $detail) {
                 $detail->UserDelete = $userDelete;
                 $detail->save();
             }
             $transaksi->TransaksiDetail()->delete();
 
-            // b. Insentif (Jika ada)
             if ($transaksi->getInsentif) {
                 foreach ($transaksi->getInsentif as $insentif) {
                     $insentif->UserDelete = $userDelete;
@@ -1044,7 +1031,7 @@ class TransaksiController extends Controller
 
         return $shift ? $shift->id : null;
     }
-     public function getDentalUnits(Request $request)
+    public function getDentalUnits(Request $request)
     {
         $kodeKlinik = $request->input('kode_klinik');
 

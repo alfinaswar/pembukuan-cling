@@ -50,7 +50,11 @@ class Transaksi extends Model
 
     public function getInsentif()
     {
-        return $this->hasMany(InsentifKaryawan::class, 'id', 'IdTransksi');
+        return $this->hasMany(InsentifKaryawan::class, 'IdTransaksi', 'id');
+    }
+    public function AmbilInsentif()
+    {
+        return $this->hasMany(InsentifKaryawan::class, 'IdTransaksi', 'id');
     }
     public function getDentalUnit()
     {
