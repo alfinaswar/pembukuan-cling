@@ -366,13 +366,18 @@ class LaporanController extends Controller
         $totalPasienDilayani = Transaksi::where($scopeTransaksi)->count();
 
         // 5c. Total insentif semua rule
-        $TotalInsentif = InsentifKaryawan::where($scopeInsentif)->sum('Nominal');
+        $TotalInsentif = InsentifKaryawan::where($scopeInsentif)
+            ->whereHas('getTransaksi')
+            ->sum('Nominal');
+
 
         // 5d. Omzet per shift (rule: omzet_shift)
         $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'omzet_shift')
+            ->whereHas('getTransaksi')
             ->get();
+
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
@@ -399,15 +404,19 @@ class LaporanController extends Controller
         $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
             ->where($scopeInsentif)
             ->where('JenisRule', 'transaksi')
+            ->whereHas('getTransaksi')
             ->whereHas('getTransaksi', fn($q) => $q->where('TotalBayar', '>=', 1_000_000))
             ->orderByDesc('Tanggal')
             ->get();
+
 
         // 5g. Odontektomi (rule: tindakan)
         $Odontektomi = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'tindakan')
+            ->whereHas('getTransaksi')
             ->get();
+
 
         // 5h. Pasien baru (rule: pasien_baru) — grouped per tanggal+shift
         $PasienBaru = InsentifKaryawan::with(['getTransaksi', 'getUser'])
@@ -433,6 +442,7 @@ class LaporanController extends Controller
         $PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
+            ->whereHas('getTransaksi')
             ->get()
             ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
@@ -446,12 +456,15 @@ class LaporanController extends Controller
             })
             ->values();
 
+
         // 5j. Insentif Hari Libur (rule: insentif_hari_libur)
         // Kumpulkan seluruh insentif dengan JenisRule 'insentif_hari_libur' dengan filter yang sama
         $InsentifHariLibur = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'insentif_hari_libur')
+            ->whereHas('getTransaksi')
             ->get();
+
 
         // ================================
         // 5i. Ringkasan per JenisRule (+ insentif_hari_libur)
@@ -627,13 +640,18 @@ class LaporanController extends Controller
         $totalPasienDilayani = Transaksi::where($scopeTransaksi)->count();
 
         // 5c. Total insentif semua rule
-        $TotalInsentif = InsentifKaryawan::where($scopeInsentif)->sum('Nominal');
+        $TotalInsentif = InsentifKaryawan::where($scopeInsentif)
+            ->whereHas('getTransaksi')
+            ->sum('Nominal');
+
 
         // 5d. Omzet per shift (rule: omzet_shift)
         $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'omzet_shift')
+            ->whereHas('getTransaksi')
             ->get();
+
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
@@ -659,7 +677,9 @@ class LaporanController extends Controller
         // 5f. Insentif Hari Libur (rule: hari_libur)
         $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
             ->where('JenisRule', 'insentif_hari_libur')
+            ->whereHas('getTransaksi')
             ->get();
+
         // dd($InsentifHariLibur);
         // 5g. Ringkasan per JenisRule
         $jenisRuleInfo = [
@@ -1482,7 +1502,7 @@ class LaporanController extends Controller
                     $encryptedId = encrypt($row->id);
                     $namaKaryawan = $row->getUser ? $row->getUser->name : 'Karyawan';
                     $keterangan = addslashes($row->Keterangan ?? ''); // Escape untuk data attribute
-
+    
                     return '
                     <div class="btn-group">
                         <button class="btn btn-sm btn-warning text-white btn-edit"
