@@ -48,11 +48,13 @@ class MasterJenisPerawatan extends Model
 
     public function getBarangNamesAttribute()
     {
-        if (empty($this->Barang)) {
+        $barang = is_array($this->Barang) ? $this->Barang : (is_string($this->Barang) ? json_decode($this->Barang, true) : []);
+
+        if (empty($barang) || !is_array($barang)) {
             return [];
         }
 
-        return Barang::whereIn('id', $this->Barang)
+        return Barang::whereIn('id', $barang)
             ->pluck('NamaBarang')
             ->toArray();
     }
@@ -62,10 +64,12 @@ class MasterJenisPerawatan extends Model
      */
     public function getBarangItemsAttribute()
     {
-        if (empty($this->Barang)) {
+        $barang = is_array($this->Barang) ? $this->Barang : (is_string($this->Barang) ? json_decode($this->Barang, true) : []);
+
+        if (empty($barang) || !is_array($barang)) {
             return collect([]);
         }
 
-        return Barang::whereIn('id', $this->Barang)->get();
+        return Barang::whereIn('id', $barang)->get();
     }
 }

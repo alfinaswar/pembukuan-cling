@@ -776,14 +776,28 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php $rowNo = 1; @endphp
                         @foreach ($transactions as $trx)
                             @php
-                                $loopNumber =
-                                    ($transactions->currentPage() - 1) * $transactions->perPage() + $loop->iteration;
-                                $detail = $trx->TransaksiDetail->first();
-                                $jenisPerawatan = $detail->masterJenisPerawatan->Nama ?? '-';
-                                $barangNames = $detail->masterJenisPerawatan->barangNames ?? [];
-                                $barangDisplay = implode(', ', $barangNames) ?: 'Behel';
+                                // Ambil hanya detail perawatan yang ter-mapping ke behel (memiliki relasi barang behel)
+                                $behelDetails = $trx->TransaksiDetail->filter(function ($d) {
+                                    return !empty($d->masterJenisPerawatan?->barangNames);
+                                });
+
+                                if ($behelDetails->isEmpty()) {
+                                    continue;
+                                }
+
+                                $jenisPerawatanNames = $behelDetails
+                                    ->map(fn($d) => $d->masterJenisPerawatan->Nama ?? '-')
+                                    ->unique()
+                                    ->implode(', ');
+
+                                $allBarangNames = $behelDetails
+                                    ->flatMap(fn($d) => $d->masterJenisPerawatan->barangNames ?? [])
+                                    ->unique()
+                                    ->values()
+                                    ->all();
 
                                 $shiftClass = match (strtolower($trx->Shift ?? '')) {
                                     'pagi', '1' => 'badge-pagi',
@@ -800,13 +814,13 @@
                                 };
                             @endphp
                             <tr>
-                                <td class="text-center fw-semibold text-muted">{{ $loopNumber }}</td>
+                                <td class="text-center fw-semibold text-muted">{{ $rowNo++ }}</td>
                                 <td class="text-nowrap">{{ \Carbon\Carbon::parse($trx->Tanggal)->format('d F Y') }}</td>
-                                <td>{{ $jenisPerawatan }}</td>
+                                <td>{{ $jenisPerawatanNames }}</td>
                                 <td><strong>{{ $trx->NamaPasien }}</strong></td>
                                 <td>
-                                    @if (!empty($barangNames))
-                                        @foreach ($barangNames as $barang)
+                                    @if (!empty($allBarangNames))
+                                        @foreach ($allBarangNames as $barang)
                                             <span class="badge bg-indigo-50 border border-indigo-100 me-1 mb-1"
                                                 style="font-size: 11px; font-weight: 600; color: #000;">
                                                 {{ $barang }}
@@ -837,16 +851,33 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // 1. Inisialisasi DataTable dengan styling custom tanpa "show entries"
+            // 1. Inisialisasi DataTable dengan opsi Show Entries
             var table = $('#datatable-transaksi').DataTable({
                 paging: true,
-                lengthChange: false, // <- Hilangkan "Show Entries"
+                lengthChange: true,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "Semua"]
+                ],
+                pageLength: 10,
                 searching: true,
                 ordering: true,
                 info: true,
                 autoWidth: false,
                 responsive: true,
-
+                language: {
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 data",
+                    infoFiltered: "(difilter dari _MAX_ total data)",
+                    zeroRecords: "Tidak ditemukan data yang sesuai",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "Berikutnya",
+                        previous: "Sebelumnya"
+                    }
+                },
                 columnDefs: [{
                         width: "50px",
                         targets: 0,
@@ -863,6 +894,13 @@
                     } // Kolom Shift
                 ]
             });
+
+            // Nomor urut dinamis mengikuti pagination & sorting DataTables
+            table.on('order.dt search.dt page.dt', function() {
+                table.column(0, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).draw();
 
 
             // 2. Hubungkan Input Search Custom dengan DataTables API

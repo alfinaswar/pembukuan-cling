@@ -220,7 +220,7 @@ class DashboardController extends Controller
             // Gunakan closure yang sama agar data tabel match dengan summary cards
             ->whereHas('TransaksiDetail.MasterJenisPerawatan', $filterBehelTransaction)
             ->latest('Tanggal')
-            ->paginate(10);
+            ->get();
 
         // 7. Data untuk Filter Dropdown
         $kliniks = MasterKlinik::orderBy('Nama', 'asc')->get();
