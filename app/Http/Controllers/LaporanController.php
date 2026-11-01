@@ -14,6 +14,7 @@ use App\Models\MasterShift;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\User;
+use App\Services\InsentifService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -1536,8 +1537,33 @@ class LaporanController extends Controller
 
         $shifts = MasterShift::get();
         $cabangs = InsentifKaryawan::distinct()->pluck('KodeCabang')->filter()->values();
+        $masterKliniks = MasterKlinik::all();
 
-        return view('laporan.insentif-karyawan.index', compact('users', 'shifts', 'cabangs'));
+        return view('laporan.insentif-karyawan.index', compact('users', 'shifts', 'cabangs', 'masterKliniks'));
+    }
+
+    public function hitungTargetBulanan(Request $request, InsentifService $insentifService)
+    {
+        $request->validate([
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2020|max:2099',
+            'kode_cabang' => 'nullable|string',
+        ]);
+
+        try {
+            $result = $insentifService->hitungTargetBulanan(
+                (int) $request->tahun,
+                (int) $request->bulan,
+                $request->kode_cabang ?: null
+            );
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan saat menghitung insentif: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function destroyInsentifKaryawan($encryptedId)

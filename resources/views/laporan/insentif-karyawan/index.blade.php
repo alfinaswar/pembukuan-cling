@@ -28,9 +28,14 @@
                             <h4 class="card-title mb-0 fw-semibold">
                                 <i class="ti ti-list me-2"></i>Data Insentif
                             </h4>
-                            <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" id="btnResetFilter">
-                                <i class="ti ti-refresh"></i> Reset Filter
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-success btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalHitungBulanan">
+                                    <i class="ti ti-calculator"></i> Hitung Insentif Bulanan
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" id="btnResetFilter">
+                                    <i class="ti ti-refresh"></i> Reset Filter
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Card Body -->
@@ -199,6 +204,79 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL HITUNG INSENTIF BULANAN -->
+    <div class="modal fade" id="modalHitungBulanan" tabindex="-1" aria-labelledby="modalHitungBulananLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title text-white" id="modalHitungBulananLabel">
+                        <i class="ti ti-calculator me-1"></i> Hitung Insentif Target Bulanan
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formHitungBulanan">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2 fs-xs mb-3">
+                            <i class="ti ti-info-circle me-1"></i> Sistem akan mengecek omzet bulanan klinik vs target capaian bulanan. Jika target tercapai, semua Resepsionis dan Perawat di cabang tersebut akan mendapatkan insentif target bulanan.
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="hitung_cabang" class="form-label fw-semibold">Cabang Klinik</label>
+                            <select class="form-select form-select-sm" name="kode_cabang" id="hitung_cabang">
+                                <option value="">-- Semua Cabang --</option>
+                                @foreach($masterKliniks ?? [] as $mk)
+                                    <option value="{{ $mk->Kode }}">{{ $mk->Nama }} ({{ $mk->Kode }})</option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Pilih cabang tertentu atau kosongkan untuk menghitung semua cabang.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="hitung_bulan" class="form-label fw-semibold">Bulan <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" name="bulan" id="hitung_bulan" required>
+                                    @php
+                                        $currentMonth = (int) date('n');
+                                        $prevMonth = $currentMonth == 1 ? 12 : $currentMonth - 1;
+                                        $daftarBulan = [
+                                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                        ];
+                                    @endphp
+                                    @foreach($daftarBulan as $num => $nama)
+                                        <option value="{{ $num }}" {{ $num == $prevMonth ? 'selected' : '' }}>
+                                            {{ $nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="hitung_tahun" class="form-label fw-semibold">Tahun <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" name="tahun" id="hitung_tahun" required>
+                                    @php
+                                        $currYear = (int) date('Y');
+                                    @endphp
+                                    @for($y = $currYear; $y >= $currYear - 3; $y--)
+                                        <option value="{{ $y }}">{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-success btn-sm px-3" id="btnSubmitHitung">
+                            <i class="ti ti-check me-1"></i> Jalankan Perhitungan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('styles')
@@ -355,6 +433,54 @@
                                 } else { Swal.fire('Gagal!', response.message || 'Terjadi kesalahan', 'error'); }
                             },
                             error: function(xhr) { Swal.fire('Gagal!', xhr.responseJSON?.message || 'Terjadi kesalahan saat menghapus data', 'error'); }
+                        });
+                    }
+                });
+            });
+            // 🔥 EVENT: Submit Hitung Insentif Bulanan via AJAX
+            $('#formHitungBulanan').on('submit', function(e) {
+                e.preventDefault();
+                const btn = $('#btnSubmitHitung');
+                const originalHtml = btn.html();
+
+                btn.prop('disabled', true).html('<i class="ti ti-loader fa-spin me-1"></i> Memproses...');
+
+                $.ajax({
+                    url: "{{ route('laporan-insentif.hitung-target-bulanan') }}",
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        $('#modalHitungBulanan').modal('hide');
+
+                        if (res.status) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Perhitungan Selesai',
+                                text: res.message,
+                                confirmButtonColor: '#3085d6'
+                            });
+                            table.ajax.reload(null, false);
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Perhatian',
+                                text: res.message,
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        const msg = xhr.responseJSON?.message || 'Terjadi kesalahan sistem.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: msg,
+                            confirmButtonColor: '#d33'
                         });
                     }
                 });

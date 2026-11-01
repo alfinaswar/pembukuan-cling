@@ -206,6 +206,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/laporan-jenis-perawatan/download', [LaporanController::class, 'downloadJenisPerawatan'])->name('laporan-jenis-perawatan.download');
 
         Route::get('/insentif-karyawan', [LaporanController::class, 'insentifKaryawan'])->name('laporan-insentif.index');
+        Route::post('/insentif-karyawan/hitung-target-bulanan', [LaporanController::class, 'hitungTargetBulanan'])->name('laporan-insentif.hitung-target-bulanan');
         Route::delete('/insentif-karyawan/delete/{id}', [LaporanController::class, 'destroyInsentifKaryawan'])->name('laporan-insentif.destroy');
         Route::put('/insentif-karyawan/{id}', [LaporanController::class, 'update'])->name('laporan-insentif.update');
 
