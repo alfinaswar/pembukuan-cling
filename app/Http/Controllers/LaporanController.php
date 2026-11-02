@@ -656,12 +656,13 @@ class LaporanController extends Controller
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
+        // dd($countpasienlama);
         $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->whereHas('getTransaksi')
             ->get()
-            ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
+            // ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
@@ -673,7 +674,7 @@ class LaporanController extends Controller
                 ];
             })
             ->values();
-
+        // dd($Shift8PasienLama);
 
         // 5f. Insentif Hari Libur (rule: hari_libur)
         $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
@@ -1503,7 +1504,7 @@ class LaporanController extends Controller
                     $encryptedId = encrypt($row->id);
                     $namaKaryawan = $row->getUser ? $row->getUser->name : 'Karyawan';
                     $keterangan = addslashes($row->Keterangan ?? ''); // Escape untuk data attribute
-    
+
                     return '
                     <div class="btn-group">
                         <button class="btn btn-sm btn-warning text-white btn-edit"
