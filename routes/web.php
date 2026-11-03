@@ -201,6 +201,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/laporan-transaksi/preview', [LaporanController::class, 'preview'])->name('laporan-transaksi.preview');
         Route::post('/download-data-transaksi', [LaporanController::class, 'downloadTransaksi'])->name('laporan-transaksi.store');
 
+        Route::get('/pasien', [LaporanController::class, 'indexPasien'])->name('laporan-pasien.index');
+        Route::post('/laporan-pasien/preview', [LaporanController::class, 'previewPasien'])->name('laporan-pasien.preview');
+        Route::post('/laporan-pasien/download', [LaporanController::class, 'downloadPasien'])->name('laporan-pasien.download');
+
         Route::get('/jenis-perawatan', [LaporanController::class, 'indexJenisPerawatan'])->name('laporan-jenis-perawatan.index');
         Route::post('/laporan-jenis-perawatan/preview', [LaporanController::class, 'previewJenisPerawatan'])->name('laporan-jenis-perawatan.preview');
         Route::post('/laporan-jenis-perawatan/download', [LaporanController::class, 'downloadJenisPerawatan'])->name('laporan-jenis-perawatan.download');

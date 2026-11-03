@@ -389,6 +389,14 @@
                                         </a>
                                     </li>
                                     {{-- @endcan --}}
+                                    <li class="sidebar-item">
+                                        <a href="{{ route('laporan-pasien.index') }}" class="sidebar-link">
+                                            <div class="round-16 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-notebook"></i>
+                                            </div>
+                                            <span class="hide-menu">Laporan Pasien</span>
+                                        </a>
+                                    </li>
                                     {{-- @can('laporan-jenis-perawatan') --}}
                                     <li class="sidebar-item">
                                         <a href="{{ route('laporan-jenis-perawatan.index') }}" class="sidebar-link">
@@ -720,6 +728,16 @@
                                                     </a>
                                                 </li>
                                                 {{-- @endcan --}}
+                                                <li class="sidebar-item">
+                                                    <a href="{{ route('laporan-pasien.index') }}"
+                                                        class="sidebar-link">
+                                                        <div
+                                                            class="round-16 d-flex align-items-center justify-content-center">
+                                                            <i class="ti ti-notebook"></i>
+                                                        </div>
+                                                        <span class="hide-menu">Laporan Pasien</span>
+                                                    </a>
+                                                </li>
                                                 {{-- @can('laporan-jenis-perawatan') --}}
                                                 <li class="sidebar-item">
                                                     <a href="{{ route('laporan-jenis-perawatan.index') }}"
@@ -1034,6 +1052,17 @@
                                                         style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
                                                 </div>
                                                 <span class="hide-menu">Laporan Transaksi</span>
+                                            </a>
+                                        </li>
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-pasien.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'pasien' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex justify-content-center align-items-center"
+                                                    style="height: 32px; width: 32px;">
+                                                    <span
+                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                </div>
+                                                <span class="hide-menu">Laporan Pasien</span>
                                             </a>
                                         </li>
                                         <li class="sidebar-item">

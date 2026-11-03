@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exports\JenisPerawatanExport;
+use App\Exports\PasienExport;
 use App\Exports\TransactionExport;
 use App\Exports\TransaksiExport;
+use App\Models\DentalUnit;
 use App\Models\InsentifKaryawan;
 use App\Models\MasterJenisPerawatan;
 use App\Models\MasterJenisPerawatans;
@@ -1611,5 +1613,183 @@ class LaporanController extends Controller
                 'message' => 'Gagal memperbarui shift: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function indexPasien(Request $request)
+    {
+        $klinik = MasterKlinik::get();
+        return view('laporan.pasien.index', compact('klinik'));
+    }
+
+    protected function resolvePeriodeRange(Request $request): array
+    {
+        if ($request->filled('FilterTanggal')) {
+            $parts = explode(' - ', $request->FilterTanggal);
+            try {
+                $startDate = Carbon::createFromFormat('m/d/Y', trim($parts[0]))->startOfDay();
+                $endDate = Carbon::createFromFormat('m/d/Y', trim($parts[1]))->endOfDay();
+            } catch (\Exception $e) {
+                try {
+                    $startDate = Carbon::parse(trim($parts[0]))->startOfDay();
+                    $endDate = Carbon::parse(trim($parts[1]))->endOfDay();
+                } catch (\Exception $e2) {
+                    $startDate = Carbon::now()->startOfDay();
+                    $endDate = Carbon::now()->endOfDay();
+                }
+            }
+            $label = $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y');
+        } elseif ($request->filled('tanggal_mulai') && $request->filled('tanggal_akhir')) {
+            $startDate = Carbon::parse($request->tanggal_mulai)->startOfDay();
+            $endDate = Carbon::parse($request->tanggal_akhir)->endOfDay();
+            $label = $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y');
+        } else {
+            $startDate = Carbon::now()->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+            $label = $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y');
+        }
+
+        return [$startDate, $endDate, $label];
+    }
+
+    public function previewPasien(Request $request)
+    {
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        [$startDate, $endDate, $periodeLabel] = $this->resolvePeriodeRange($request);
+
+        $query = Transaksi::with([
+            'getCabang',
+            'getDentalUnit',
+            'TransaksiDetail.MasterJenisPerawatan',
+            'getDokter',
+            'getPerawat',
+            'getResepsionis',
+        ])
+            ->when($klinikId, function ($q) use ($klinikId) {
+                $q->where('KodeCabang', $klinikId);
+            })
+            ->when($request->filled('tipe_pasien'), function ($q) use ($request) {
+                $q->where('JenisPasien', $request->tipe_pasien);
+            })
+            ->whereBetween('Tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->orderBy('Tanggal', 'desc')
+            ->get();
+
+        $totalPendapatan = (float) $query->sum('TotalBayar');
+        $totalPasien = $query->count();
+        $pasienBaruCount = $query->where('JenisPasien', 'Baru')->count();
+        $pasienBaruPendapatan = (float) $query->where('JenisPasien', 'Baru')->sum('TotalBayar');
+        $pasienLamaCount = $query->where('JenisPasien', 'Lama')->count();
+        $pasienLamaPendapatan = (float) $query->where('JenisPasien', 'Lama')->sum('TotalBayar');
+
+        $data = $query->values()->map(function ($item, $idx) {
+            $tanggalRaw = $item->Tanggal ?? $item->tanggal ?? $item->created_at ?? '';
+            $tanggal = $tanggalRaw ? Carbon::parse($tanggalRaw)->format('d/m/Y') : '-';
+
+            $tipePasien = '-';
+            if ($item->JenisPasien === 'Baru') {
+                $tipePasien = 'Pasien Baru';
+            } elseif ($item->JenisPasien === 'Lama') {
+                $tipePasien = 'Pasien Lama';
+            } elseif (!empty($item->JenisPasien)) {
+                $tipePasien = $item->JenisPasien;
+            }
+
+            $perawatanList = [];
+            if (isset($item->TransaksiDetail) && $item->TransaksiDetail->count()) {
+                foreach ($item->TransaksiDetail as $detail) {
+                    $nama = optional($detail->MasterJenisPerawatan)->Nama ?? $detail->JenisPerawatan ?? null;
+                    if ($nama) {
+                        $perawatanList[] = $nama;
+                    }
+                }
+            }
+            $jenisPerawatan = !empty($perawatanList) ? implode(', ', $perawatanList) : '-';
+
+            return [
+                'no' => $idx + 1,
+                'kode' => $item->Kode ?? '-',
+                'tanggal' => $tanggal,
+                'nama_pasien' => $item->NamaPasien ?? '-',
+                'tipe_pasien' => $tipePasien,
+                'dental_unit' => $item->getDentalUnit?->Nama ?? $item->DentalUnit ?? '-',
+                'dokter' => $item->getDokter?->name ?? $item->getDokter?->Nama ?? '-',
+                'perawat' => $item->getPerawat?->name ?? $item->getPerawat?->Nama ?? '-',
+                'resepsionis' => $item->getResepsionis?->name ?? $item->getResepsionis?->Nama ?? '-',
+                'cabang' => $item->getCabang?->Nama ?? $item->KodeCabang ?? '-',
+                'total_biaya' => (float) ($item->TotalBayar ?? $item->total ?? 0),
+                'jenis_perawatan' => $jenisPerawatan,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'summary' => [
+                'total_pendapatan' => $totalPendapatan,
+                'total_pasien' => $totalPasien,
+                'pasien_baru_count' => $pasienBaruCount,
+                'pasien_baru_pendapatan' => $pasienBaruPendapatan,
+                'pasien_lama_count' => $pasienLamaCount,
+                'pasien_lama_pendapatan' => $pasienLamaPendapatan,
+                'periode_label' => $periodeLabel,
+            ],
+            'data' => $data,
+        ]);
+    }
+
+    public function downloadPasien(Request $request)
+    {
+        $user = auth()->user();
+        $klinikId = $request->klinik_id;
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Management')) {
+            $klinikId = $user->kodeperusahaan;
+        }
+
+        [$startDate, $endDate, $periodeLabel] = $this->resolvePeriodeRange($request);
+
+        $query = Transaksi::with([
+            'getCabang',
+            'getDentalUnit',
+            'TransaksiDetail.MasterJenisPerawatan',
+            'getDokter',
+            'getPerawat',
+            'getResepsionis',
+        ])
+            ->when($klinikId, function ($q) use ($klinikId) {
+                $q->where('KodeCabang', $klinikId);
+            })
+            ->when($request->filled('tipe_pasien'), function ($q) use ($request) {
+                $q->where('JenisPasien', $request->tipe_pasien);
+            })
+            ->whereBetween('Tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->orderBy('Tanggal', 'desc')
+            ->get();
+
+        $klinikNama = 'Semua';
+        if ($klinikId) {
+            $klinikNama = MasterKlinik::where('Kode', $klinikId)->value('Nama') ?? $klinikId;
+        }
+
+        $tipePasienLabel = 'Semua';
+        if ($request->tipe_pasien === 'Baru') {
+            $tipePasienLabel = 'Pasien Baru';
+        } elseif ($request->tipe_pasien === 'Lama') {
+            $tipePasienLabel = 'Pasien Lama';
+        }
+
+        $filterInfo = [
+            'klinik' => $klinikNama,
+            'tipe_pasien' => $tipePasienLabel,
+            'periode_label' => $periodeLabel,
+        ];
+
+        return Excel::download(
+            new PasienExport($query, $filterInfo),
+            'Laporan-Pasien-' . date('Y-m-d') . '.xlsx'
+        );
     }
 }
