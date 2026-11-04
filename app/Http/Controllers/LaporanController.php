@@ -375,26 +375,28 @@ class LaporanController extends Controller
 
 
         // 5d. Omzet per shift (rule: omzet_shift)
-        $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'omzet_shift')
             ->whereHas('getTransaksi')
+            ->orderByDesc('Tanggal')
             ->get();
 
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
 
-        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->whereHas('getTransaksi')
             ->get()
-            ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
+            // ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
                     'created_at' => $first->Tanggal,
+                    'cabang_nama' => $first->getCabang?->Nama ?? $first->getTransaksi?->getCabang?->Nama ?? $first->KodeCabang ?? '-',
                     'jumlah_pasien_lama' => $countpasienlama . ' Pasien',
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -649,17 +651,18 @@ class LaporanController extends Controller
 
 
         // 5d. Omzet per shift (rule: omzet_shift)
-        $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $ShiftTotalBiayaKlinik = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'omzet_shift')
             ->whereHas('getTransaksi')
+            ->orderByDesc('Tanggal')
             ->get();
 
 
         // 5e. 8 pasien lama per shift (rule: pasien_lama)
         $countpasienlama = Transaksi::where($scopeTransaksi)->where('JenisPasien', 'Lama')->count();
         // dd($countpasienlama);
-        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $Shift8PasienLama = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->whereHas('getTransaksi')
@@ -669,6 +672,7 @@ class LaporanController extends Controller
                 $first = $group->first();
                 return [
                     'created_at' => $first->Tanggal,
+                    'cabang_nama' => $first->getCabang?->Nama ?? $first->getTransaksi?->getCabang?->Nama ?? $first->KodeCabang ?? '-',
                     'jumlah_pasien_lama' => $countpasienlama,
                     'perawat_nama' => $first->getUser->name ?? '-',
                     'shift' => $first->Shift ?? null,
@@ -1095,7 +1099,7 @@ class LaporanController extends Controller
         }
 
         // Query billing minimal per perawat, disimpan di $billingByPerawat
-        $billingByPerawat = InsentifKaryawan::with('getTransaksi')
+        $billingByPerawat = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->whereBetween('Tanggal', [$startDate, $endDate])
             ->where('JenisRule', 'pasien_lama')
             ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
@@ -1108,8 +1112,97 @@ class LaporanController extends Controller
 
         return view('laporan.perawat.pasien_lama', [
             'billingByPerawat' => $billingByPerawat,
+            'roleName' => 'Perawat',
             'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
             'shift' => $billingByPerawat->first()?->Shift ?? null,
+        ]);
+    }
+
+    public function pasienLamaResepsionis(Request $request)
+    {
+        $validated = $request->validate([
+            'FilterTanggal' => 'required|string',
+            'perawat' => 'nullable|integer',
+            'shift' => 'nullable|integer',
+        ]);
+        [$startRaw, $endRaw] = explode(' - ', $validated['FilterTanggal']);
+        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
+        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
+
+        $kasirId = $validated['perawat'] ?? null;
+        $shift = $validated['shift'] ?? null;
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $kasirUser = User::find($kasirId);
+            $kodeCabang = $kasirUser ? $kasirUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
+
+        $billingByPerawat = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->where('JenisRule', 'pasien_lama')
+            ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
+            ->when($kasirId, fn($q) => $q->where('UserId', $kasirId))
+            ->when($shift, fn($q) => $q->where('Shift', $shift))
+            ->whereHas('getTransaksi', fn($q) => $q->where('JenisPasien', '=', 'Lama'))
+            ->orderByDesc('Tanggal')
+            ->get();
+
+        return view('laporan.perawat.pasien_lama', [
+            'billingByPerawat' => $billingByPerawat,
+            'roleName' => 'Kasir / Resepsionis',
+            'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
+            'shift' => $billingByPerawat->first()?->Shift ?? null,
+        ]);
+    }
+
+    public function omzetShiftPerawat(Request $request)
+    {
+        return $this->detailOmzetShift($request, 'Perawat');
+    }
+
+    public function omzetShiftResepsionis(Request $request)
+    {
+        return $this->detailOmzetShift($request, 'Kasir / Resepsionis');
+    }
+
+    private function detailOmzetShift(Request $request, $roleName = 'Perawat')
+    {
+        $validated = $request->validate([
+            'FilterTanggal' => 'required|string',
+            'perawat' => 'nullable|integer',
+            'shift' => 'nullable|integer',
+        ]);
+        [$startRaw, $endRaw] = explode(' - ', $validated['FilterTanggal']);
+        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->startOfDay();
+        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->endOfDay();
+
+        $userId = $validated['perawat'] ?? null;
+        $shift = $validated['shift'] ?? null;
+        $user = auth()->user();
+        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
+            $targetUser = User::find($userId);
+            $kodeCabang = $targetUser ? $targetUser->kodeperusahaan : null;
+        } else {
+            $kodeCabang = $user->kodeperusahaan;
+        }
+
+        $billingData = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
+            ->whereBetween('Tanggal', [$startDate, $endDate])
+            ->where('JenisRule', 'omzet_shift')
+            ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
+            ->when($userId, fn($q) => $q->where('UserId', $userId))
+            ->when($shift, fn($q) => $q->where('Shift', $shift))
+            ->whereHas('getTransaksi')
+            ->orderByDesc('Tanggal')
+            ->get();
+
+        return view('laporan.omzet_shift', [
+            'billingData' => $billingData,
+            'roleName' => $roleName,
+            'FilterTanggal' => \Carbon\Carbon::createFromFormat('m/d/Y', trim($startRaw))->format('d/m/Y') . ' - ' . \Carbon\Carbon::createFromFormat('m/d/Y', trim($endRaw))->format('d/m/Y'),
+            'shift' => $shift ?? ($billingData->first()?->Shift ?? null),
         ]);
     }
     public function pasienBaruPerawat(Request $request)
@@ -1506,7 +1599,7 @@ class LaporanController extends Controller
                     $encryptedId = encrypt($row->id);
                     $namaKaryawan = $row->getUser ? $row->getUser->name : 'Karyawan';
                     $keterangan = addslashes($row->Keterangan ?? ''); // Escape untuk data attribute
-
+    
                     return '
                     <div class="btn-group">
                         <button class="btn btn-sm btn-warning text-white btn-edit"

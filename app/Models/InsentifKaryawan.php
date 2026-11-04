@@ -40,4 +40,9 @@ class InsentifKaryawan extends Model
     {
         return $this->belongsTo(MasterShift::class, 'Shift', 'id');
     }
+
+    public function getCabang()
+    {
+        return $this->belongsTo(MasterKlinik::class, 'KodeCabang', 'Kode');
+    }
 }

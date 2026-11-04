@@ -196,6 +196,9 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/perawat/billing-minimal', [LaporanController::class, 'billingMinimalPerawat'])->name('laporan-perawat.billing-minimal');
         Route::get('/perawat/pasien-lama', [LaporanController::class, 'pasienLamaPerawat'])->name('laporan-perawat.pasien-lama');
         Route::get('/perawat/pasien-baru', [LaporanController::class, 'pasienBaruPerawat'])->name('laporan-perawat.pasien-baru');
+        Route::get('/perawat/omzet-shift', [LaporanController::class, 'omzetShiftPerawat'])->name('laporan-perawat.omzet-shift');
+        Route::get('/resepsionis/omzet-shift', [LaporanController::class, 'omzetShiftResepsionis'])->name('laporan-resepsionis.omzet-shift');
+        Route::get('/resepsionis/pasien-lama', [LaporanController::class, 'pasienLamaResepsionis'])->name('laporan-resepsionis.pasien-lama');
 
         Route::get('/transaksi', [LaporanController::class, 'indexTransaksi'])->name('laporan-transaksi.index');
         Route::post('/laporan-transaksi/preview', [LaporanController::class, 'preview'])->name('laporan-transaksi.preview');

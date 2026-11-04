@@ -271,31 +271,76 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body pb-2">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="fw-semibold" style="color: #3a037b;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Cabang</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Perawat</th>
+                                    <th class="fw-semibold" style="color: #3a037b;">Insentif</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (isset($data['ShiftTotalBiayaKlinik']) && count($data['ShiftTotalBiayaKlinik']) > 0)
+                                    @foreach (collect($data['ShiftTotalBiayaKlinik'])->take(5) as $row)
+                                        <tr>
+                                            <td style="color: #3a037b;">
+                                                {{ \Carbon\Carbon::parse($row->Tanggal ?? $row['Tanggal'])->translatedFormat('d/m/Y') }}
+                                                @if (isset($row->getTransaksi->NamaPasien))
+                                                    <small class="d-block text-muted">{{ $row->getTransaksi->NamaPasien }}</small>
+                                                @endif
+                                            </td>
+                                            <td style="color: #3a037b;">
+                                                {{ $row->getCabang?->Nama ?? $row->getTransaksi?->getCabang?->Nama ?? $row->KodeCabang ?? '-' }}
+                                            </td>
+                                            <td style="color: #3a037b;">{{ $row->getUser->name ?? '-' }}</td>
+                                            <td class="fw-semibold" style="color: #3a037b;">
+                                                Rp {{ number_format($row->Nominal ?? 0, 0, ',', '.') }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="4" class="text-center" style="color: #3a037b;">Tidak ada data shift dengan minimal omzet Rp 6.000.000.</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                        @if (($data['ShiftTotalBiayaKlinik'] ?? collect())->count() > 5)
+                            <div class="mt-3 mb-3 text-end">
+                                <a href="{{ route('laporan-perawat.omzet-shift', request()->all()) }}"
+                                    style="color: #162878; font-size: 14px; text-decoration: underline;" target="_blank"
+                                    rel="noopener">
+                                    Lihat semua data &raquo;
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+
                     @php
                         $totalShift = isset($data['ShiftTotalBiayaKlinik']) ? count($data['ShiftTotalBiayaKlinik']) : 0;
                         $totalInsentif = collect($data['ShiftTotalBiayaKlinik'] ?? [])->sum('Nominal');
                     @endphp
-                    <div class="text-center mb-3">
-                        <div class="fw-semibold mb-2" style="font-size: 16px; color: #3a037b;">
-                            Total Insentif Shift
-                        </div>
-                        <div class="fw-bold" style="font-size:26px; color: #3a037b;">
-                            Rp {{ number_format($totalInsentif, 0, ',', '.') }}
-                        </div>
-
-                    </div>
-
-                    <div class="alert alert-primary d-flex align-items-start mt-2" role="alert"
-                        style="background-color: #f5f6ff; border-color: #d9e0fc; border-radius: 12px;">
+                    <div class="alert alert-primary d-flex justify-content-between align-items-start mt-2" role="alert"
+                        style="background: #f5f6ff; border-color: #d9e0fc;">
                         <div>
-                            <div class="fw-semibold mb-2" style="font-size: 14px; color: #3a037b;">
-                                Perhitungan Insentif
+                            <div class="fw-semibold mb-2" style="font-size: 15px; color: #3a037b;">Perhitungan Insentif
                             </div>
-                            <ul class="mb-0 ps-3" style="font-size: 13px; color: #3a037b; line-height: 1.5;">
+                            <ul class="mb-0 ps-3" style="font-size: 14px; color: #3a037b;">
                                 <li>Rp 50.000 untuk setiap kelipatan Rp 6.000.000</li>
-
                             </ul>
+                        </div>
+                        <div class="text-end ms-4">
+                            <div class="fw-semibold" style="font-size: 15px; color: #3a037b;">Total Shift Tercapai
+                                <span class="fw-bold"
+                                    style="font-size: 18px; color:#3a037b;">{{ $totalShift }}</span>
+                            </div>
+                            <div class="mt-2" style="color: #3a037b;">Total Insentif</div>
+                            <div class="fw-bold" style="font-size:18px; color: #3a037b;">
+                                Rp {{ number_format($totalInsentif, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
 
@@ -327,6 +372,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color: #166534;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #166534;">Cabang</th>
                                     <th class="fw-semibold" style="color: #166534;">Perawat</th>
                                     <th class="fw-semibold" style="color: #166534;">Insentif</th>
                                 </tr>
@@ -339,13 +385,16 @@
                                             <td style="color: #166534;">
                                                 {{ \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') }}
                                             </td>
+                                            <td style="color: #166534;">
+                                                {{ $row['cabang_nama'] ?? '-' }}
+                                            </td>
                                             <td style="color: #166534;">{{ $row['perawat_nama'] }}</td>
                                             <td class="fw-semibold" style="color: #166534;">Rp 30.000</td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr>
-                                        <td colspan="3" class="text-center" style="color: #166534;">Tidak ada data
+                                        <td colspan="4" class="text-center" style="color: #166534;">Tidak ada data
                                             shift dengan
                                             minimal 8 pasien lama.</td>
                                     </tr>

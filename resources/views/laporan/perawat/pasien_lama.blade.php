@@ -53,7 +53,7 @@
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0 fw-semibold" style="color: #162878;">
-                            <i class="ti ti-user-check me-2"></i>Daftar Pasien Lama pada Kunjungan Perawat
+                            <i class="ti ti-user-check me-2"></i>Daftar Pasien Lama pada Kunjungan {{ $roleName ?? 'Perawat' }}
                         </h5>
                         <button type="button" onclick="window.close();"
                             class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
@@ -64,8 +64,8 @@
                     <div class="card-body pb-2">
                         <div class="alert alert-info mb-4"
                             style="background: #f5f8ff; color: #1a438b; border-color: #dbeafc;">
-                            Berikut adalah daftar transaksi insentif perawat untuk <b>pasien lama</b><br>
-                            pada tanggal dan shift terpilih. Data ditampilkan per transaksi (bukan agregat perawat).
+                            Berikut adalah daftar transaksi insentif {{ strtolower($roleName ?? 'perawat') }} untuk <b>pasien lama</b><br>
+                            pada tanggal dan shift terpilih. Data ditampilkan per transaksi (bukan agregat {{ strtolower($roleName ?? 'perawat') }}).
                         </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-hover align-middle mb-0">
@@ -73,7 +73,8 @@
                                     <tr>
                                         <th class="fw-semibold text-center" style="color: #162878; width:40px;">#</th>
                                         <th class="fw-semibold" style="color: #162878;">Waktu Transaksi</th>
-                                        <th class="fw-semibold" style="color: #162878;">Nama Perawat</th>
+                                        <th class="fw-semibold" style="color: #162878;">Nama Cabang</th>
+                                        <th class="fw-semibold" style="color: #162878;">Nama {{ $roleName ?? 'Perawat' }}</th>
                                         <th class="fw-semibold" style="color: #162878;">Nama Pasien</th>
                                         <th class="fw-semibold" style="color: #162878;">Total Billing</th>
                                         <th class="fw-semibold" style="color: #162878;">Insentif</th>
@@ -86,6 +87,9 @@
                                             <td class="text-center" style="color: #162878;">{{ $index + 1 }}</td>
                                             <td style="color: #162878;">
                                                 {{ isset($item->Tanggal) ? \Carbon\Carbon::parse($item->Tanggal)->format('d F Y') : '-' }}
+                                            </td>
+                                            <td style="color: #162878;">
+                                                {{ $item->getCabang?->Nama ?? $item->getTransaksi?->getCabang?->Nama ?? $item->KodeCabang ?? '-' }}
                                             </td>
                                             <td style="color: #162878;">
                                                 {{ $item->getUser->name ?? '-' }}
@@ -107,7 +111,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted" style="color: #162878;">Tidak
+                                            <td colspan="8" class="text-center text-muted" style="color: #162878;">Tidak
                                                 ada data pasien lama ditemukan.</td>
                                         </tr>
                                     @endforelse
