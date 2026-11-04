@@ -582,6 +582,9 @@
                                     <span class="mx-3 fw-semibold" style="font-size: 15px;">
                                         Shift: {{ auth()->user()?->getShift?->Nama ?? '-' }}
                                     </span>
+                                    <span class="fw-semibold" style="font-size: 15px;">
+                                        Cabang: {{ auth()->user()?->getPerusahaan?->Nama ?? '-' }}
+                                    </span>
                                 </div>
                                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
                                     <li class="nav-item">

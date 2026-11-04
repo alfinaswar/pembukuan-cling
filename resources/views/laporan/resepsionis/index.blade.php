@@ -386,7 +386,9 @@
                                                 {{ $row['cabang_nama'] ?? '-' }}
                                             </td>
                                             <td style="color: #166534;">{{ $row['perawat_nama'] }}</td>
-                                            <td class="fw-semibold" style="color: #166534;">Rp 30.000</td>
+                                            <td class="fw-semibold" style="color: #166534;">
+                                                Rp {{ isset($row['insentif']) ? number_format($row['insentif'], 0, ',', '.') : '30.000' }}
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @else
@@ -465,6 +467,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color:#e67e22;">Tanggal</th>
+                                    <th class="fw-semibold" style="color:#e67e22;">Cabang</th>
                                     <th class="fw-semibold" style="color:#e67e22;">Nominal</th>
                                 </tr>
                             </thead>
@@ -480,7 +483,9 @@
                                             <td style="color:#e67e22;">
                                                 {{ isset($row['created_at']) ? \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') : '-' }}
                                             </td>
-
+                                            <td style="color:#e67e22;">
+                                                {{ $row->getCabang?->Nama ?? $row->getTransaksi?->getCabang?->Nama ?? $row['KodeCabang'] ?? '-' }}
+                                            </td>
                                             <td class="fw-semibold" style="color:#e67e22;">
                                                 {{ isset($row['Nominal']) ? 'Rp ' . number_format($row['Nominal'], 0, ',', '.') : '-' }}
                                                 @php $totalInsentifLibur += $row['Nominal'] ?? 0; @endphp

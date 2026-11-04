@@ -389,7 +389,9 @@
                                                 {{ $row['cabang_nama'] ?? '-' }}
                                             </td>
                                             <td style="color: #166534;">{{ $row['perawat_nama'] }}</td>
-                                            <td class="fw-semibold" style="color: #166534;">Rp 30.000</td>
+                                            <td class="fw-semibold" style="color: #166534;">
+                                                Rp {{ isset($row['insentif']) ? number_format($row['insentif'], 0, ',', '.') : '30.000' }}
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @else
@@ -473,6 +475,7 @@
                                 <tr>
                                     <th class="fw-semibold" style="color: #162878;">No</th>
                                     <th class="fw-semibold" style="color: #162878;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #162878;">Cabang</th>
                                     <th class="fw-semibold" style="color: #162878;">Nama Pasien</th>
                                     <th class="fw-semibold" style="color: #162878;">Total Billing</th>
                                     <th class="fw-semibold" style="color: #162878;">Insentif</th>
@@ -490,6 +493,9 @@
                                         <td style="color: #162878;">
                                             {{ isset($item->created_at) ? \Carbon\Carbon::parse($item->created_at)->translatedFormat('d/m/Y') : '-' }}
                                         </td>
+                                        <td style="color: #162878;">
+                                            {{ $item->getCabang?->Nama ?? $item->getTransaksi?->getCabang?->Nama ?? $item->KodeCabang ?? '-' }}
+                                        </td>
                                         <td style="color: #162878;">{{ $item->getTransaksi->NamaPasien ?? '-' }}</td>
                                         <td style="color: #162878;">
                                             Rp
@@ -502,7 +508,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center" style="color: #162878;">Tidak ada data
+                                        <td colspan="6" class="text-center" style="color: #162878;">Tidak ada data
                                             pasien dengan
                                             billing minimal.</td>
                                     </tr>
@@ -577,6 +583,7 @@
                                 <tr>
                                     <th class="fw-semibold" style="color: #FF8000;">No</th>
                                     <th class="fw-semibold" style="color: #FF8000;">Tanggal</th>
+                                    <th class="fw-semibold" style="color: #FF8000;">Cabang</th>
                                     <th class="fw-semibold" style="color: #FF8000;">Nama</th>
                                     <th class="fw-semibold" style="color: #FF8000;">Perawat</th>
                                     <th class="fw-semibold" style="color: #FF8000;">Insentif</th>
@@ -594,6 +601,9 @@
                                         <td style="color: #FF8000;">{{ $no }}</td>
                                         <td style="color: #FF8000;">
                                             {{ $item->created_at ? \Carbon\Carbon::parse($item->getTransaksi->Tanggal)->format('d/m/Y') : '-' }}
+                                        </td>
+                                        <td style="color: #FF8000;">
+                                            {{ $item->getCabang?->Nama ?? $item->getTransaksi?->getCabang?->Nama ?? $item->KodeCabang ?? '-' }}
                                         </td>
                                         <td style="color: #FF8000;">
                                             {{ $item->getTransaksi && isset($item->getTransaksi->NamaPasien) ? $item->getTransaksi->NamaPasien : '-' }}
@@ -679,6 +689,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color:#FF2AA0;">Tanggal</th>
+                                    <th class="fw-semibold" style="color:#FF2AA0;">Cabang</th>
                                     {{-- <th class="fw-semibold" style="color:#FF2AA0;">Jumlah</th> --}}
                                     <th class="fw-semibold" style="color:#FF2AA0;">Perawat</th>
                                     <th class="fw-semibold" style="color:#FF2AA0;">Insentif</th>
@@ -694,6 +705,7 @@
 
                                             </td>
 
+                                            <td style="color:#FF2AA0;">{{ $pasien['cabang_nama'] ?? '-' }}</td>
                                             {{-- <td style="color:#FF2AA0;">{{ $pasien['jumlah'] ?? '-' }}</td> --}}
                                             <td style="color:#FF2AA0;">{{ $pasien['perawat'] ?? '-' }}</td>
                                             <td style="color:#FF2AA0;">
@@ -782,6 +794,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="fw-semibold" style="color:#e67e22;">Tanggal</th>
+                                    <th class="fw-semibold" style="color:#e67e22;">Cabang</th>
                                     <th class="fw-semibold" style="color:#e67e22;">Nominal</th>
                                 </tr>
                             </thead>
@@ -796,7 +809,9 @@
                                             <td style="color:#e67e22;">
                                                 {{ isset($row['created_at']) ? \Carbon\Carbon::parse($row['created_at'])->translatedFormat('d/m/Y') : '-' }}
                                             </td>
-
+                                            <td style="color:#e67e22;">
+                                                {{ $row->getCabang?->Nama ?? $row->getTransaksi?->getCabang?->Nama ?? $row['KodeCabang'] ?? '-' }}
+                                            </td>
                                             <td class="fw-semibold" style="color:#e67e22;">
                                                 {{ isset($row['Nominal']) ? 'Rp ' . number_format($row['Nominal'], 0, ',', '.') : '-' }}
                                                 @php $totalInsentifLibur += $row['Nominal'] ?? 0; @endphp

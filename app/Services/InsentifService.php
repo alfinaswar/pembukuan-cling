@@ -217,6 +217,7 @@ class InsentifService
 
                 $isValid = false;
                 $finalNominal = $rule->Nominal;
+                $insertCount = 1;
 
                 // C. Rule Tindakan
                 if ($rule->JenisRule == 'tindakan') {
@@ -252,6 +253,7 @@ class InsentifService
 
                         if ($kelipatanBaru > 0) {
                             $finalNominal = $rule->Nominal;
+                            $insertCount = (int) $kelipatanBaru;
                         } else {
                             continue;
                         }
@@ -303,20 +305,22 @@ class InsentifService
                     continue;
             }
 
-            // Simpan ke Database
-            InsentifKaryawan::create([
-                'IdTransaksi' => $transaksi->id,
-                'Tanggal' => $transaksi->Tanggal,
-                'UserId' => $userId,
-                'Role' => $rule->Role,
-                'Nominal' => $finalNominal,
-                'JenisRule' => $rule->JenisRule,
-                'Keterangan' => $rule->Keterangan,
-                'Shift' => $shift,
-                'KodeCabang' => $kodeCabang,
-                'DentalUnit' => $dentalUnit, // 🔥 Simpan info Dental Unit ke riwayat insentif
-                'UserCreate' => auth()->check() ? auth()->user()->name : 'System',
-            ]);
+            // Simpan ke Database (loop jika kelipatan baru > 1)
+            for ($k = 0; $k < $insertCount; $k++) {
+                InsentifKaryawan::create([
+                    'IdTransaksi' => $transaksi->id,
+                    'Tanggal' => $transaksi->Tanggal,
+                    'UserId' => $userId,
+                    'Role' => $rule->Role,
+                    'Nominal' => $finalNominal,
+                    'JenisRule' => $rule->JenisRule,
+                    'Keterangan' => $rule->Keterangan,
+                    'Shift' => $shift,
+                    'KodeCabang' => $kodeCabang,
+                    'DentalUnit' => $dentalUnit, // 🔥 Simpan info Dental Unit ke riwayat insentif
+                    'UserCreate' => auth()->check() ? auth()->user()->name : 'System',
+                ]);
+            }
         }
     }
 

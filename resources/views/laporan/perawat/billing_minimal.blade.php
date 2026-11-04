@@ -75,6 +75,7 @@
                                     <tr>
                                         <th class="fw-semibold text-center" style="color: #162878; width:40px;">#</th>
                                         <th class="fw-semibold" style="color: #162878;">Waktu Transaksi</th>
+                                        <th class="fw-semibold" style="color: #162878;">Nama Cabang</th>
                                         <th class="fw-semibold" style="color: #162878;">Nama Perawat</th>
                                         <th class="fw-semibold" style="color: #162878;">Nama Pasien</th>
                                         <th class="fw-semibold" style="color: #162878;">Total Billing</th>
@@ -89,6 +90,11 @@
                                             <td style="color: #162878;">
                                                 {{ isset($item->Tanggal) ? \Carbon\Carbon::parse($item->Tanggal)->format('d F Y') : '-' }}
 
+                                            </td>
+                                            <td style="color: #162878;">
+                                                <span class="badge bg-light-primary text-primary fw-semibold">
+                                                    {{ $item->getCabang?->Nama ?? $item->getTransaksi?->getCabang?->Nama ?? $item->KodeCabang ?? '-' }}
+                                                </span>
                                             </td>
                                             <td style="color: #162878;">
                                                 {{ $item->getUser->name ?? '-' }}
@@ -110,7 +116,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted" style="color: #162878;">Tidak
+                                            <td colspan="8" class="text-center text-muted" style="color: #162878;">Tidak
                                                 ada data transaksi billing minimal ditemukan.</td>
                                         </tr>
                                     @endforelse

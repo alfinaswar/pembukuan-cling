@@ -255,9 +255,9 @@ class LaporanController extends Controller
 
     public function indexPerawat(Request $request)
     {
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+        $dokter = User::role('Dokter')->orderBy('name', 'asc')->get();
+        $perawat = User::role('Perawat')->orderBy('name', 'asc')->get();
+        $kasir = User::role('Kasir / Resepsionis')->orderBy('name', 'asc')->get();
         $shift = MasterShift::get();
         // dd($OmsetSatuShift);
         return view('laporan.perawat.index', compact('dokter', 'perawat', 'kasir', 'shift'));
@@ -309,12 +309,8 @@ class LaporanController extends Controller
         $perawatId = $request->perawat;
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
         $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $perawatUser = User::find($request->perawat);
-            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        // Jangan batasi hanya dari cabang asal karyawan, izinkan semua cabang
+        $kodeCabang = null;
 
         // =============================================
         // 3. BASE SCOPE — dua closure reusable
@@ -324,7 +320,7 @@ class LaporanController extends Controller
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
                 ->whereBetween('Tanggal', [$startDate, $endDate])
-                ->where('KodeCabang', $kodeCabang)
+                ->when($kodeCabang, fn($qq) => $qq->where('KodeCabang', $kodeCabang))
                 ->where('IdPerawat', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
@@ -332,7 +328,7 @@ class LaporanController extends Controller
         $scopeInsentif = function ($q) use ($startDate, $endDate, $perawatId, $shiftFilter, $kodeCabang) {
             $q
                 ->whereBetween('Tanggal', [$startDate, $endDate])
-                ->where('KodeCabang', $kodeCabang)
+                ->when($kodeCabang, fn($qq) => $qq->where('KodeCabang', $kodeCabang))
                 ->where('UserId', $perawatId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
@@ -390,8 +386,9 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->whereHas('getTransaksi')
+            ->orderByDesc('Tanggal')
             ->get()
-            // ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
+            ->groupBy(fn($item) => ($item->Tanggal ? \Carbon\Carbon::parse($item->Tanggal)->format('Y-m-d') : '') . '|' . $item->Shift . '|' . ($item->KodeCabang ?? $item->getTransaksi?->KodeCabang ?? ''))
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
@@ -399,6 +396,7 @@ class LaporanController extends Controller
                     'cabang_nama' => $first->getCabang?->Nama ?? $first->getTransaksi?->getCabang?->Nama ?? $first->KodeCabang ?? '-',
                     'jumlah_pasien_lama' => $countpasienlama . ' Pasien',
                     'perawat_nama' => $first->getUser->name ?? '-',
+                    'shift' => $first->Shift ?? null,
                     'insentif' => $group->sum('Nominal'),
                 ];
             })
@@ -406,7 +404,7 @@ class LaporanController extends Controller
 
 
         // 5f. Billing minimal 1jt (rule: transaksi, TotalBayar >= 1jt)
-        $pasienBillingMinimal = InsentifKaryawan::with('getTransaksi')
+        $pasienBillingMinimal = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'transaksi')
             ->whereHas('getTransaksi')
@@ -416,7 +414,7 @@ class LaporanController extends Controller
 
 
         // 5g. Odontektomi (rule: tindakan)
-        $Odontektomi = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $Odontektomi = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'tindakan')
             ->whereHas('getTransaksi')
@@ -424,7 +422,7 @@ class LaporanController extends Controller
 
 
         // 5h. Pasien baru (rule: pasien_baru) — grouped per tanggal+shift
-        $PasienBaru = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $PasienBaru = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_baru')
             ->whereHas('getTransaksi')
@@ -434,6 +432,7 @@ class LaporanController extends Controller
                 $first = $group->first();
                 return [
                     'tanggal' => $first->Tanggal,
+                    'cabang_nama' => $first->getCabang?->Nama ?? $first->getTransaksi?->getCabang?->Nama ?? $first->KodeCabang ?? '-',
                     'jumlah' => $group->count(),
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -444,7 +443,7 @@ class LaporanController extends Controller
 
         // 5h. Pasien lama (rule: pasien_lama) — grouped per tanggal+shift
         $countpasienlama = Transaksi::where('JenisPasien', 'Lama')->count();
-        $PasienLama = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $PasienLama = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->whereHas('getTransaksi')
@@ -454,6 +453,7 @@ class LaporanController extends Controller
                 $first = $group->first();
                 return [
                     'tanggal' => $first->Tanggal,
+                    'cabang_nama' => $first->getCabang?->Nama ?? $first->getTransaksi?->getCabang?->Nama ?? $first->KodeCabang ?? '-',
                     'jumlah' => $countpasienlama,
                     'perawat' => $first->getUser->name ?? '-',
                     'insentif' => $group->sum('Nominal'),
@@ -464,7 +464,7 @@ class LaporanController extends Controller
 
         // 5j. Insentif Hari Libur (rule: insentif_hari_libur)
         // Kumpulkan seluruh insentif dengan JenisRule 'insentif_hari_libur' dengan filter yang sama
-        $InsentifHariLibur = InsentifKaryawan::with(['getTransaksi', 'getUser'])
+        $InsentifHariLibur = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->where($scopeInsentif)
             ->where('JenisRule', 'insentif_hari_libur')
             ->whereHas('getTransaksi')
@@ -508,9 +508,9 @@ class LaporanController extends Controller
         // =============================================
         // 6. DROPDOWN (untuk form filter)
         // =============================================
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+        $dokter = User::role('Dokter')->orderBy('name', 'asc')->get();
+        $perawat = User::role('Perawat')->orderBy('name', 'asc')->get();
+        $kasir = User::role('Kasir / Resepsionis')->orderBy('name', 'asc')->get();
         $shift = MasterShift::get();
 
         // =============================================
@@ -543,9 +543,9 @@ class LaporanController extends Controller
      */
     public function indexResepsionis(Request $request)
     {
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+        $dokter = User::role('Dokter')->orderBy('name', 'asc')->get();
+        $perawat = User::role('Perawat')->orderBy('name', 'asc')->get();
+        $kasir = User::role('Kasir / Resepsionis')->orderBy('name', 'asc')->get();
         $shift = MasterShift::get();
         // dd($OmsetSatuShift);
         return view('laporan.resepsionis.index', compact('dokter', 'perawat', 'kasir', 'shift'));
@@ -594,18 +594,14 @@ class LaporanController extends Controller
         $shiftFilter = $request->filled('shift') ? $request->shift : null;
 
         $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $perawatUser = User::find($request->perawat);
-            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        // Jangan batasi hanya dari cabang asal karyawan, izinkan semua cabang
+        $kodeCabang = null;
 
         // 3. BASE SCOPE (Reusable Closures)
         $scopeTransaksi = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
                 ->whereBetween('Tanggal', [$startDate, $endDate])
-                ->where('KodeCabang', $kodeCabang)
+                ->when($kodeCabang, fn($qq) => $qq->where('KodeCabang', $kodeCabang))
                 ->where('IdResepsionis', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
@@ -613,7 +609,7 @@ class LaporanController extends Controller
         $scopeInsentif = function ($q) use ($startDate, $endDate, $kodeCabang, $kasirId, $shiftFilter) {
             $q
                 ->whereBetween('Tanggal', [$startDate, $endDate])
-                ->where('KodeCabang', $kodeCabang)
+                ->when($kodeCabang, fn($qq) => $qq->where('KodeCabang', $kodeCabang))
                 ->where('UserId', $kasirId)
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
@@ -666,8 +662,9 @@ class LaporanController extends Controller
             ->where($scopeInsentif)
             ->where('JenisRule', 'pasien_lama')
             ->whereHas('getTransaksi')
+            ->orderByDesc('Tanggal')
             ->get()
-            // ->groupBy(fn($item) => $item->Tanggal . '|' . $item->Shift)
+            ->groupBy(fn($item) => ($item->Tanggal ? \Carbon\Carbon::parse($item->Tanggal)->format('Y-m-d') : '') . '|' . $item->Shift . '|' . ($item->KodeCabang ?? $item->getTransaksi?->KodeCabang ?? ''))
             ->map(function ($group) use ($countpasienlama) {
                 $first = $group->first();
                 return [
@@ -683,7 +680,8 @@ class LaporanController extends Controller
         // dd($Shift8PasienLama);
 
         // 5f. Insentif Hari Libur (rule: hari_libur)
-        $InsentifHariLibur = InsentifKaryawan::where($scopeInsentif)
+        $InsentifHariLibur = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
+            ->where($scopeInsentif)
             ->where('JenisRule', 'insentif_hari_libur')
             ->whereHas('getTransaksi')
             ->get();
@@ -718,9 +716,9 @@ class LaporanController extends Controller
         })->sortBy('order')->values();
 
         // 6. DROPDOWN (Data untuk Filter)
-        $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+        $dokter = User::role('Dokter')->orderBy('name', 'asc')->get();
+        $perawat = User::role('Perawat')->orderBy('name', 'asc')->get();
+        $kasir = User::role('Kasir / Resepsionis')->orderBy('name', 'asc')->get();
         $shift = MasterShift::get();
         // dd($InsentifHariLibur);
         // 7. KIRIM KE VIEW
@@ -1048,16 +1046,10 @@ class LaporanController extends Controller
 
         $perawatId = $validated['perawat'] ?? null;
         $shift = $validated['shift'] ?? null;
-        $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $perawatUser = User::find($perawatId);
-            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        $kodeCabang = null;
 
         // Query billing minimal per perawat, disimpan di $billingByPerawat
-        $billingByPerawat = InsentifKaryawan::with('getTransaksi')
+        $billingByPerawat = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->whereBetween('Tanggal', [$startDate, $endDate])
             ->where('JenisRule', 'transaksi')
             ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
@@ -1090,13 +1082,7 @@ class LaporanController extends Controller
 
         $perawatId = $validated['perawat'] ?? null;
         $shift = $validated['shift'] ?? null;
-        $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $perawatUser = User::find($perawatId);
-            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        $kodeCabang = null;
 
         // Query billing minimal per perawat, disimpan di $billingByPerawat
         $billingByPerawat = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
@@ -1131,13 +1117,7 @@ class LaporanController extends Controller
 
         $kasirId = $validated['perawat'] ?? null;
         $shift = $validated['shift'] ?? null;
-        $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $kasirUser = User::find($kasirId);
-            $kodeCabang = $kasirUser ? $kasirUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        $kodeCabang = null;
 
         $billingByPerawat = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->whereBetween('Tanggal', [$startDate, $endDate])
@@ -1180,13 +1160,7 @@ class LaporanController extends Controller
 
         $userId = $validated['perawat'] ?? null;
         $shift = $validated['shift'] ?? null;
-        $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $targetUser = User::find($userId);
-            $kodeCabang = $targetUser ? $targetUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        $kodeCabang = null;
 
         $billingData = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->whereBetween('Tanggal', [$startDate, $endDate])
@@ -1219,16 +1193,10 @@ class LaporanController extends Controller
 
         $perawatId = $validated['perawat'] ?? null;
         $shift = $validated['shift'] ?? null;
-        $user = auth()->user();
-        if ($user->hasRole('Superadmin') || $user->hasRole('Management')) {
-            $perawatUser = User::find($perawatId);
-            $kodeCabang = $perawatUser ? $perawatUser->kodeperusahaan : null;
-        } else {
-            $kodeCabang = $user->kodeperusahaan;
-        }
+        $kodeCabang = null;
 
         // Query billing minimal per perawat, disimpan di $billingByPerawat
-        $billingByPerawat = InsentifKaryawan::with('getTransaksi')
+        $billingByPerawat = InsentifKaryawan::with(['getTransaksi.getCabang', 'getUser', 'getCabang'])
             ->whereBetween('Tanggal', [$startDate, $endDate])
             ->where('JenisRule', 'pasien_baru')
             ->when($kodeCabang, fn($q) => $q->where('KodeCabang', $kodeCabang))
