@@ -40,6 +40,37 @@
 
                         <!-- Card Body -->
                         <div class="card-body">
+                            <!-- Filter Section -->
+                            <div class="row g-3 mb-4 align-items-end">
+                                <div class="col-md-4 col-sm-6">
+                                    <label for="filter_role" class="form-label small text-muted fw-semibold mb-1">
+                                        <i class="ti ti-shield-lock me-1"></i>Filter Role
+                                    </label>
+                                    <select id="filter_role" class="form-select form-select-sm">
+                                        <option value="">Semua Role</option>
+                                        @foreach ($roles as $role)
+                                            <option value="{{ $role->name }}">{{ $role->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4 col-sm-6">
+                                    <label for="filter_cabang" class="form-label small text-muted fw-semibold mb-1">
+                                        <i class="ti ti-building me-1"></i>Filter Cabang
+                                    </label>
+                                    <select id="filter_cabang" class="form-select form-select-sm">
+                                        <option value="">Semua Cabang</option>
+                                        @foreach ($cabangs as $cabang)
+                                            <option value="{{ $cabang->Kode }}">{{ $cabang->Nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4 col-sm-12 d-flex gap-2">
+                                    <button type="button" id="btnResetFilter" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+                                        <i class="ti ti-refresh"></i> Reset Filter
+                                    </button>
+                                </div>
+                            </div>
+
                             <!-- DataTable -->
                             <div class="table-responsive">
                                 <table data-tables="basic" class="table table-striped dt-responsive align-middle mb-0"
@@ -155,7 +186,7 @@
             });
 
             // DataTables Init - ✅ Style asli dipertahankan, ✅ NO ORDERING
-            $('#usersTable').DataTable({
+            const table = $('#usersTable').DataTable({
                 responsive: true,
                 serverSide: true,
                 processing: true,
@@ -163,7 +194,11 @@
                 ordering: false, // ✅ DISABLE ORDERING sesuai request
                 ajax: {
                     url: "{{ route('users.index') }}",
-                    type: 'GET'
+                    type: 'GET',
+                    data: function(d) {
+                        d.role = $('#filter_role').val();
+                        d.cabang = $('#filter_cabang').val();
+                    }
                 },
                 language: {
                     processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Memuat...</span>',
@@ -175,7 +210,7 @@
                 },
                 columnDefs: [{
                         className: 'text-center',
-                        targets: [0, 4]
+                        targets: [0, 5]
                     },
 
                     {
@@ -220,6 +255,17 @@
 
                     }
                 ]
+            });
+
+            // Filter event handlers
+            $('#filter_role, #filter_cabang').on('change', function() {
+                table.ajax.reload();
+            });
+
+            $('#btnResetFilter').on('click', function() {
+                $('#filter_role').val('');
+                $('#filter_cabang').val('');
+                table.ajax.reload();
             });
         });
     </script>

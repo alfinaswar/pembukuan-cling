@@ -5,22 +5,19 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use Illuminate\Support\Collection;
 
-class TransaksiExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents, WithTitle
+class TransaksiExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths, WithEvents, WithTitle
 {
     protected $data;
     protected $filterInfo;
-    protected $rowMap = []; // [excel_row => transaksi_index]
-    protected $transaksiRowRanges = []; // [transaksi_index => ['start' => x, 'end' => y]]
+    protected $rowNumber = 0;
 
     public function __construct($data, $filterInfo = [])
     {
@@ -38,16 +35,34 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
         return $this->data;
     }
 
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 6,   // No
+            'B' => 18,  // Tanggal
+            'C' => 18,  // Kode Transaksi
+            'D' => 24,  // Nama Pasien
+            'E' => 14,  // Jenis Pasien
+            'F' => 38,  // Layanan
+            'G' => 18,  // Total Bayar
+            'H' => 12,  // Shift
+            'I' => 28,  // Metode Bayar
+            'J' => 20,  // Dokter
+            'K' => 20,  // Perawat
+            'L' => 20,  // Resepsionis
+        ];
+    }
+
     public function headings(): array
     {
         return [
             [
+                'No',
                 'Tanggal',
                 'Kode Transaksi',
                 'Nama Pasien',
                 'Jenis Pasien',
                 'Layanan',
-                'Harga Layanan',
                 'Total Bayar',
                 'Shift',
                 'Metode Bayar',
@@ -60,14 +75,18 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
 
     public function map($row): array
     {
+        $this->rowNumber++;
+
         // ===== Format Tanggal =====
-        $tanggalRaw = $row->tanggal ?? $row->created_at ?? '';
+        $tanggalRaw = $row->Tanggal ?? $row->tanggal ?? $row->created_at ?? '';
         $tanggal = $tanggalRaw ? \Carbon\Carbon::parse($tanggalRaw)->format('d/m/Y H:i') : '-';
 
-        $kodeTransaksi = $row->Kode ?? $row->Kode ?? '-';
+        $kodeTransaksi = $row->Kode ?? '-';
         $namaPasien = $row->NamaPasien ?? '-';
         $jenisPasien = $row->JenisPasien ?? '-';
         $shift = $row->getShift->Nama ?? $row->Shift ?? '-';
+
+        // Metode Pembayaran
         if (isset($row->getMetodePembayaran) && $row->getMetodePembayaran->count()) {
             $metodeList = [];
             foreach ($row->getMetodePembayaran as $p) {
@@ -79,13 +98,13 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
         } else {
             $metodeBayar = '-';
         }
+
         $dokter = $row->getDokter->name ?? $row->getDokter->Nama ?? '-';
         $perawat = $row->getPerawat->name ?? $row->getPerawat->Nama ?? '-';
         $resepsionis = $row->getResepsionis->name ?? $row->getResepsionis->Nama ?? '-';
-
         $totalBayar = (float) ($row->total ?? $row->TotalBayar ?? 0);
 
-        // 1 transaksi bisa punya banyak layanan (dari TransaksiDetail)
+        // Layanan (ringkas per transaksi dalam 1 baris)
         $layananItems = [];
         if (isset($row->TransaksiDetail) && $row->TransaksiDetail->count()) {
             foreach ($row->TransaksiDetail as $detail) {
@@ -96,69 +115,39 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
                 $harga = (float) ($detail->Biaya ?? $detail->Harga ?? 0);
                 $qty = (int) ($detail->Qty ?? $detail->Jumlah ?? 1);
 
-                // Jika qty > 1, tampilkan sebagai "Nama (x2)"
+                $itemStr = $layananNama;
                 if ($qty > 1) {
-                    $layananNama .= ' (x' . $qty . ')';
-                    $harga = $harga * $qty;
+                    $itemStr .= ' (x' . $qty . ')';
                 }
-
-                $layananItems[] = [
-                    'nama' => $layananNama,
-                    'harga' => $harga,
-                ];
+                $itemStr .= ' [Rp ' . number_format($harga * $qty, 0, ',', '.') . ']';
+                $layananItems[] = $itemStr;
             }
         }
+        $layanan = !empty($layananItems) ? implode('; ', $layananItems) : '-';
 
-        // Jika tidak ada layanan, tetap tampilkan 1 baris
-        if (empty($layananItems)) {
-            $layananItems[] = ['nama' => '-', 'harga' => 0];
-        }
-
-        // Simpan mapping row untuk merging nanti
-        $transaksiIndex = count($this->transaksiRowRanges);
-        $startRow = count($this->rowMap);
-        foreach ($layananItems as $item) {
-            $this->rowMap[] = $transaksiIndex;
-        }
-        $this->transaksiRowRanges[$transaksiIndex] = [
-            'start' => $startRow,
-            'end' => count($this->rowMap) - 1,
-            'total' => $totalBayar,
+        return [
+            $this->rowNumber,
+            $tanggal,
+            $kodeTransaksi,
+            $namaPasien,
+            $jenisPasien,
+            $layanan,
+            $totalBayar,
+            $shift,
+            $metodeBayar,
+            $dokter,
+            $perawat,
+            $resepsionis,
         ];
-
-        // Return array of rows (1 transaksi bisa jadi multiple rows)
-        $rows = [];
-        foreach ($layananItems as $item) {
-            $rows[] = [
-                $tanggal,
-                $kodeTransaksi,
-                $namaPasien,
-                $jenisPasien,
-                $item['nama'],
-                $item['harga'],
-                $totalBayar,
-                $shift,
-                $metodeBayar,
-                $dokter,
-                $perawat,
-                $resepsionis,
-            ];
-        }
-
-        return $rows;
     }
 
-    /**
-     * Override default behavior: map() returns array of rows (multi-row per record)
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // ===== 1. INSERT HEADER LAPORAN (geser data ke bawah) =====
-                // Insert 4 baris di atas untuk header laporan
+                // ===== 1. HEADER LAPORAN (4 baris di atas) =====
                 $sheet->insertNewRowBefore(1, 4);
 
                 // Row 1: Judul
@@ -211,10 +200,10 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
 
-                // Row 4: Empty spacer
+                // Row 4: Spacer
                 $sheet->getRowDimension(4)->setRowHeight(8);
 
-                // ===== 2. STYLE HEADER KOLOM (sekarang di row 5) =====
+                // ===== 2. STYLE HEADER KOLOM (Row 5) =====
                 $headerRow = 5;
                 $sheet->getStyle('A' . $headerRow . ':L' . $headerRow)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
@@ -229,82 +218,48 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
                 ]);
                 $sheet->getRowDimension($headerRow)->setRowHeight(30);
 
-                // ===== 3. HITUNG TOTAL & MERGE CELL =====
+                // ===== 3. STYLE DATA ROWS (Range-based, Instant) =====
                 $lastDataRow = $sheet->getHighestRow();
                 $dataStartRow = $headerRow + 1; // row 6
 
-                // Hitung total
-                $totalPasien = 0;
-                $akumulasiTotalBayar = 0;
-                $transaksiSeen = [];
-
-                foreach ($this->transaksiRowRanges as $range) {
-                    $excelStartRow = $dataStartRow + $range['start'];
-                    $excelEndRow = $dataStartRow + $range['end'];
-
-                    // Merge kolom A-F, H-L (kecuali G = Total Bayar, E = Layanan, F = Harga Layanan)
-                    // Kolom yang di-merge: A(Tanggal), B(Kode), C(Nama Pasien), D(Jenis Pasien),
-                    //                       G(Total Bayar), H(Shift), I(Metode Bayar), J(Dokter), K(Perawat), L(Resepsionis)
-                    $mergeColumns = ['A', 'B', 'C', 'D', 'G', 'H', 'I', 'J', 'K', 'L'];
-
-                    if ($excelEndRow > $excelStartRow) {
-                        foreach ($mergeColumns as $col) {
-                            $sheet->mergeCells($col . $excelStartRow . ':' . $col . $excelEndRow);
-                            $sheet->getStyle($col . $excelStartRow . ':' . $col . $excelEndRow)
-                                ->getAlignment()
-                                ->setVertical(Alignment::VERTICAL_CENTER);
-                        }
-                    }
-
-                    // Hitung total (hitung per transaksi, bukan per baris)
-                    if (!in_array($excelStartRow, $transaksiSeen)) {
-                        $totalPasien++;
-                        $akumulasiTotalBayar += $range['total'];
-                        $transaksiSeen[] = $excelStartRow;
-                    }
-                }
-
-                // ===== 4. STYLE DATA ROWS =====
                 if ($lastDataRow >= $dataStartRow) {
-                    // Alternating row colors
-                    for ($r = $dataStartRow; $r <= $lastDataRow; $r++) {
-                        $bgColor = ($r % 2 == 0) ? 'F2F7FB' : 'FFFFFF';
-                        $sheet->getStyle('A' . $r . ':L' . $r)->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => $bgColor],
-                            ],
-                            'borders' => [
-                                'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D0D7DE']],
-                            ],
-                            'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
-                        ]);
-                    }
+                    // Border & Vertical Alignment sekaligus untuk seluruh tabel data
+                    $sheet->getStyle('A' . $dataStartRow . ':L' . $lastDataRow)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D0D7DE']],
+                        ],
+                        'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+                    ]);
 
-                    // Format Rupiah kolom F (Harga Layanan) dan G (Total Bayar)
-                    $sheet->getStyle('F' . $dataStartRow . ':G' . $lastDataRow)
+                    // Format Rupiah Kolom G (Total Bayar)
+                    $sheet->getStyle('G' . $dataStartRow . ':G' . $lastDataRow)
                         ->getNumberFormat()
                         ->setFormatCode('"Rp"#,##0');
 
-                    // Alignment kanan untuk angka
-                    $sheet->getStyle('F' . $dataStartRow . ':G' . $lastDataRow)
+                    // Right align untuk Total Bayar
+                    $sheet->getStyle('G' . $dataStartRow . ':G' . $lastDataRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-                    // Center untuk kolom Tanggal, Kode Transaksi
-                    $sheet->getStyle('A' . $dataStartRow . ':B' . $lastDataRow)
+                    // Center align untuk No, Tanggal, Kode Transaksi, Jenis Pasien, Shift
+                    $sheet->getStyle('A' . $dataStartRow . ':C' . $lastDataRow)
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('E' . $dataStartRow . ':E' . $lastDataRow)
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('H' . $dataStartRow . ':H' . $lastDataRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
 
-                // ===== 5. FOOTER TOTAL =====
+                // ===== 4. FOOTER TOTAL =====
                 $footerRow = $lastDataRow + 1;
-                $sheet->insertNewRowBefore($footerRow, 2);
 
-                // Row footer 1: Total Pasien
-                $sheet->setCellValue('A' . $footerRow, 'TOTAL JUMLAH PASIEN');
+                // Footer Row 1: Total Jumlah Transaksi
+                $sheet->setCellValue('A' . $footerRow, 'TOTAL JUMLAH TRANSAKSI');
                 $sheet->mergeCells('A' . $footerRow . ':F' . $footerRow);
-                $sheet->setCellValue('G' . $footerRow, $totalPasien . ' Pasien');
+                $sheet->setCellValue('G' . $footerRow, ($lastDataRow >= $dataStartRow ? ($lastDataRow - $dataStartRow + 1) : 0) . ' Transaksi');
                 $sheet->mergeCells('G' . $footerRow . ':L' . $footerRow);
                 $sheet->getStyle('A' . $footerRow . ':L' . $footerRow)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '1F4E79']],
@@ -318,11 +273,15 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
                     ],
                 ]);
 
-                // Row footer 2: Akumulasi Total Bayar
+                // Footer Row 2: Akumulasi Total Bayar
                 $footerRow2 = $footerRow + 1;
                 $sheet->setCellValue('A' . $footerRow2, 'AKUMULASI TOTAL BAYAR');
                 $sheet->mergeCells('A' . $footerRow2 . ':F' . $footerRow2);
-                $sheet->setCellValue('G' . $footerRow2, $akumulasiTotalBayar);
+                if ($lastDataRow >= $dataStartRow) {
+                    $sheet->setCellValue('G' . $footerRow2, '=SUM(G' . $dataStartRow . ':G' . $lastDataRow . ')');
+                } else {
+                    $sheet->setCellValue('G' . $footerRow2, 0);
+                }
                 $sheet->mergeCells('G' . $footerRow2 . ':L' . $footerRow2);
                 $sheet->getStyle('A' . $footerRow2 . ':L' . $footerRow2)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
@@ -337,9 +296,11 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, Shou
                 ]);
                 $sheet->getStyle('G' . $footerRow2)->getNumberFormat()->setFormatCode('"Rp"#,##0');
 
-                // ===== 6. FREEZE PANE =====
+                // ===== 5. FREEZE PANE =====
                 $sheet->freezePane('A' . ($headerRow + 1));
             },
         ];
     }
 }
+
+

@@ -25,7 +25,18 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::latest();
+            $data = User::with(['roles', 'getPerusahaan'])->latest();
+
+            if ($request->filled('role')) {
+                $data->whereHas('roles', function ($q) use ($request) {
+                    $q->where('name', $request->role);
+                });
+            }
+
+            if ($request->filled('cabang')) {
+                $data->where('kodeperusahaan', $request->cabang);
+            }
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('roles', function ($row) {
@@ -44,7 +55,7 @@ class UserController extends Controller
                         <a href="' . route('users.edit', $encryptedId) . '" class="btn btn-sm btn-warning">
                             <i class="fa fa-edit"></i>
                         </a>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '">
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="' . $encryptedId . '" data-name="' . e($row->name) . '">
                             <i class="fa fa-trash"></i>
                         </button>
                     ';
@@ -58,7 +69,10 @@ class UserController extends Controller
                 ->make(true);
         }
 
-        return view('users.index');
+        $roles = Role::orderBy('name')->get();
+        $cabangs = MasterKlinik::orderBy('Nama')->get();
+
+        return view('users.index', compact('roles', 'cabangs'));
     }
 
     /**
