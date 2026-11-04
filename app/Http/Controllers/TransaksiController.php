@@ -363,8 +363,16 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+
+        $perawatQuery = User::role('Perawat');
+        $kasirQuery = User::role('Kasir / Resepsionis');
+        if (!empty($kodeCabang)) {
+            $perawatQuery->activeDiCabang($kodeCabang);
+            $kasirQuery->activeDiCabang($kodeCabang);
+        }
+        $perawat = $perawatQuery->get();
+        $kasir = $kasirQuery->get();
+
         $dental = DentalUnit::where('KodeCabang', $kodeCabang)->get();
         return view('transaksi.kasir.create', compact('dental', 'Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
     }
@@ -626,7 +634,7 @@ class TransaksiController extends Controller
             ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
             ->first();
 
-        $kodeCabang = auth()->user()->cabangAktif();
+        $kodeCabang = $transaksi->KodeCabang ?: auth()->user()->cabangAktif();
         $totalPasienBaru = Transaksi::where('JenisPasien', 'Baru')
             ->where('Shift', optional($shift)->id)
             ->where('KodeCabang', $kodeCabang)
@@ -641,8 +649,33 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->get();
-        $kasir = User::role('Kasir / Resepsionis')->get();
+
+        $perawatQuery = User::role('Perawat');
+        $kasirQuery = User::role('Kasir / Resepsionis');
+        if (!empty($kodeCabang)) {
+            $perawatQuery->where(function ($q) use ($kodeCabang, $transaksi) {
+                $q->activeDiCabang($kodeCabang);
+                if (!empty($transaksi->IdPerawat)) {
+                    $q->orWhere('id', $transaksi->IdPerawat);
+                }
+                if (!empty($transaksi->IdPerawatPendamping)) {
+                    $q->orWhere('id', $transaksi->IdPerawatPendamping);
+                }
+            });
+
+            $kasirQuery->where(function ($q) use ($kodeCabang, $transaksi) {
+                $q->activeDiCabang($kodeCabang);
+                if (!empty($transaksi->IdResepsionis)) {
+                    $q->orWhere('id', $transaksi->IdResepsionis);
+                }
+                if (!empty($transaksi->IdResepsionisPendamping)) {
+                    $q->orWhere('id', $transaksi->IdResepsionisPendamping);
+                }
+            });
+        }
+        $perawat = $perawatQuery->get();
+        $kasir = $kasirQuery->get();
+
         $dental = DentalUnit::where('KodeCabang', $kodeCabang)->get();
         // dd($transaksi);
         $masterShift = MasterShift::get();

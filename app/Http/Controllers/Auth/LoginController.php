@@ -58,6 +58,8 @@ class LoginController extends Controller
                 // Always reset shift and last_login
                 $user->shift = null;
                 $user->last_login = null;
+                $user->cabang_tugas = null;
+                $user->tanggal_tugas = null;
                 $user->save();
                 Auth::login($user, $request->filled('remember'));
                 $request->session()->forget('active_cabang');
@@ -77,6 +79,8 @@ class LoginController extends Controller
             if ($user) {
                 $user->shift = null;
                 $user->last_login = null;
+                $user->cabang_tugas = null;
+                $user->tanggal_tugas = null;
                 $user->save();
                 $request->session()->forget('active_cabang');
             }
@@ -93,6 +97,8 @@ class LoginController extends Controller
         if ($user) {
             $user->shift = null;
             $user->last_login = null;
+            $user->cabang_tugas = null;
+            $user->tanggal_tugas = null;
             $user->save();
             $request->session()->forget('shift');
             $request->session()->forget('active_cabang');

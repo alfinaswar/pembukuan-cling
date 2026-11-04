@@ -231,10 +231,10 @@
                 loadDentalUnits($(this).val());
             });
 
-            // 2. Trigger untuk User Biasa: Load otomatis saat halaman dibuka berdasarkan kodeperusahaan
+            // 2. Trigger untuk User Biasa: Load otomatis saat halaman dibuka berdasarkan cabang aktif
             @if (!in_array('Superadmin', auth()->user()->getRoleNames()->toArray()))
                 $(document).ready(function() {
-                    const userKlinik = '{{ auth()->user()->kodeperusahaan ?? "" }}';
+                    const userKlinik = '{{ auth()->user()->cabangAktif() ?? "" }}';
                     if (userKlinik) {
                         loadDentalUnits(userKlinik);
                     }

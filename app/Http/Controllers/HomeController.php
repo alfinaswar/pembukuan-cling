@@ -229,12 +229,15 @@ class HomeController extends Controller
         $user = auth()->user();
         $user->shift = $request->shift;
         $user->last_login = now()->toDateString(); // hanya tanggal, tidak pakai jam
-        $user->save();
 
         // Hanya Perawat dan Kasir / Resepsionis yang mengatur cabang bertugas
         if ($user->hasRole(['Perawat', 'Kasir / Resepsionis'])) {
-            session(['active_cabang' => $request->cabang_tugas ?: $user->kodeperusahaan]);
+            $cabang = $request->cabang_tugas ?: $user->kodeperusahaan;
+            $user->cabang_tugas = $cabang;
+            $user->tanggal_tugas = now()->toDateString();
+            session(['active_cabang' => $cabang]);
         }
+        $user->save();
 
         return redirect()->back()->with('success', 'Shift dan cabang bertugas berhasil disimpan.');
     }
