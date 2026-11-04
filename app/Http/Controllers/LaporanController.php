@@ -277,7 +277,14 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'nullable|exists:transaksis,IdPerawat',
+            'perawat' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if ($value && !Transaksi::where('IdPerawat', $value)->orWhere('IdPerawatPendamping', $value)->exists()) {
+                        $fail('Perawat tidak bertugas di tanggal / shift tersebut.');
+                    }
+                }
+            ],
             'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
@@ -321,7 +328,10 @@ class LaporanController extends Controller
             $q
                 ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->when($kodeCabang, fn($qq) => $qq->where('KodeCabang', $kodeCabang))
-                ->where('IdPerawat', $perawatId)
+                ->where(function ($qq) use ($perawatId) {
+                    $qq->where('IdPerawat', $perawatId)
+                        ->orWhere('IdPerawatPendamping', $perawatId);
+                })
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
 
@@ -563,7 +573,14 @@ class LaporanController extends Controller
                 'string',
                 'regex:/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s\-\s[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/'
             ],
-            'perawat' => 'required|exists:transaksis,IdResepsionis',
+            'perawat' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!Transaksi::where('IdResepsionis', $value)->orWhere('IdResepsionisPendamping', $value)->exists()) {
+                        $fail('Kasir tidak bertugas di tanggal / shift tersebut');
+                    }
+                }
+            ],
             'shift' => 'nullable|exists:transaksis,Shift',
         ], [
             'FilterTanggal.required' => 'Tanggal periode wajib diisi.',
@@ -602,7 +619,10 @@ class LaporanController extends Controller
             $q
                 ->whereBetween('Tanggal', [$startDate, $endDate])
                 ->when($kodeCabang, fn($qq) => $qq->where('KodeCabang', $kodeCabang))
-                ->where('IdResepsionis', $kasirId)
+                ->where(function ($qq) use ($kasirId) {
+                    $qq->where('IdResepsionis', $kasirId)
+                        ->orWhere('IdResepsionisPendamping', $kasirId);
+                })
                 ->when($shiftFilter, fn($qq) => $qq->where('Shift', $shiftFilter));
         };
 
@@ -962,21 +982,17 @@ class LaporanController extends Controller
         $Hari = \Carbon\Carbon::parse($startDate)->translatedFormat('l, d F Y');
 
         // Ambil perawat yang bertugas pada shift dan tanggal tersebut (via relasi pada transaksi)
-        $PerawatBertugas = Transaksi::with('getPerawat')
+        $PerawatBertugas = Transaksi::with(['getPerawat', 'getPerawatPendamping'])
             ->where($scopeTransaksi)
-            ->whereNotNull('IdPerawat')
             ->get()
-            ->pluck('getPerawat')
-            ->filter()  // hilangkan null jika ada transaksi tanpa perawat
+            ->flatMap(fn($t) => array_filter([$t->getPerawat, $t->getPerawatPendamping]))
             ->unique('id')
             ->values();
         // Ambil resepsionis yang terkait dengan transaksi pada filter saat ini
-        $ResepsionisBertugas = Transaksi::with('getResepsionis')
+        $ResepsionisBertugas = Transaksi::with(['getResepsionis', 'getResepsionisPendamping'])
             ->where($scopeTransaksi)
-            ->whereNotNull('IdResepsionis')
             ->get()
-            ->pluck('getResepsionis')
-            ->filter()
+            ->flatMap(fn($t) => array_filter([$t->getResepsionis, $t->getResepsionisPendamping]))
             ->unique('id')
             ->values();
 

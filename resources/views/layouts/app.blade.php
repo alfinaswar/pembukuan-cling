@@ -583,7 +583,7 @@
                                         Shift: {{ auth()->user()?->getShift?->Nama ?? '-' }}
                                     </span>
                                     <span class="fw-semibold" style="font-size: 15px;">
-                                        Cabang: {{ auth()->user()?->getPerusahaan?->Nama ?? '-' }}
+                                        Cabang: {{ auth()->user()?->getPerusahaanAktif()?->Nama ?? auth()->user()?->getPerusahaan?->Nama ?? '-' }}
                                     </span>
                                 </div>
                                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">

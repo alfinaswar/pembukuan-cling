@@ -26,7 +26,7 @@ class TransaksiController extends Controller
     {
         if ($request->ajax()) {
             $user = auth()->user();
-            $kodeCabang = $user->kodeperusahaan;
+            $kodeCabang = $user->cabangAktif();
             $tanggalMulai = $request->input('tanggal_mulai');
             $tanggalAkhir = $request->input('tanggal_akhir');
             $shiftId = $request->input('shift');
@@ -187,7 +187,7 @@ class TransaksiController extends Controller
     {
         if ($request->ajax()) {
             $user = auth()->user();
-            $kodeCabang = $user->kodeperusahaan;
+            $kodeCabang = $user->cabangAktif();
             $searchNama = $request->input('search_nama');
 
             $data = Transaksi::with('TransaksiDetail')
@@ -346,7 +346,7 @@ class TransaksiController extends Controller
             ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
             ->first();
         // dd($shift);
-        $kodeCabang = auth()->user()->kodeperusahaan;
+        $kodeCabang = auth()->user()->cabangAktif();
 
         $totalPasienBaru = Transaksi::where('JenisPasien', 'Baru')
             ->where('Shift', optional($shift)->id)
@@ -362,11 +362,10 @@ class TransaksiController extends Controller
             ->count();
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
-        $kodeCabang = auth()->user()->kodeperusahaan;
         $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->where('KodePerusahaan', $kodeCabang)->get();
-        $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $kodeCabang)->get();
-        $dental = DentalUnit::where('KodeCabang', auth()->user()->kodeperusahaan)->get();
+        $perawat = User::role('Perawat')->get();
+        $kasir = User::role('Kasir / Resepsionis')->get();
+        $dental = DentalUnit::where('KodeCabang', $kodeCabang)->get();
         return view('transaksi.kasir.create', compact('dental', 'Perawatan', 'MetodePembayaran', 'dokter', 'perawat', 'kasir', 'totalPasienLama', 'totalPasienBaru'));
     }
 
@@ -393,7 +392,9 @@ class TransaksiController extends Controller
             'JenisPerawatan.*.Biaya' => 'required|numeric|min:0',
             'Dokter' => 'required|exists:users,id',
             'Perawat' => 'required|exists:users,id',
+            'PerawatPendamping' => 'nullable|exists:users,id|different:Perawat',
             'Kasir' => 'required|exists:users,id',
+            'KasirPendamping' => 'nullable|exists:users,id|different:Kasir',
             'DentalUnit' => 'nullable',
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => [
@@ -437,14 +438,16 @@ class TransaksiController extends Controller
             'JenisPerawatan.required' => 'Minimal 1 perawatan harus dipilih',
             'Dokter.required' => 'Pilih dokter',
             'Perawat.required' => 'Pilih perawat',
+            'PerawatPendamping.different' => 'Perawat pendamping tidak boleh sama dengan perawat utama.',
             'Kasir.required' => 'Pilih kasir/resepsionis',
+            'KasirPendamping.different' => 'Resepsionis pendamping tidak boleh sama dengan resepsionis utama.',
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
         ]);
 
         $shiftId = auth()->user()->shift;
-        $kodeCabang = auth()->user()->kodeperusahaan;
+        $kodeCabang = auth()->user()->cabangAktif();
         $userName = auth()->user()->name;
 
         // 🔥 2. MULAI DATABASE TRANSACTION
@@ -459,7 +462,9 @@ class TransaksiController extends Controller
                 'BiayaAdmin' => $request->BiayaAdmin,
                 'TotalBayar' => $request->TotalBiaya,
                 'IdResepsionis' => $request->Kasir,
+                'IdResepsionisPendamping' => $request->KasirPendamping,
                 'IdPerawat' => $request->Perawat,
+                'IdPerawatPendamping' => $request->PerawatPendamping,
                 'IdDokter' => $request->Dokter,
                 'DentalUnit' => $request->DentalUnit,
                 'Shift' => $shiftId,
@@ -621,7 +626,7 @@ class TransaksiController extends Controller
             ->whereTime('JamSelesai', '>=', now()->format('H:i:s'))
             ->first();
 
-        $kodeCabang = auth()->user()->kodeperusahaan;
+        $kodeCabang = auth()->user()->cabangAktif();
         $totalPasienBaru = Transaksi::where('JenisPasien', 'Baru')
             ->where('Shift', optional($shift)->id)
             ->where('KodeCabang', $kodeCabang)
@@ -636,9 +641,9 @@ class TransaksiController extends Controller
 
         $MetodePembayaran = MasterMetodePembayaran::where('Status', 'Y')->get();
         $dokter = User::role('Dokter')->get();
-        $perawat = User::role('Perawat')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
-        $kasir = User::role('Kasir / Resepsionis')->where('KodePerusahaan', $transaksi->KodeCabang)->get();
-        $dental = DentalUnit::where('KodeCabang', auth()->user()->kodeperusahaan)->get();
+        $perawat = User::role('Perawat')->get();
+        $kasir = User::role('Kasir / Resepsionis')->get();
+        $dental = DentalUnit::where('KodeCabang', $kodeCabang)->get();
         // dd($transaksi);
         $masterShift = MasterShift::get();
         return view('transaksi.kasir.edit', compact(
@@ -688,7 +693,9 @@ class TransaksiController extends Controller
             'JenisPerawatan.*.Biaya' => 'required|numeric|min:0',
             'Dokter' => 'required|exists:users,id',
             'Perawat' => 'required|exists:users,id',
+            'PerawatPendamping' => 'nullable|exists:users,id|different:Perawat',
             'Kasir' => 'required|exists:users,id',
+            'KasirPendamping' => 'nullable|exists:users,id|different:Kasir',
             'BiayaAdmin' => 'required|numeric|min:0',
             'MetodePembayaran' => ['required', 'array', 'min:1'],
             'MetodePembayaran.*' => 'required|integer|exists:master_metode_pembayarans,id',
@@ -719,13 +726,15 @@ class TransaksiController extends Controller
             'JenisPerawatan.required' => 'Minimal 1 perawatan harus dipilih',
             'Dokter.required' => 'Pilih dokter',
             'Perawat.required' => 'Pilih perawat',
+            'PerawatPendamping.different' => 'Perawat pendamping tidak boleh sama dengan perawat utama.',
             'Kasir.required' => 'Pilih kasir/resepsionis',
+            'KasirPendamping.different' => 'Resepsionis pendamping tidak boleh sama dengan resepsionis utama.',
             'BiayaAdmin.required' => 'Biaya admin wajib diisi',
             'MetodePembayaran.required' => 'Pilih minimal satu metode pembayaran',
             'TotalBiaya.required' => 'Total biaya wajib diisi',
         ]);
 
-        $kodeCabang = auth()->user()->kodeperusahaan;
+        $kodeCabang = auth()->user()->cabangAktif();
         $userName = auth()->user()->name;
 
         // 🔥 1. MULAI DATABASE TRANSACTION
@@ -790,7 +799,9 @@ class TransaksiController extends Controller
                 'DentalUnit' => $request->DentalUnit,
                 'TotalBayar' => $request->TotalBiaya,
                 'IdResepsionis' => $request->Kasir,
+                'IdResepsionisPendamping' => $request->KasirPendamping,
                 'IdPerawat' => $request->Perawat,
+                'IdPerawatPendamping' => $request->PerawatPendamping,
                 'IdDokter' => $request->Dokter,
                 'UserUpdate' => $userName,
             ]);

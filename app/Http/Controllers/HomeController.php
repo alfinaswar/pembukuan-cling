@@ -169,7 +169,7 @@ class HomeController extends Controller
     public function monitor(Request $request)
     {
         $user = auth()->user();
-        $kodeCabang = $user->kodeperusahaan;
+        $kodeCabang = $user->cabangAktif();
 
         $dropdown = $this->getDropdownData($request);
         $klinikList = MasterKlinik::where('Kode', $kodeCabang)->get();
@@ -197,6 +197,7 @@ class HomeController extends Controller
 
         $onTrack = $single['persentase'] >= $progressWaktu;
         $listShift = MasterShift::get();
+        $allKlinik = MasterKlinik::all();
         return view('dashboard.monitor.index', array_merge(
             $dropdown,
             [
@@ -212,6 +213,7 @@ class HomeController extends Controller
                     : 'Tingkatkan performa untuk mengejar target!',
                 'lastUpdate' => $now->format('d F Y H:i'),
                 'listShift' => $listShift, // tambahkan listShift ke view
+                'allKlinik' => $allKlinik,
             ]
         ));
 
@@ -221,6 +223,7 @@ class HomeController extends Controller
     {
         $request->validate([
             'shift' => 'required|exists:master_shifts,id',
+            'cabang_tugas' => 'nullable|exists:master_kliniks,Kode',
         ]);
 
         $user = auth()->user();
@@ -228,6 +231,11 @@ class HomeController extends Controller
         $user->last_login = now()->toDateString(); // hanya tanggal, tidak pakai jam
         $user->save();
 
-        return redirect()->back()->with('success', 'Shift Anda berhasil disimpan.');
+        // Hanya Perawat dan Kasir / Resepsionis yang mengatur cabang bertugas
+        if ($user->hasRole(['Perawat', 'Kasir / Resepsionis'])) {
+            session(['active_cabang' => $request->cabang_tugas ?: $user->kodeperusahaan]);
+        }
+
+        return redirect()->back()->with('success', 'Shift dan cabang bertugas berhasil disimpan.');
     }
 }

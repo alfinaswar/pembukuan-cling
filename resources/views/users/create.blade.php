@@ -116,6 +116,29 @@
                                             </div>
                                         @enderror
                                     </div>
+
+                                    <!-- Tanggal Bergabung -->
+                                    <div class="mb-4">
+                                        <label for="tanggal_bergabung" class="form-label fw-semibold mb-2">
+                                            Tanggal Bergabung
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="ti ti-calendar text-muted"></i>
+                                            </span>
+                                            <input type="date" id="tanggal_bergabung" name="tanggal_bergabung"
+                                                class="form-control @error('tanggal_bergabung') is-invalid @enderror"
+                                                value="{{ old('tanggal_bergabung') }}">
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="ti ti-info-circle me-1"></i>Digunakan untuk validasi masa kerja insentif (min. 2 minggu)
+                                        </small>
+                                        @error('tanggal_bergabung')
+                                            <div class="invalid-feedback d-block mt-1">
+                                                <i class="ti ti-alert-circle me-1"></i>{{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
                                 </div>
 
                                 <!-- Right Column: Credentials & Role -->

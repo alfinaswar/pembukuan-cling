@@ -60,6 +60,7 @@ class LoginController extends Controller
                 $user->last_login = null;
                 $user->save();
                 Auth::login($user, $request->filled('remember'));
+                $request->session()->forget('active_cabang');
                 return $this->sendLoginResponse($request);
             }
         }
@@ -77,6 +78,7 @@ class LoginController extends Controller
                 $user->shift = null;
                 $user->last_login = null;
                 $user->save();
+                $request->session()->forget('active_cabang');
             }
             return $this->sendLoginResponse($request);
         }
@@ -93,6 +95,7 @@ class LoginController extends Controller
             $user->last_login = null;
             $user->save();
             $request->session()->forget('shift');
+            $request->session()->forget('active_cabang');
         }
 
 

@@ -83,6 +83,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required|array',
             'kodeperusahaan' => 'required',  // tambahkan validasi kodeperusahaan
+            'tanggal_bergabung' => 'nullable|date',
         ]);
 
         $user = User::create([
@@ -90,6 +91,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => \Hash::make($request->password),
             'kodeperusahaan' => $request->kodeperusahaan,  // set kodeperusahaan dari request
+            'tanggal_bergabung' => $request->tanggal_bergabung,
         ]);
         $user->syncRoles($request->roles[0]);
 
@@ -140,12 +142,14 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'roles' => 'required|array',
             'kodeperusahaan' => 'required',  // tambahkan validasi kodeperusahaan untuk update
+            'tanggal_bergabung' => 'nullable|date',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
         $user->kodeperusahaan = $request->kodeperusahaan;
+        $user->tanggal_bergabung = $request->tanggal_bergabung;
 
         if ($request->filled('password')) {
             $user->password = \Hash::make($request->password);

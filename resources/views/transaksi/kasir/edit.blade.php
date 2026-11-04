@@ -369,8 +369,11 @@
                 <!-- LEFT: Form Transaksi Kasir -->
                 <div class="col-xl-8">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title">Edit Transaksi Kasir</h5>
+                            <span class="badge bg-primary fs-2 py-1 px-2">
+                                <i class="fas fa-clinic-medical me-1"></i> Cabang: {{ auth()->user()->getPerusahaanAktif()?->Nama ?? auth()->user()->cabangAktif() }}
+                            </span>
                         </div>
                         <div class="card-body">
 
@@ -814,6 +817,26 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Perawat Pendamping -->
+                                    <div class="mb-2">
+                                        <label for="PerawatPendamping" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="user-plus" style="width:14px;height:14px;" class="me-1"></i>
+                                            Perawat Pendamping
+                                        </label>
+                                        <select name="PerawatPendamping" id="PerawatPendamping"
+                                            class="form-select staff-select @error('PerawatPendamping') is-invalid @enderror">
+                                            <option value="">-- Tidak Ada Pendamping --</option>
+                                            @foreach ($perawat as $p)
+                                                <option value="{{ $p->id }}"
+                                                    {{ old('PerawatPendamping', $transaksi->IdPerawatPendamping) == $p->id ? 'selected' : '' }}>
+                                                    {{ $p->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('PerawatPendamping')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
                                     <!-- Kasir / Resepsionis -->
                                     <div class="mb-2">
                                         <label for="Kasir" class="form-label fw-bold text-uppercase">
@@ -831,6 +854,27 @@
                                             @endforeach
                                         </select>
                                         @error('Kasir')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Resepsionis Pendamping -->
+                                    <div class="mb-2">
+                                        <label for="KasirPendamping" class="form-label fw-bold text-uppercase">
+                                            <i data-lucide="user-plus" style="width:14px;height:14px;"
+                                                class="me-1"></i>
+                                            Resepsionis Pendamping
+                                        </label>
+                                        <select name="KasirPendamping" id="KasirPendamping"
+                                            class="form-select staff-select @error('KasirPendamping') is-invalid @enderror">
+                                            <option value="">-- Tidak Ada Pendamping --</option>
+                                            @foreach ($kasir as $r)
+                                                <option value="{{ $r->id }}"
+                                                    {{ old('KasirPendamping', $transaksi->IdResepsionisPendamping) == $r->id ? 'selected' : '' }}>
+                                                    {{ $r->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('KasirPendamping')
                                             <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
@@ -923,9 +967,14 @@
                 return false;
             }
 
+            let cabangNama = '{{ auth()->user()->getPerusahaanAktif()?->Nama ?? auth()->user()->cabangAktif() }}';
             Swal.fire({
                 title: 'Konfirmasi Update Transaksi',
-                html: 'Anda yakin sudah memilih shift yang benar?<br><strong>Shift: ' + shiftText + '</strong>',
+                html: '<div style="text-align:left;">' +
+                      '<div class="mb-1"><strong>Cabang:</strong> <span style="float:right;" class="badge bg-primary text-white">' + cabangNama + '</span></div>' +
+                      '<div><strong>Shift:</strong> <span style="float:right;">' + shiftText + '</span></div>' +
+                      '</div>' +
+                      '<div class="alert alert-warning mt-2 mb-0" style="padding:6px 8px;font-size:.95em;">Pastikan shift dan data sudah sesuai!</div>',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, simpan!',
@@ -952,6 +1001,36 @@
                 dropdownParent: $('.card-body:has(#Kasir)').length ? $('.card-body:has(#Kasir)') : $(
                     document.body)
             });
+
+            // Validasi Perawat & Perawat Pendamping tidak boleh sama
+            function checkPerawatPendamping() {
+                let perawat = $('#Perawat').val();
+                let pendamping = $('#PerawatPendamping').val();
+                if (perawat && pendamping && perawat === pendamping) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian',
+                        text: 'Perawat pendamping tidak boleh sama dengan perawat utama!'
+                    });
+                    $('#PerawatPendamping').val('').trigger('change');
+                }
+            }
+            $('#Perawat, #PerawatPendamping').on('change', checkPerawatPendamping);
+
+            // Validasi Resepsionis & Resepsionis Pendamping tidak boleh sama
+            function checkKasirPendamping() {
+                let kasir = $('#Kasir').val();
+                let pendamping = $('#KasirPendamping').val();
+                if (kasir && pendamping && kasir === pendamping) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian',
+                        text: 'Resepsionis pendamping tidak boleh sama dengan resepsionis utama!'
+                    });
+                    $('#KasirPendamping').val('').trigger('change');
+                }
+            }
+            $('#Kasir, #KasirPendamping').on('change', checkKasirPendamping);
 
             $('input[name="JenisPasien"]').on('change', function() {
                 let currentAdmin = parseRupiah($('#biaya_admin').val());

@@ -28,6 +28,11 @@ class Transaksi extends Model
         return $this->belongsTo(User::class, 'IdPerawat', 'id');
     }
 
+    public function getPerawatPendamping()
+    {
+        return $this->belongsTo(User::class, 'IdPerawatPendamping', 'id');
+    }
+
     public function getDokter()
     {
         return $this->belongsTo(User::class, 'IdDokter', 'id');
@@ -36,6 +41,11 @@ class Transaksi extends Model
     public function getResepsionis()
     {
         return $this->belongsTo(User::class, 'IdResepsionis', 'id');
+    }
+
+    public function getResepsionisPendamping()
+    {
+        return $this->belongsTo(User::class, 'IdResepsionisPendamping', 'id');
     }
 
     public function getShift()

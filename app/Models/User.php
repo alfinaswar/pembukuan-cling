@@ -51,6 +51,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'tanggal_bergabung' => 'date',
     ];
 
     /**
@@ -61,6 +62,28 @@ class User extends Authenticatable
     public function getPerusahaan()
     {
         return $this->hasOne(MasterKlinik::class, 'Kode', 'kodeperusahaan');
+    }
+
+    /**
+     * Ambil kode cabang aktif saat bertugas (prioritas session, fallback ke cabang homebase)
+     */
+    public function cabangAktif()
+    {
+        return session('active_cabang') ?: $this->kodeperusahaan;
+    }
+
+    public function getCabangAktifAttribute()
+    {
+        return $this->cabangAktif();
+    }
+
+    /**
+     * Ambil model klinik yang sedang aktif
+     */
+    public function getPerusahaanAktif()
+    {
+        $kode = $this->cabangAktif();
+        return MasterKlinik::where('Kode', $kode)->first() ?: $this->getPerusahaan;
     }
 
     public function getShift()

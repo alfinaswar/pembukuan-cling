@@ -86,31 +86,45 @@ class InsentifService
 
             // A. Rule: Insentif Hari Libur (1x per SHIFT)
             if ($rule->JenisRule == 'insentif_hari_libur') {
-                $userId = $this->getUserByRole($transaksi, $rule->Role);
-                if (!$userId)
-                    continue;
-
                 $isHoliday = $this->isHariLibur($transaksi->Tanggal);
                 if (!$isHoliday)
                     continue;
 
-                // Cek insentif hari libur sudah didapatkan untuk user pada SHIFT yang sama
-                $sudahDapatHariIniQuery = InsentifKaryawan::where('UserId', $userId)
-                    ->where('Role', $rule->Role)
-                    ->where('JenisRule', $rule->JenisRule)
-                    ->whereDate('Tanggal', $tanggal)
-                    ->where('Shift', $shift)
-                    ->where('KodeCabang', $kodeCabang);
-
-                if ($dentalUnit) {
-                    $sudahDapatHariIniQuery->where('DentalUnit', $dentalUnit);
-                }
-
-                if ($sudahDapatHariIniQuery->exists())
+                $targetUsers = $this->getTargetUsersForRule($transaksi, $rule->Role);
+                if (empty($targetUsers))
                     continue;
 
-                $isValid = true;
-                $finalNominal = $rule->Nominal;
+                foreach ($targetUsers as $targetUserId) {
+                    // Cek insentif hari libur sudah didapatkan untuk user pada SHIFT yang sama
+                    $sudahDapatHariIniQuery = InsentifKaryawan::where('UserId', $targetUserId)
+                        ->where('Role', $rule->Role)
+                        ->where('JenisRule', $rule->JenisRule)
+                        ->whereDate('Tanggal', $tanggal)
+                        ->where('Shift', $shift)
+                        ->where('KodeCabang', $kodeCabang);
+
+                    if ($dentalUnit) {
+                        $sudahDapatHariIniQuery->where('DentalUnit', $dentalUnit);
+                    }
+
+                    if ($sudahDapatHariIniQuery->exists())
+                        continue;
+
+                    InsentifKaryawan::create([
+                        'IdTransaksi' => $transaksi->id,
+                        'Tanggal' => $transaksi->Tanggal,
+                        'UserId' => $targetUserId,
+                        'Role' => $rule->Role,
+                        'Nominal' => $rule->Nominal,
+                        'JenisRule' => $rule->JenisRule,
+                        'Keterangan' => $rule->Keterangan,
+                        'Shift' => $shift,
+                        'KodeCabang' => $kodeCabang,
+                        'DentalUnit' => $dentalUnit,
+                        'UserCreate' => auth()->check() ? auth()->user()->name : 'System',
+                    ]);
+                }
+                continue;
             }
             // B. Rule: Target Tercapai (1x per BULAN)
             elseif ($rule->JenisRule == 'target_tercapai') {
@@ -211,13 +225,11 @@ class InsentifService
                 if ($rule->JenisRule == 'pasien_lama' && $transaksi->JenisPasien !== 'Lama')
                     continue;
 
-                $userId = $this->getUserByRole($transaksi, $rule->Role);
-                if (!$userId)
+                $targetUsers = $this->getTargetUsersForRule($transaksi, $rule->Role);
+                if (empty($targetUsers))
                     continue;
 
                 $isValid = false;
-                $finalNominal = $rule->Nominal;
-                $insertCount = 1;
 
                 // C. Rule Tindakan
                 if ($rule->JenisRule == 'tindakan') {
@@ -232,31 +244,8 @@ class InsentifService
                 elseif ($rule->Operator == 'kelipatan') {
                     $threshold = $rule->Nilai;
                     $totalKelipatanTercapai = floor($totalShift / $threshold);
-
                     if ($totalKelipatanTercapai >= 1) {
                         $isValid = true;
-
-                        // 🔥 Cek duplikasi kelipatan PER Dental Unit
-                        $sudahDiberikanQuery = InsentifKaryawan::where('UserId', $userId)
-                            ->where('Role', $rule->Role)
-                            ->where('JenisRule', $rule->JenisRule)
-                            ->where('Shift', $shift)
-                            ->whereDate('Tanggal', $tanggal)
-                            ->where('KodeCabang', $kodeCabang);
-
-                        if ($dentalUnit) {
-                            $sudahDiberikanQuery->where('DentalUnit', $dentalUnit);
-                        }
-
-                        $sudahDiberikan = $sudahDiberikanQuery->count();
-                        $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
-
-                        if ($kelipatanBaru > 0) {
-                            $finalNominal = $rule->Nominal;
-                            $insertCount = (int) $kelipatanBaru;
-                        } else {
-                            continue;
-                        }
                     }
                 }
                 // E. Rule Operator Biasa
@@ -278,48 +267,73 @@ class InsentifService
 
                 if (!$isValid)
                     continue;
-            }
 
-            // =================================================
-            // 3. CEK DUPLICATE & SIMPAN
-            // =================================================
-            if (
-                $rule->BerlakuPer == 'shift' &&
-                $rule->Operator != 'kelipatan' &&
-                $rule->JenisRule != 'target_tercapai' &&
-                $rule->JenisRule != 'insentif_hari_libur'
-            ) {
-                $existsQuery = InsentifKaryawan::where('UserId', $userId)
-                    ->where('Role', $rule->Role)
-                    ->where('JenisRule', $rule->JenisRule)
-                    ->where('Shift', $shift)
-                    ->whereDate('Tanggal', $tanggal)
-                    ->where('KodeCabang', $kodeCabang);
+                // Loop setiap penerima insentif (Primary & Pendamping jika eligible)
+                foreach ($targetUsers as $targetUserId) {
+                    $insertCount = 1;
+                    $finalNominal = $rule->Nominal;
 
-                // 🔥 Pastikan cek duplikasi juga memisahkan berdasarkan Dental Unit
-                if ($dentalUnit) {
-                    $existsQuery->where('DentalUnit', $dentalUnit);
+                    if ($rule->Operator == 'kelipatan') {
+                        $threshold = $rule->Nilai;
+                        $totalKelipatanTercapai = floor($totalShift / $threshold);
+
+                        // Cek duplikasi kelipatan PER Dental Unit untuk user ini
+                        $sudahDiberikanQuery = InsentifKaryawan::where('UserId', $targetUserId)
+                            ->where('Role', $rule->Role)
+                            ->where('JenisRule', $rule->JenisRule)
+                            ->where('Shift', $shift)
+                            ->whereDate('Tanggal', $tanggal)
+                            ->where('KodeCabang', $kodeCabang);
+
+                        if ($dentalUnit) {
+                            $sudahDiberikanQuery->where('DentalUnit', $dentalUnit);
+                        }
+
+                        $sudahDiberikan = $sudahDiberikanQuery->count();
+                        $kelipatanBaru = $totalKelipatanTercapai - $sudahDiberikan;
+
+                        if ($kelipatanBaru > 0) {
+                            $insertCount = (int) $kelipatanBaru;
+                        } else {
+                            continue;
+                        }
+                    } elseif (
+                        $rule->BerlakuPer == 'shift' &&
+                        $rule->JenisRule != 'target_tercapai' &&
+                        $rule->JenisRule != 'insentif_hari_libur'
+                    ) {
+                        $existsQuery = InsentifKaryawan::where('UserId', $targetUserId)
+                            ->where('Role', $rule->Role)
+                            ->where('JenisRule', $rule->JenisRule)
+                            ->where('Shift', $shift)
+                            ->whereDate('Tanggal', $tanggal)
+                            ->where('KodeCabang', $kodeCabang);
+
+                        if ($dentalUnit) {
+                            $existsQuery->where('DentalUnit', $dentalUnit);
+                        }
+
+                        if ($existsQuery->exists())
+                            continue;
+                    }
+
+                    // Simpan ke Database (loop jika kelipatan baru > 1)
+                    for ($k = 0; $k < $insertCount; $k++) {
+                        InsentifKaryawan::create([
+                            'IdTransaksi' => $transaksi->id,
+                            'Tanggal' => $transaksi->Tanggal,
+                            'UserId' => $targetUserId,
+                            'Role' => $rule->Role,
+                            'Nominal' => $finalNominal,
+                            'JenisRule' => $rule->JenisRule,
+                            'Keterangan' => $rule->Keterangan,
+                            'Shift' => $shift,
+                            'KodeCabang' => $kodeCabang,
+                            'DentalUnit' => $dentalUnit, // 🔥 Simpan info Dental Unit ke riwayat insentif
+                            'UserCreate' => auth()->check() ? auth()->user()->name : 'System',
+                        ]);
+                    }
                 }
-
-                if ($existsQuery->exists())
-                    continue;
-            }
-
-            // Simpan ke Database (loop jika kelipatan baru > 1)
-            for ($k = 0; $k < $insertCount; $k++) {
-                InsentifKaryawan::create([
-                    'IdTransaksi' => $transaksi->id,
-                    'Tanggal' => $transaksi->Tanggal,
-                    'UserId' => $userId,
-                    'Role' => $rule->Role,
-                    'Nominal' => $finalNominal,
-                    'JenisRule' => $rule->JenisRule,
-                    'Keterangan' => $rule->Keterangan,
-                    'Shift' => $shift,
-                    'KodeCabang' => $kodeCabang,
-                    'DentalUnit' => $dentalUnit, // 🔥 Simpan info Dental Unit ke riwayat insentif
-                    'UserCreate' => auth()->check() ? auth()->user()->name : 'System',
-                ]);
             }
         }
     }
@@ -519,7 +533,7 @@ class InsentifService
     }
 
     // =====================================================
-    // MAPPING ROLE
+    // MAPPING ROLE & PENDAMPING
     // =====================================================
     private function getUserByRole($transaksi, $role)
     {
@@ -529,5 +543,51 @@ class InsentifService
             4 => $transaksi->IdPerawat,
             default => null
         };
+    }
+
+    private function getPendampingByRole($transaksi, $role)
+    {
+        return match ((int) $role) {
+            3 => $transaksi->IdResepsionisPendamping,
+            4 => $transaksi->IdPerawatPendamping,
+            default => null
+        };
+    }
+
+    /**
+     * Cek apakah pendamping sudah bekerja minimal 2 minggu (14 hari) pada tanggal transaksi
+     */
+    public function isEligiblePendamping($userId, $tanggalTransaksi)
+    {
+        if (!$userId)
+            return false;
+
+        $user = User::find($userId);
+        if (!$user || empty($user->tanggal_bergabung))
+            return false;
+
+        $trxDate = Carbon::parse($tanggalTransaksi)->startOfDay();
+        $joinDate = Carbon::parse($user->tanggal_bergabung)->startOfDay();
+
+        return $joinDate->diffInDays($trxDate, false) >= 14;
+    }
+
+    /**
+     * Ambil seluruh user penerima insentif (utama + pendamping jika masa kerja >= 2 minggu)
+     */
+    private function getTargetUsersForRule($transaksi, $role)
+    {
+        $users = [];
+        $primary = $this->getUserByRole($transaksi, $role);
+        if ($primary) {
+            $users[] = (int) $primary;
+        }
+
+        $pendamping = $this->getPendampingByRole($transaksi, $role);
+        if ($pendamping && (int) $pendamping !== (int) $primary && $this->isEligiblePendamping($pendamping, $transaksi->Tanggal)) {
+            $users[] = (int) $pendamping;
+        }
+
+        return array_values(array_unique($users));
     }
 }

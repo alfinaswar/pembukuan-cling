@@ -320,6 +320,21 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label for="modalCabangTugas" class="form-label">Cabang Bertugas Hari Ini</label>
+                                <select name="cabang_tugas" id="modalCabangTugas" class="form-select">
+                                    @php
+                                        $currentActive = auth()->user()->cabangAktif();
+                                        $kliniksForModal = $allKlinik ?? \App\Models\MasterKlinik::all();
+                                    @endphp
+                                    @foreach ($kliniksForModal as $k)
+                                        <option value="{{ $k->Kode }}" {{ $currentActive == $k->Kode ? 'selected' : '' }}>
+                                            {{ $k->Nama }} {{ $k->Kode == auth()->user()->kodeperusahaan ? '(Cabang Asal)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Pilih cabang bila Anda hari ini diperbantukan di klinik lain.</small>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary">Simpan Shift</button>
