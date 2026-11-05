@@ -292,14 +292,14 @@
                             </a>
                         </li>
                         @role('Superadmin')
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="{{ route('dashboard.stok') }}" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-stack"></i>
-                                </span>
-                                <span class="hide-menu">Dashboard Stok</span>
-                            </a>
-                        </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="{{ route('dashboard.stok') }}" aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-stack"></i>
+                                    </span>
+                                    <span class="hide-menu">Dashboard Stok</span>
+                                </a>
+                            </li>
                         @endrole
 
 
@@ -379,51 +379,53 @@
                                             </a>
                                         </li>
                                     @endcan
-                                    {{-- @can('laporan-transaksi') --}}
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-transaksi.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-notebook"></i>
-                                            </div>
-                                            <span class="hide-menu">Laporan Transaksi</span>
-                                        </a>
-                                    </li>
-                                    {{-- @endcan --}}
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-pasien.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-notebook"></i>
-                                            </div>
-                                            <span class="hide-menu">Laporan Pasien</span>
-                                        </a>
-                                    </li>
-                                    {{-- @can('laporan-jenis-perawatan') --}}
-                                    <li class="sidebar-item">
-                                        <a href="{{ route('laporan-jenis-perawatan.index') }}" class="sidebar-link">
-                                            <div class="round-16 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-notebook"></i>
-                                            </div>
-                                            <span class="hide-menu">Laporan Perawatan</span>
-                                        </a>
-                                    </li>
-                                    {{-- @endcan --}}
- @can('laporan-insentif')
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('laporan-insentif.index') }}"
-                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
-                                                    <div class="round-16 d-flex justify-content-center align-items-center"
-                                                        style="height: 32px; width: 32px;">
-                                                        <span
-                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                    </div>
-                                                    <span class="hide-menu">Laporan Insentif</span>
-                                                </a>
-                                            </li>
-                                        @endcan
+                                    @can('laporan-transaksi')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-transaksi.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-notebook"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Transaksi</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('laporan-pasien')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-pasien.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-notebook"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Pasien</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('laporan-jenis-perawatan')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-jenis-perawatan.index') }}" class="sidebar-link">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-notebook"></i>
+                                                </div>
+                                                <span class="hide-menu">Laporan Perawatan</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('laporan-insentif')
+                                        <li class="sidebar-item">
+                                            <a href="{{ route('laporan-insentif.index') }}"
+                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
+                                                <div class="round-16 d-flex justify-content-center align-items-center"
+                                                    style="height: 32px; width: 32px;">
+                                                    <span
+                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                </div>
+                                                <span class="hide-menu">Laporan Insentif</span>
+                                            </a>
+                                        </li>
+                                    @endcan
                                 </ul>
                             </li>
                         @endcan
-                         @can('dashboard-stok')
+                        @can('dashboard-stok')
                             <li class="sidebar-item">
                                 <a href="{{ route('Stok.index') }}" class="sidebar-link">
                                     <div class="round-16 d-flex align-items-center justify-content-center">
@@ -583,7 +585,8 @@
                                         Shift: {{ auth()->user()?->getShift?->Nama ?? '-' }}
                                     </span>
                                     <span class="fw-semibold" style="font-size: 15px;">
-                                        Cabang: {{ auth()->user()?->getPerusahaanAktif()?->Nama ?? auth()->user()?->getPerusahaan?->Nama ?? '-' }}
+                                        Cabang:
+                                        {{ auth()->user()?->getPerusahaanAktif()?->Nama ?? (auth()->user()?->getPerusahaan?->Nama ?? '-') }}
                                     </span>
                                 </div>
                                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
@@ -631,14 +634,15 @@
                                     </li>
 
                                     @can('Superadmin')
-                                    <li class="sidebar-item">
-                                        <a class="sidebar-link" href="{{ route('dashboard.stok') }}" aria-expanded="false">
-                                            <span>
-                                                <i class="ti ti-stack"></i>
-                                            </span>
-                                            <span class="hide-menu">Dashboard Stok</span>
-                                        </a>
-                                    </li>
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link" href="{{ route('dashboard.stok') }}"
+                                                aria-expanded="false">
+                                                <span>
+                                                    <i class="ti ti-stack"></i>
+                                                </span>
+                                                <span class="hide-menu">Dashboard Stok</span>
+                                            </a>
+                                        </li>
                                     @endcan
 
 
@@ -719,61 +723,61 @@
                                                     </li>
                                                 @endcan
 
-                                                {{-- @can('laporan-transaksi') --}}
-                                                <li class="sidebar-item">
-                                                    <a href="{{ route('laporan-transaksi.index') }}"
-                                                        class="sidebar-link">
-                                                        <div
-                                                            class="round-16 d-flex align-items-center justify-content-center">
-                                                            <i class="ti ti-notebook"></i>
-                                                        </div>
-                                                        <span class="hide-menu">Laporan Transaksi</span>
-                                                    </a>
-                                                </li>
-                                                {{-- @endcan --}}
-                                                <li class="sidebar-item">
-                                                    <a href="{{ route('laporan-pasien.index') }}"
-                                                        class="sidebar-link">
-                                                        <div
-                                                            class="round-16 d-flex align-items-center justify-content-center">
-                                                            <i class="ti ti-notebook"></i>
-                                                        </div>
-                                                        <span class="hide-menu">Laporan Pasien</span>
-                                                    </a>
-                                                </li>
-                                                {{-- @can('laporan-jenis-perawatan') --}}
-                                                <li class="sidebar-item">
-                                                    <a href="{{ route('laporan-jenis-perawatan.index') }}"
-                                                        class="sidebar-link">
-                                                        <div
-                                                            class="round-16 d-flex align-items-center justify-content-center">
-                                                            <i class="ti ti-notebook"></i>
-                                                        </div>
-                                                        <span class="hide-menu">Laporan Perawatan</span>
-                                                    </a>
-                                                </li>
-                                                {{-- @endcan --}}
-                                                 @can('laporan-insentif')
-                                            <li class="sidebar-item">
-                                                <a href="{{ route('laporan-insentif.index') }}"
-                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
-                                                    <div class="round-16 d-flex justify-content-center align-items-center"
-                                                        style="height: 32px; width: 32px;">
-                                                        <span
-                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                    </div>
-                                                    <span class="hide-menu">Laporan Insentif</span>
-                                                </a>
-                                            </li>
-                                        @endcan
+                                                @can('laporan-transaksi')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-transaksi.index') }}"
+                                                            class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-notebook"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Transaksi</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('laporan-pasien')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-pasien.index') }}" class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-notebook"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Pasien</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('laporan-jenis-perawatan')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-jenis-perawatan.index') }}"
+                                                            class="sidebar-link">
+                                                            <div
+                                                                class="round-16 d-flex align-items-center justify-content-center">
+                                                                <i class="ti ti-notebook"></i>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Perawatan</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
+                                                @can('laporan-insentif')
+                                                    <li class="sidebar-item">
+                                                        <a href="{{ route('laporan-insentif.index') }}"
+                                                            class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'insentif' ? 'active' : '' }}">
+                                                            <div class="round-16 d-flex justify-content-center align-items-center"
+                                                                style="height: 32px; width: 32px;">
+                                                                <span
+                                                                    style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                            </div>
+                                                            <span class="hide-menu">Laporan Insentif</span>
+                                                        </a>
+                                                    </li>
+                                                @endcan
                                             </ul>
                                         </li>
                                     @endcan
                                     @can('inventori')
                                         <li class="sidebar-item">
                                             <a href="{{ route('Stok.index') }}" class="sidebar-link">
-                                                <div
-                                                    class="round-16 d-flex align-items-center justify-content-center">
+                                                <div class="round-16 d-flex align-items-center justify-content-center">
                                                     <i class="ti ti-package"></i>
                                                 </div>
                                                 <span class="hide-menu">Stok</span>
@@ -1046,39 +1050,45 @@
                                                 </a>
                                             </li>
                                         @endcan
-                                        <li class="sidebar-item">
-                                            <a href="{{ route('laporan-transaksi.index') }}"
-                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'transaksi' ? 'active' : '' }}">
-                                                <div class="round-16 d-flex justify-content-center align-items-center"
-                                                    style="height: 32px; width: 32px;">
-                                                    <span
-                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                </div>
-                                                <span class="hide-menu">Laporan Transaksi</span>
-                                            </a>
-                                        </li>
-                                        <li class="sidebar-item">
-                                            <a href="{{ route('laporan-pasien.index') }}"
-                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'pasien' ? 'active' : '' }}">
-                                                <div class="round-16 d-flex justify-content-center align-items-center"
-                                                    style="height: 32px; width: 32px;">
-                                                    <span
-                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                </div>
-                                                <span class="hide-menu">Laporan Pasien</span>
-                                            </a>
-                                        </li>
-                                        <li class="sidebar-item">
-                                            <a href="{{ route('laporan-jenis-perawatan.index') }}"
-                                                class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
-                                                <div class="round-16 d-flex justify-content-center align-items-center"
-                                                    style="height: 32px; width: 32px;">
-                                                    <span
-                                                        style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
-                                                </div>
-                                                <span class="hide-menu">Laporan Perawatan</span>
-                                            </a>
-                                        </li>
+                                        @can('laporan-transaksi')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-transaksi.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'transaksi' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Transaksi</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('laporan-pasien')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-pasien.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'pasien' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Pasien</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('laporan-jenis-perawatan')
+                                            <li class="sidebar-item">
+                                                <a href="{{ route('laporan-jenis-perawatan.index') }}"
+                                                    class="sidebar-link {{ request()->segment(1) === 'laporan' && request()->segment(2) === 'jenis-perawatan' ? 'active' : '' }}">
+                                                    <div class="round-16 d-flex justify-content-center align-items-center"
+                                                        style="height: 32px; width: 32px;">
+                                                        <span
+                                                            style="font-size: 32px; line-height: 32px; color: #bbb; display: flex; align-items: center; justify-content: center;">•</span>
+                                                    </div>
+                                                    <span class="hide-menu">Laporan Perawatan</span>
+                                                </a>
+                                            </li>
+                                        @endcan
                                         @can('laporan-insentif')
                                             <li class="sidebar-item">
                                                 <a href="{{ route('laporan-insentif.index') }}"
