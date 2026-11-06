@@ -119,6 +119,7 @@
                                         <tr>
                                             <th style="width:40px;" class="text-center">No</th>
                                             <th style="width:80px;">Kode</th>
+                                            <th style="width:140px;">Nama Cabang</th>
                                             <th style="width:110px;">Tanggal</th>
                                             <th style="width:140px;">Nama Pasien</th>
                                             <th style="width:90px;">Jenis Pasien</th>
@@ -131,7 +132,7 @@
                                     </thead>
                                     <tbody id="tableBody">
                                         <tr>
-                                            <td colspan="10" class="text-center text-muted py-4">
+                                            <td colspan="11" class="text-center text-muted py-4">
                                                 Klik tombol Preview untuk menampilkan data
                                             </td>
                                         </tr>
@@ -188,7 +189,7 @@
                     method: 'POST',
                     data: formData,
                     beforeSend: function() {
-                        $('#tableBody').html('<tr><td colspan="10" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                        $('#tableBody').html('<tr><td colspan="11" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
                         $('#previewSection').show();
                     },
                     success: function(response) {
@@ -197,12 +198,13 @@
                             let total = 0;
 
                             if (response.data.length === 0) {
-                                html = '<tr><td colspan="10" class="text-center text-muted py-4">Tidak ada data untuk periode ini</td></tr>';
+                                html = '<tr><td colspan="11" class="text-center text-muted py-4">Tidak ada data untuk periode ini</td></tr>';
                             } else {
                                 response.data.forEach((item, index) => {
                                     total += parseFloat(item.total_bayar ?? item.total ?? 0);
                                     // Fallback/placeholder for fields unavailable in original response:
                                     let kode = item.kode ?? '-';
+                                    let cabang = item.nama_cabang ?? '-';
                                     let tanggal = item.tanggal ?? '-';
                                     let namaPasien = item.pelanggan ?? item.nama_pasien ?? '-';
                                     let jenisPasien = item.jenis_pasien ?? '-';
@@ -216,6 +218,7 @@
                                         <tr>
                                             <td class="text-center">${index + 1}</td>
                                             <td>${kode}</td>
+                                            <td>${cabang}</td>
                                             <td>${formatDate(tanggal)}</td>
                                             <td>${namaPasien}</td>
                                             <td>${jenisPasien}</td>
@@ -231,7 +234,7 @@
                                 // Add total row
                                 html += `
                                     <tr class="table-primary fw-bold">
-                                        <td colspan="7" class="text-end">Total:</td>
+                                        <td colspan="8" class="text-end">Total:</td>
                                         <td class="text-end">Rp ${formatRupiah(total)}</td>
                                         <td colspan="2"></td>
                                     </tr>

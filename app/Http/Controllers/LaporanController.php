@@ -1308,6 +1308,7 @@ class LaporanController extends Controller
                 return [
                     'no' => $idx + 1,
                     'kode' => $item->Kode ?? '-',
+                    'nama_cabang' => $item->getCabang->Nama ?? $item->KodeCabang ?? '-',
                     'tanggal' => $item->Tanggal ?? $item->tanggal ?? $item->Tanggal,
                     'nama_pasien' => $item->pelanggan->nama ?? $item->NamaPasien ?? '-',
                     'jenis_pasien' => $item->JenisPasien ?? '-',

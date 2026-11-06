@@ -41,15 +41,16 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
             'A' => 6,   // No
             'B' => 18,  // Tanggal
             'C' => 18,  // Kode Transaksi
-            'D' => 24,  // Nama Pasien
-            'E' => 14,  // Jenis Pasien
-            'F' => 38,  // Layanan
-            'G' => 18,  // Total Bayar
-            'H' => 12,  // Shift
-            'I' => 28,  // Metode Bayar
-            'J' => 20,  // Dokter
-            'K' => 20,  // Perawat
-            'L' => 20,  // Resepsionis
+            'D' => 24,  // Nama Cabang
+            'E' => 24,  // Nama Pasien
+            'F' => 14,  // Jenis Pasien
+            'G' => 38,  // Layanan
+            'H' => 18,  // Total Bayar
+            'I' => 12,  // Shift
+            'J' => 28,  // Metode Bayar
+            'K' => 20,  // Dokter
+            'L' => 20,  // Perawat
+            'M' => 20,  // Resepsionis
         ];
     }
 
@@ -60,6 +61,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
                 'No',
                 'Tanggal',
                 'Kode Transaksi',
+                'Nama Cabang',
                 'Nama Pasien',
                 'Jenis Pasien',
                 'Layanan',
@@ -129,6 +131,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
             $this->rowNumber,
             $tanggal,
             $kodeTransaksi,
+            $row->getCabang->Nama ?? $row->KodeCabang ?? '-',
             $namaPasien,
             $jenisPasien,
             $layanan,
@@ -152,7 +155,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
 
                 // Row 1: Judul
                 $sheet->setCellValue('A1', 'LAPORAN TRANSAKSI');
-                $sheet->mergeCells('A1:L1');
+                $sheet->mergeCells('A1:M1');
                 $sheet->getStyle('A1')->applyFromArray([
                     'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => [
@@ -165,7 +168,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
 
                 // Row 2: Tanggal cetak
                 $sheet->setCellValue('A2', 'Tanggal Cetak: ' . date('d/m/Y H:i') . ' WIB');
-                $sheet->mergeCells('A2:L2');
+                $sheet->mergeCells('A2:M2');
                 $sheet->getStyle('A2')->applyFromArray([
                     'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '555555']],
                     'fill' => [
@@ -190,7 +193,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
                 $filterText .= implode(' | ', $parts);
 
                 $sheet->setCellValue('A3', $filterText);
-                $sheet->mergeCells('A3:L3');
+                $sheet->mergeCells('A3:M3');
                 $sheet->getStyle('A3')->applyFromArray([
                     'font' => ['size' => 10, 'color' => ['rgb' => '333333']],
                     'fill' => [
@@ -205,7 +208,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
 
                 // ===== 2. STYLE HEADER KOLOM (Row 5) =====
                 $headerRow = 5;
-                $sheet->getStyle('A' . $headerRow . ':L' . $headerRow)->applyFromArray([
+                $sheet->getStyle('A' . $headerRow . ':M' . $headerRow)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -224,7 +227,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
 
                 if ($lastDataRow >= $dataStartRow) {
                     // Border & Vertical Alignment sekaligus untuk seluruh tabel data
-                    $sheet->getStyle('A' . $dataStartRow . ':L' . $lastDataRow)->applyFromArray([
+                    $sheet->getStyle('A' . $dataStartRow . ':M' . $lastDataRow)->applyFromArray([
                         'borders' => [
                             'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D0D7DE']],
                         ],
@@ -232,12 +235,12 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
                     ]);
 
                     // Format Rupiah Kolom G (Total Bayar)
-                    $sheet->getStyle('G' . $dataStartRow . ':G' . $lastDataRow)
+                    $sheet->getStyle('H' . $dataStartRow . ':H' . $lastDataRow)
                         ->getNumberFormat()
                         ->setFormatCode('"Rp"#,##0');
 
                     // Right align untuk Total Bayar
-                    $sheet->getStyle('G' . $dataStartRow . ':G' . $lastDataRow)
+                    $sheet->getStyle('H' . $dataStartRow . ':H' . $lastDataRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
@@ -258,10 +261,10 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
 
                 // Footer Row 1: Total Jumlah Transaksi
                 $sheet->setCellValue('A' . $footerRow, 'TOTAL JUMLAH TRANSAKSI');
-                $sheet->mergeCells('A' . $footerRow . ':F' . $footerRow);
-                $sheet->setCellValue('G' . $footerRow, ($lastDataRow >= $dataStartRow ? ($lastDataRow - $dataStartRow + 1) : 0) . ' Transaksi');
-                $sheet->mergeCells('G' . $footerRow . ':L' . $footerRow);
-                $sheet->getStyle('A' . $footerRow . ':L' . $footerRow)->applyFromArray([
+                $sheet->mergeCells('A' . $footerRow . ':G' . $footerRow);
+                $sheet->setCellValue('H' . $footerRow, ($lastDataRow >= $dataStartRow ? ($lastDataRow - $dataStartRow + 1) : 0) . ' Transaksi');
+                $sheet->mergeCells('H' . $footerRow . ':M' . $footerRow);
+                $sheet->getStyle('A' . $footerRow . ':M' . $footerRow)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '1F4E79']],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -276,14 +279,14 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
                 // Footer Row 2: Akumulasi Total Bayar
                 $footerRow2 = $footerRow + 1;
                 $sheet->setCellValue('A' . $footerRow2, 'AKUMULASI TOTAL BAYAR');
-                $sheet->mergeCells('A' . $footerRow2 . ':F' . $footerRow2);
+                $sheet->mergeCells('A' . $footerRow2 . ':G' . $footerRow2);
                 if ($lastDataRow >= $dataStartRow) {
-                    $sheet->setCellValue('G' . $footerRow2, '=SUM(G' . $dataStartRow . ':G' . $lastDataRow . ')');
+                    $sheet->setCellValue('H' . $footerRow2, '=SUM(H' . $dataStartRow . ':H' . $lastDataRow . ')');
                 } else {
-                    $sheet->setCellValue('G' . $footerRow2, 0);
+                    $sheet->setCellValue('H' . $footerRow2, 0);
                 }
-                $sheet->mergeCells('G' . $footerRow2 . ':L' . $footerRow2);
-                $sheet->getStyle('A' . $footerRow2 . ':L' . $footerRow2)->applyFromArray([
+                $sheet->mergeCells('H' . $footerRow2 . ':M' . $footerRow2);
+                $sheet->getStyle('A' . $footerRow2 . ':M' . $footerRow2)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -294,7 +297,7 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
                         'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '14532D']],
                     ],
                 ]);
-                $sheet->getStyle('G' . $footerRow2)->getNumberFormat()->setFormatCode('"Rp"#,##0');
+                $sheet->getStyle('H' . $footerRow2)->getNumberFormat()->setFormatCode('"Rp"#,##0');
 
                 // ===== 5. FREEZE PANE =====
                 $sheet->freezePane('A' . ($headerRow + 1));
@@ -302,5 +305,3 @@ class TransaksiExport implements FromCollection, WithHeadings, WithMapping, With
         ];
     }
 }
-
-
